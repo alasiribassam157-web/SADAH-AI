@@ -15,9 +15,9 @@
     <path d="M6 6.5H58M6 57.5H58" stroke="#C9A45C" stroke-width="1.2"/>
     <path d="M49.5 6V36H35.5M42.5 6V36M35.5 6V41A10.5 10.5 0 0 1 14.5 41V31" fill="none" stroke="url(#gold)" stroke-width="3.4"/>
   </g>
-  <text x="940" y="172" text-anchor="end" font-family="Reem Kufi, Amiri, Tahoma, serif" font-size="112" font-weight="600" fill="#D8B873" direction="rtl">سَداة</text>
-  <text x="940" y="230" text-anchor="end" font-family="IBM Plex Sans Arabic, Tahoma, sans-serif" font-size="28" fill="#C7B9A6" direction="rtl">عقل عربي مبني من الصفر · بدون أي نموذج خارجي</text>
+  <text x="940" y="172" text-anchor="end" font-family="Reem Kufi, Amiri, Tahoma, serif" font-size="112" font-weight="600" fill="#D8B873">سَداة</text>
+  <text x="940" y="230" text-anchor="end" font-family="IBM Plex Sans Arabic, Tahoma, sans-serif" font-size="28" fill="#C7B9A6">عقل عربي مبني من الصفر</text>
   <text x="84" y="180" font-family="Cormorant Garamond, Georgia, Times New Roman, serif" font-size="72" font-weight="600" letter-spacing="18" fill="#D8B873">SADAH</text>
   <path d="M86 204H200M228 204H342" stroke="#C9A45C" stroke-width="1"/><path d="M214 197L221 204L214 211L207 204Z" fill="#C9A45C"/>
-  <text x="86" y="244" font-family="Georgia, Times New Roman, serif" font-size="22" font-style="italic" fill="#C7B9A6">The warp of the loom · an Arabic AI built from scratch</text>
+  <text x="86" y="244" font-family="Georgia, Times New Roman, serif" font-size="22" font-style="italic" fill="#C7B9A6">The warp of the loom · an Arabic AI</text>
 </svg>
