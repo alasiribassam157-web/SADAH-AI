@@ -1,17 +1,17 @@
 ---
-title: NAWL
+title: SADAH
 emoji: 🧶
-colorFrom: red
+colorFrom: gray
 colorTo: yellow
 sdk: docker
 app_port: 7860
 pinned: false
 ---
 
-<p align="center"><img src="docs/banner.svg" alt="نَوْل · NAWL — عقل عربي مبني من الصفر" width="100%"></p>
+<p align="center"><img src="docs/banner.svg" alt="سَداة · SADAH — عقل عربي مبني من الصفر" width="100%"></p>
 
 <p align="center">
-  <a href="https://nexus-1-ai.onrender.com"><b>🌐 جرّب نَوْل الآن</b></a> ·
+  <a href="https://nexus-1-ai.onrender.com"><b>🌐 جرّب سَداة الآن</b></a> ·
   <a href="#كيف-يشتغل">كيف يشتغل</a> ·
   <a href="#شغّله-على-جهازك">شغّله على جهازك</a> ·
   <a href="#english">English</a>
@@ -19,13 +19,13 @@ pinned: false
 
 ---
 
-## وش هو نَوْل؟
+## وش هي سَداة؟
 
-**نَوْل** مساعد ذكاء اصطناعي عربي، **عقله مبني ومُدرَّب من الصفر بالكامل**: ما يستخدم ChatGPT ولا Gemini ولا أي نموذج جاهز أو واجهة ذكاء خارجية. كل معامل في عقله تدرّب هنا، والكود كله في هذا المستودع.
+**سَداة** مساعدة ذكاء اصطناعي عربية، **عقلها مبني ومُدرَّب من الصفر بالكامل**: ما تستخدم ChatGPT ولا Gemini ولا أي نموذج جاهز أو واجهة ذكاء خارجية. كل معامل في عقلها تدرّب هنا، والكود كله في هذا المستودع.
 
-الاسم من **النَّوْل**: الآلة اللي يُنسج عليها **السدو** البدوي. نَوْل «ينسج» لك الإجابة من خيوط دقيقة: فهم السؤال بعقله الخاص، ثم يجيب المعلومة من أدوات موثوقة.
+الاسم من **السَّداة**: الخيوط الطولية اللي تنشدّ على النول قبل النسج، وعليها يقوم كل نقش في **السدو** البدوي. وكذا سَداة: أساس متين تنسج عليه الإجابة، تفهم السؤال بعقلها الخاص ثم تجيب المعلومة من أدوات موثوقة.
 
-| تسأل | نَوْل يرد |
+| تسأل | سَداة ترد |
 |---|---|
 | كيف الجو في الرياض؟ | الطقس الحالي والعظمى والصغرى |
 | متى أذان المغرب في جدة؟ | مواقيت الصلاة اليوم |
@@ -55,7 +55,7 @@ flowchart RL
 | **العقل التوليدي** | GPT بحجم **335 مليون معامل** يتدرّب الآن من الصفر على ويكيبيديا العربية، ليكتب الردود بنفسه | `core/gpt.py` · `gpu/` |
 | **الوكيل** | المخطّط والمدقّق وكل الأدوات الدقيقة (حقائق، بحث، رياضيات، أسواق، صلاة، ترجمة) | `agent/` |
 | **السيرة الذاتية** | استخراج الحقول من PDF/Word وتوليد سيرة عربية أو إنجليزية | `cv/` |
-| **الواجهة** | HTML/CSS/JS بدون مكتبات، عربي أولاً، فاتح وداكن، بهوية السدو | `ui/` |
+| **الواجهة** | HTML/CSS/JS بدون مكتبات، عربي أولاً، فاتح وداكن، بهوية فاخرة (ليلي وذهبي) مستوحاة من السدو | `ui/` |
 | **الخادم** | FastAPI · `app.py` | الجذر |
 
 ### أرقام صادقة
@@ -85,7 +85,7 @@ python app.py          # http://localhost:8000
 
 ## القاعدة الأساسية
 
-> عقل نَوْل مملوك 100% ومُدرَّب من الصفر. ممنوع ربطه بأي نموذج خارجي أو تحميل أوزان جاهزة، حتى لو كان أبطأ أو أصغر.
+> عقل سَداة مملوك 100% ومُدرَّب من الصفر. ممنوع ربطه بأي نموذج خارجي أو تحميل أوزان جاهزة، حتى لو كان أبطأ أو أصغر.
 
 ---
 
@@ -93,7 +93,7 @@ python app.py          # http://localhost:8000
 
 ## English
 
-**NAWL** (نَوْل, the loom that weaves Bedouin *Al Sadu*) is an Arabic AI assistant whose brain is **built and trained entirely from scratch**: no ChatGPT, no Gemini, no pretrained weights, no external AI API.
+**SADAH** (سَداة, the warp threads of the loom that every Bedouin *Al Sadu* pattern is woven on) is an Arabic AI assistant whose brain is **built and trained entirely from scratch**: no ChatGPT, no Gemini, no pretrained weights, no external AI API.
 
 - **Live:** https://nexus-1-ai.onrender.com
 - **How it works:** a from-scratch Transformer routes each question to one of 12 skills; precise tools (Wikidata, Wikipedia, a local knowledge library, live markets, weather, prayer times, a safe math engine, a coding brain) produce the answer, checked before and after execution.
