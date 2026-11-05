@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320">
+  <title>نَوْل · NAWL</title>
+  <defs>
+    <pattern id="sadu" width="28" height="12" patternUnits="userSpaceOnUse">
+      <rect width="28" height="12" fill="#F3ECE4"/><path d="M0 12L7 0L14 12Z" fill="#8E1B2C"/><path d="M14 12L21 0L28 12Z" fill="#1C1214"/>
+      <path d="M7 6L9 8.5L7 11L5 8.5Z" fill="#D9A441"/><path d="M21 6L23 8.5L21 11L19 8.5Z" fill="#F3ECE4"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="320" fill="#F3ECE4"/>
+  <rect width="1200" height="24" fill="url(#sadu)"/><rect y="296" width="1200" height="24" fill="url(#sadu)"/>
+  <g transform="translate(980 80) scale(2.5)">
+    <rect width="64" height="64" fill="#8E1B2C"/><path d="M0 7.5H64M0 56.5H64" stroke="#D9A441" stroke-width="2.2"/>
+    <path d="M14 25L32 45.5L50 25" fill="none" stroke="#F3ECE4" stroke-width="8.5"/><path d="M32 12.5L38 18.5L32 24.5L26 18.5Z" fill="#D9A441"/>
+  </g>
+  <text x="930" y="170" text-anchor="end" font-family="Lalezar, Tajawal, Tahoma, sans-serif" font-size="120" fill="#8E1B2C" direction="rtl">نَوْل</text>
+  <text x="930" y="230" text-anchor="end" font-family="Tajawal, Tahoma, sans-serif" font-size="30" font-weight="700" fill="#1C1214" direction="rtl">عقل عربي مبني من الصفر · بدون أي نموذج خارجي</text>
+  <text x="80" y="190" font-family="Arial Black, Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="10" fill="#1C1214">NAWL</text>
+  <text x="84" y="232" font-family="Arial, sans-serif" font-size="22" fill="#57474A">An Arabic AI, woven from scratch</text>
+</svg>
