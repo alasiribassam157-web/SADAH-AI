@@ -32,7 +32,7 @@ function renderHistory(activeId) {
   const startOfDay = new Date().setHours(0, 0, 0, 0);
   const row = (c) => `<div class="hist-row ${c.id === activeId ? "on" : ""}" data-chat="${c.id}">
       ${svg("chat")}<span dir="auto">${esc(c.title)}</span>
-      <button class="hist-del" data-del="${c.id}" aria-label="delete">×</button></div>`;
+      <button class="hist-del" data-del="${c.id}" aria-label="${t("del")}">×</button></div>`;
   const today = chats.filter((c) => c.updated >= startOfDay), earlier = chats.filter((c) => c.updated < startOfDay);
   $("history").innerHTML = !chats.length ? `<p class="hist-empty">${t("empty")}</p>`
     : (today.length ? `<p class="hist-group">${t("today")}</p>${today.map(row).join("")}` : "")

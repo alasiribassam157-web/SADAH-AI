@@ -1,61 +1,67 @@
 <!doctype html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="google" content="notranslate" />
-  <title>NEXUS</title>
+  <meta name="theme-color" content="#8E1B2C" />
+  <title>نَوْل · NAWL</title>
   <link rel="icon" href="/ui/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700&family=Sora:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/ui/style.css" />
   <link rel="stylesheet" href="/ui/home.css" />
+  <link rel="stylesheet" href="/ui/chat.css" />
   <link rel="stylesheet" href="/ui/cv.css" />
 </head>
 <body>
+  <div class="band" aria-hidden="true"></div>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="NEXUS"><img src="/ui/logo.svg" alt="" class="mark" /><span class="word">NEXUS</span></a>
+    <a class="brand" href="/" aria-label="NAWL نَوْل">
+      <img src="/ui/logo.svg" alt="" class="mark" />
+      <span class="word"><b data-t="brand"></b><small data-t="tagline"></small></span>
+    </a>
     <div class="top-actions">
-      <button id="btn-cv" class="tb-btn cv-btn" aria-label="CV">
-        <svg viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M9 13h6M9 17h4"/><circle cx="10" cy="9" r="1.2"/></svg><span data-t="cv"></span>
-      </button>
-      <button id="btn-history" class="tb-btn" aria-label="conversations">
-        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg><span data-t="history"></span>
-      </button>
-      <button class="tb-btn" data-new aria-label="new chat"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
-      <button id="btn-theme" class="tb-icon" aria-label="theme"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
-      <button id="btn-lang" class="tb-icon lang" aria-label="language"></button>
+      <button class="tb-new" data-new><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
+      <button id="btn-theme" class="tb-icon"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button id="btn-lang" class="tb-icon lang"></button>
+      <button id="btn-history" class="tb-icon" data-label="menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
     </div>
   </header>
 
-  <aside id="drawer" class="drawer" aria-label="conversations">
-    <div class="drawer-head"><b data-t="history"></b><button class="tb-icon" data-close aria-label="close">×</button></div>
-    <button class="new-chat" data-new><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
+  <aside id="drawer" class="drawer">
+    <div class="drawer-head"><b data-t="history"></b><button class="tb-icon" data-close data-label="close">×</button></div>
+    <button class="drawer-row primary" data-new><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
+    <button class="drawer-row" id="btn-cv"><svg viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M9 13h6M9 17h4"/></svg><span data-t="cv"></span></button>
     <nav id="history" class="history"></nav>
+    <p class="drawer-foot" data-t="localOnly"></p>
   </aside>
   <div class="scrim" id="scrim"></div>
 
   <main id="main">
     <section class="home">
-      <div class="bento">
-        <div class="hero card">
-          <p class="hello" id="hello"></p>
-          <h1 data-t="ask"></h1>
-          <div id="home-slot" class="home-slot"></div>
+      <div class="intro">
+        <p class="dateline"><span id="hello"></span><span class="sep" aria-hidden="true">·</span><span id="hijri"></span><span class="sep" aria-hidden="true">·</span>
           <label class="city"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-            <span data-t="city"></span><select id="city"></select></label>
-        </div>
-        <div class="tile t-weather" id="tile-weather" role="button" tabindex="0"></div>
-        <div class="tile t-prayer" id="tile-prayer" role="button" tabindex="0"></div>
-        <div class="tile t-fx" id="tile-fx" role="button" tabindex="0"></div>
-        <div class="tile t-code" id="tile-code" role="button" tabindex="0"></div>
+            <span class="sr" data-t="city"></span><select id="city"></select></label></p>
+        <h1 data-t="ask"></h1>
       </div>
-      <div class="popular">
-        <h2 data-t="popular"></h2>
-        <div id="cats" class="cats"></div>
+      <div id="home-slot" class="home-slot"></div>
+      <div class="ideas">
+        <div id="cats" class="cats" role="tablist"></div>
+        <p class="ideas-label" data-t="try"></p>
         <div id="examples" class="examples"></div>
       </div>
+      <section class="board" aria-labelledby="board-title">
+        <h2 id="board-title" data-t="board"></h2>
+        <div class="board-row">
+          <button class="cell" id="tile-weather"></button>
+          <button class="cell" id="tile-prayer"></button>
+          <button class="cell" id="tile-fx"></button>
+        </div>
+      </section>
+      <p class="own"><img src="/ui/logo.svg" alt="" /><span data-t="own"></span></p>
     </section>
     <section id="thread" class="thread" aria-live="polite"></section>
   </main>
@@ -63,9 +69,14 @@
   <div id="dock" class="dock">
     <form id="composer" class="composer">
       <textarea id="input" rows="1" dir="auto" autocomplete="off"></textarea>
-      <button id="send" type="submit" class="send" aria-label="send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+      <button id="send" type="submit" class="send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
     </form>
     <p class="hint" data-t="hint"></p>
+  </div>
+
+  <div id="wake" class="wake" role="status" aria-live="polite">
+    <img src="/ui/logo.svg" alt="" class="wake-mark" />
+    <b data-t="waking"></b><span data-t="wakingNote"></span>
   </div>
 
   <script src="/ui/content.js"></script>
@@ -73,5 +84,6 @@
   <script src="/ui/home.js"></script>
   <script src="/ui/chat.js"></script>
   <script src="/ui/cv.js"></script>
+  <script src="/ui/wake.js"></script>
 </body>
 </html>

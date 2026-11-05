@@ -1,4 +1,4 @@
-// NEXUS user chat: bento home (home.js) and a focused conversation, with saved chats (history.js).
+// NAWL user chat: bento home (home.js) and a focused conversation, with saved chats (history.js).
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const sharedQuestion = params.get("q");  // shareable links: /?q=...  and  /?theme=dark
@@ -35,22 +35,25 @@ function applyLang() {
   document.querySelectorAll("[data-t]").forEach((el) => (el.textContent = t(el.dataset.t)));
   $("input").placeholder = t("placeholder");
   $("btn-lang").textContent = t("langBtn");
+  document.querySelectorAll("[data-label]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.label)));
+  $("send").setAttribute("aria-label", t("send")); $("btn-lang").setAttribute("aria-label", lang === "ar" ? "English" : "العربية");
   applyTheme(document.documentElement.dataset.theme || "light");
   renderHello(); renderCats(); renderHistory(chatId); loadHome();
 }
 function renderCats() {
   $("cats").innerHTML = Object.keys(POPULAR).map((k) =>
-    `<button class="pill ${k === cat ? "on" : ""}" data-cat="${k}">${svg(k)}${t("cats")[k]}</button>`).join("");
-  $("examples").innerHTML = POPULAR[cat].map(([ar, en]) => {
-    const q = lang === "ar" ? ar : en;
-    return `<button class="example" data-q="${esc(q)}">${svg(cat)}<span>${esc(q)}</span></button>`;
-  }).join("");
+    `<button class="pill ${k === cat ? "on" : ""}" role="tab" aria-selected="${k === cat}" data-cat="${k}">${svg(k)}${t("cats")[k]}</button>`).join("");
+  const qs = POPULAR[cat].map(([ar, en]) => (lang === "ar" ? ar : en));
+  const daily = typeof homeData !== "undefined" && homeData && homeData.code;
+  if (cat === "code" && daily && !qs.includes(daily.question)) qs.unshift(daily.question);  // code of the day first
+  $("examples").innerHTML = qs.slice(0, 4).map((q) =>
+    `<button class="example" data-q="${esc(q)}">${svg(cat)}<span>${esc(q)}</span>${svg("arrow").replace("<svg", '<svg class="go"')}</button>`).join("");
 }
 function userBubble(text) { return `<div class="msg-user" dir="auto">${esc(text)}</div>`; }
 function botBubble(answer, intent) {
   const skill = t("cats")[intent] || t("skills")[intent];
-  return `<div class="msg-bot"><img class="avatar" src="/ui/logo.svg" alt="" /><div class="bot-body">
-    <div class="bot-meta">NEXUS${skill ? `<span class="badge">${skill}</span>` : ""}</div>
+  return `<div class="msg-bot"><div class="bot-meta"><img class="avatar" src="/ui/logo.svg" alt="" />${t("brand")}${skill
+    ? `<span class="badge" data-i="${esc(intent)}">${skill}</span>` : ""}</div><div class="bot-body">
     <div class="answer" dir="auto">${md(answer)}</div>
     <div class="actions"><button class="mini" data-copy-answer>${svg("copy")}${t("copy")}</button></div></div></div>`;
 }
@@ -73,8 +76,8 @@ async function send(text) {
   History.add(chatId, { role: "user", text });
   renderHistory(chatId);
   const pending = document.createElement("div");
-  pending.className = "msg-bot";
-  pending.innerHTML = `<img class="avatar" src="/ui/logo.svg" alt="" /><div class="bot-body"><div class="typing"><i></i><i></i><i></i></div></div>`;
+  pending.className = "msg-bot pending";
+  pending.innerHTML = `<div class="bot-meta"><img class="avatar" src="/ui/logo.svg" alt="" />${t("brand")}</div><div class="bot-body"><div class="typing"><i></i><i></i><i></i><span>${t("thinking")}</span></div></div>`;
   $("thread").appendChild(pending); scrollDown();
   try {
     const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" },
@@ -141,6 +144,6 @@ $("btn-lang").onclick = () => { lang = lang === "ar" ? "en" : "ar"; store.set("n
 $("btn-history").onclick = () => toggleDrawer(!document.body.classList.contains("drawer-open"));
 $("scrim").onclick = () => toggleDrawer(false);
 
-document.documentElement.dataset.theme = store.get("nexus_theme", "light");
+document.documentElement.dataset.theme = store.get("nexus_theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 applyLang(); setMode(false); refreshSend();
 if (sharedQuestion) send(sharedQuestion);

@@ -79,7 +79,7 @@ function cvReview(f) {
   const lists = CV_LISTS.map((k) =>
     `<label class="cv-f wide"><span>${ct(k)}</span><textarea data-k="${k}" rows="${k === "summary" ? 3 : 4}" dir="auto">${esc((f[k] || []).join("\n"))}</textarea></label>`).join("");
   $("cv-body").innerHTML = `<p class="cv-note">${ct("review")}</p><div class="cv-grid">${text}${lists}</div>
-    <div class="cv-actions"><button class="tb-btn" id="cv-back">${ct("back")}</button>
+    <div class="cv-actions"><button class="cv-ghost" id="cv-back">${ct("back")}</button>
       <label class="cv-lang">${ct("cvLang")} <select id="cv-lang"><option value="ar">العربية</option><option value="en">English</option></select></label>
       <button class="cv-go" id="cv-make">${ct("make")}</button></div>`;
   $("cv-lang").value = lang;
@@ -101,6 +101,6 @@ async function cvMake() {
   if (tab) tab.location = url; else location.href = url;
 }
 
-function openCV() { cvShell().classList.add("open"); cvUpload(); }
+function openCV() { toggleDrawer(false); cvShell().classList.add("open"); cvUpload(); }
 $("btn-cv").onclick = openCV;
 if (location.hash === "#cv") openCV();  // shareable link straight to the CV builder

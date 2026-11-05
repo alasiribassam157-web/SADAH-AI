@@ -1,15 +1,22 @@
-// Bento home: greeting, city picker and live tiles (weather, next prayer, dollar, code of the day).
+// Home: greeting, Hijri date, city picker and the "today" board (weather, next prayer, dollar).
 let homeData = null;
 
 function cityName() {
-  const saved = store.get("nexus_city", "0");
-  const pair = CITIES[Number(saved)] || CITIES[0];
+  const pair = CITIES[Number(store.get("nexus_city", "0"))] || CITIES[0];
   return lang === "ar" ? pair[0] : pair[1];
 }
 
+// «الخميس ١٤ جمادى الأولى ١٤٤٨ هـ» from the browser's Umm al-Qura calendar
+function hijriToday() {
+  try {
+    return new Intl.DateTimeFormat(lang === "ar" ? "ar-SA-u-ca-islamic-umalqura" : "en-u-ca-islamic-umalqura",
+      { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date());
+  } catch { return new Date().toLocaleDateString(); }
+}
+
 function renderHello() {
-  const hour = new Date().getHours();
-  $("hello").textContent = `${hour < 12 ? t("morning") : t("evening")} 👋`;
+  $("hello").textContent = new Date().getHours() < 12 ? t("morning") : t("evening");
+  $("hijri").textContent = hijriToday();
   $("city").innerHTML = CITIES.map(([ar, en], i) => `<option value="${i}">${esc(lang === "ar" ? ar : en)}</option>`).join("");
   $("city").value = store.get("nexus_city", "0");
 }
@@ -23,41 +30,34 @@ function countdown(h, m) {
   return parts ? `بعد ${parts}` : "الآن";
 }
 
-function tileHead(icon, label) { return `<div class="tile-head">${svg(icon)}<span>${label}</span></div>`; }
-function skeleton(id, icon, label) {
-  $(id).innerHTML = `${tileHead(icon, label)}<div class="tile-body"><span class="shimmer"></span><span class="shimmer short"></span></div>`;
+const label = (icon, text) => `<span class="lbl">${svg(icon)}${text}</span>`;
+const missing = () => `<span class="na">${t("unavailable")}</span>`;
+function cell(id, icon, text, body, q) {
+  $(id).innerHTML = label(icon, text) + body;
+  if (q) $(id).dataset.q = q; else delete $(id).dataset.q;
 }
 
 function renderTiles() {
-  const d = homeData;
-  const city = d ? d.city : cityName();
-  const w = d && d.weather, p = d && d.prayer, fx = d && d.usd_sar, c = d && d.code;
-  $("tile-weather").dataset.q = lang === "ar" ? `كيف الجو في ${city}؟` : `Weather in ${city}`;
-  $("tile-weather").innerHTML = tileHead("weather", t("weatherNow")) + (w
-    ? `<div class="tile-body"><b class="big">${w.temp}°</b><span>${esc(city)} · ${esc(w.desc)}</span>
-       <small>↑ ${w.high}°  ↓ ${w.low}°</small></div>` : `<div class="tile-body"><small>${t("unavailable")}</small></div>`);
-  $("tile-prayer").dataset.q = lang === "ar" ? `مواقيت الصلاة في ${city}` : `Prayer times in ${city}`;
-  $("tile-prayer").innerHTML = tileHead("prayer", t("nextPrayer")) + (p
-    ? `<div class="tile-body"><b class="big">${esc(p.name)}</b><span>${esc(p.time)}</span>
-       <small>${countdown(p.in_hours, p.in_minutes)}</small></div>`
-    : `<div class="tile-body"><small>${t("unavailable")}</small></div>`);
-  $("tile-fx").dataset.q = lang === "ar" ? "كم سعر الدولار بالريال؟" : "Convert 1 USD to SAR";
-  $("tile-fx").innerHTML = tileHead("currency", t("dollar")) + (fx
-    ? `<div class="tile-body"><b class="big">${fx.toFixed(2)}</b><span>${t("sar")}</span><small>1 USD</small></div>`
-    : `<div class="tile-body"><small>${t("unavailable")}</small></div>`);
-  if (c) {
-    $("tile-code").dataset.q = c.question;
-    $("tile-code").innerHTML = `${tileHead("code", t("codeDay"))}<div class="tile-body">
-      <span class="code-title">${esc(c.title)} · ${esc(c.language)}</span><pre>${esc(c.code)}</pre></div>`;
-  }
+  const d = homeData, city = d ? d.city : cityName();
+  const w = d && d.weather, p = d && d.prayer, fx = d && d.usd_sar;
+  cell("tile-weather", "weather", t("weatherNow"), w
+    ? `<b class="val">${w.temp}°</b><span class="sub">${esc(city)} · ${esc(w.desc)} · <bdi>↑${w.high}° ↓${w.low}°</bdi></span>` : missing(),
+    lang === "ar" ? `كيف الجو في ${city}؟` : `Weather in ${city}`);
+  cell("tile-prayer", "prayer", t("nextPrayer"), p
+    ? `<b class="val gold">${esc(p.name)}</b><span class="sub"><bdi>${esc(p.time)}</bdi> · ${countdown(p.in_hours, p.in_minutes)}</span>` : missing(),
+    lang === "ar" ? `مواقيت الصلاة في ${city}` : `Prayer times in ${city}`);
+  cell("tile-fx", "currency", t("dollar"), fx
+    ? `<b class="val">${fx.toFixed(2)}</b><span class="sub">${t("sar")} · <bdi>1 USD</bdi></span>` : missing(),
+    lang === "ar" ? "كم سعر الدولار بالريال؟" : "Convert 1 USD to SAR");
 }
 
 async function loadHome() {
-  ["tile-weather", "tile-prayer", "tile-fx", "tile-code"].forEach((id, i) =>
-    skeleton(id, ["weather", "prayer", "currency", "code"][i], t(["weatherNow", "nextPrayer", "dollar", "codeDay"][i])));
+  [["tile-weather", "weather", "weatherNow"], ["tile-prayer", "prayer", "nextPrayer"], ["tile-fx", "currency", "dollar"]].forEach(([id, icon, k]) =>
+    cell(id, icon, t(k), `<span class="shimmer"></span><span class="shimmer short"></span>`));
   try {
     const res = await fetch(`/api/home?city=${encodeURIComponent(cityName())}&lang=${lang}`);
     homeData = res.ok ? await res.json() : null;
   } catch { homeData = null; }
   renderTiles();
+  if (typeof renderCats === "function") renderCats();  // code of the day joins the code ideas
 }
