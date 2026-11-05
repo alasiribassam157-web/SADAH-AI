@@ -1,68 +1,102 @@
 ---
-title: NEXUS-1
-emoji: 🧠
-colorFrom: indigo
-colorTo: purple
+title: NAWL
+emoji: 🧶
+colorFrom: red
+colorTo: yellow
 sdk: docker
 app_port: 7860
 pinned: false
 ---
 
-# NEXUS-1 — Autonomous AI Platform
+<p align="center"><img src="docs/banner.svg" alt="نَوْل · NAWL — عقل عربي مبني من الصفر" width="100%"></p>
 
-## 🔗 Live platform
+<p align="center">
+  <a href="https://nexus-1-ai.onrender.com"><b>🌐 جرّب نَوْل الآن</b></a> ·
+  <a href="#كيف-يشتغل">كيف يشتغل</a> ·
+  <a href="#شغّله-على-جهازك">شغّله على جهازك</a> ·
+  <a href="#english">English</a>
+</p>
 
-**https://nexus-1-ai.onrender.com**: hosted 24/7 on Render and redeployed
-on every deploy of `main`. Open to everyone, no sign-in. Public visitors get a safe
-experience: answers, search, files, and math through a sandbox-free evaluator, with no code or
-system execution.
+---
 
-> If the link shows a loading screen, the free instance is waking from sleep
-> (about one minute after 15 idle minutes).
+## وش هو نَوْل؟
 
-## 🛠 Development workflow
+**نَوْل** مساعد ذكاء اصطناعي عربي، **عقله مبني ومُدرَّب من الصفر بالكامل**: ما يستخدم ChatGPT ولا Gemini ولا أي نموذج جاهز أو واجهة ذكاء خارجية. كل معامل في عقله تدرّب هنا، والكود كله في هذا المستودع.
 
-1. Edit the code (VS Code / Claude Code).
-2. Double-click **`update.bat`**. It runs the smoke tests (`py -m tests.smoke_test`),
-   asks for a short description, commits, and pushes to GitHub.
-3. Render rebuilds and the live link serves the new version within a few minutes.
+الاسم من **النَّوْل**: الآلة اللي يُنسج عليها **السدو** البدوي. نَوْل «ينسج» لك الإجابة من خيوط دقيقة: فهم السؤال بعقله الخاص، ثم يجيب المعلومة من أدوات موثوقة.
 
-If tests fail, nothing is pushed, so the live link never breaks.
+| تسأل | نَوْل يرد |
+|---|---|
+| كيف الجو في الرياض؟ | الطقس الحالي والعظمى والصغرى |
+| متى أذان المغرب في جدة؟ | مواقيت الصلاة اليوم |
+| كم 100 دولار بالريال؟ | سعر الصرف الحي (49 عملة) |
+| كم سعر الذهب عيار 21؟ | أسعار الذهب والفضة والعملات الرقمية لحظياً |
+| حل x² − 5x + 6 = 0 | الحل مع التحقق بالتعويض |
+| كيف أعكس نص في بايثون؟ | كود جاهز ومختبر (45 مهمة × 6 لغات) |
+| ما هي عاصمة اليابان؟ | إجابة من Wikidata وويكيبيديا ومكتبة معرفة محلية |
+| سوّ لي سيرة ذاتية | يقرأ ملفاتك (بدون حفظها) ويطلع سيرة جاهزة للطباعة |
 
-A self-contained AI platform built from scratch:
+## كيف يشتغل
 
-- **`core/`** — a custom mini-Transformer (multi-head self-attention, feed-forward,
-  LayerNorm, positional encoding, custom Arabic/English tokenizer) trained in
-  under 15 seconds on CPU to classify user intent and route tasks.
-- **`agent/`** — an orchestrator that plans → picks a tool → runs a critic check →
-  self-corrects → answers. Tools: Python executor, file manager, web research,
-  system commands (all confined to `workspace/`).
-- **`ui/` + `app.py`** — FastAPI server + glassmorphism dashboard (AR/EN, RTL),
-  live training studio (Chart.js) and workspace file monitor.
-- **`deploy/`** — Dockerfile, Render and Hugging Face Spaces config, and a
-  one-click local launcher with a public tunnel.
-
-## Quick start (Windows)
-
-```bat
-launch_platform.bat
+```mermaid
+flowchart RL
+  Q["📝 سؤالك"] --> T["🔤 Tokenizer عربي"]
+  T --> B["🧠 عقل التوجيه<br/>(Transformer من الصفر)"]
+  B --> C["🔍 المدقّق يراجع النوع"]
+  C --> P["🗺 المخطّط يختار الأداة"]
+  P --> X["⚙️ التنفيذ<br/>Wikidata · طقس · صلاة · عملات · حاسبة · كود"]
+  X --> V["🔎 تحقّق بعد التنفيذ"]
+  V --> A["💬 الإجابة"]
 ```
 
-Or manually:
+| الجزء | وش يسوي | المجلد |
+|---|---|---|
+| **عقلا التصنيف** | عقل يحدد نوع السؤال (12 مهارة) وعقل للبرمجة. 13.58 مليون معامل، تعلّم مسبق ذاتي (BPE + MLM) على ويكيبيديا ثم نقل تعلّم | `core/` |
+| **العقل التوليدي** | GPT بحجم **335 مليون معامل** يتدرّب الآن من الصفر على ويكيبيديا العربية، ليكتب الردود بنفسه | `core/gpt.py` · `gpu/` |
+| **الوكيل** | المخطّط والمدقّق وكل الأدوات الدقيقة (حقائق، بحث، رياضيات، أسواق، صلاة، ترجمة) | `agent/` |
+| **السيرة الذاتية** | استخراج الحقول من PDF/Word وتوليد سيرة عربية أو إنجليزية | `cv/` |
+| **الواجهة** | HTML/CSS/JS بدون مكتبات، عربي أولاً، فاتح وداكن، بهوية السدو | `ui/` |
+| **الخادم** | FastAPI · `app.py` | الجذر |
+
+### أرقام صادقة
+
+- الاختبار الرسمي: **310 / 310** · الاختبار المخفي (صيغ ما شافها العقل): **87.9%**
+- العقل التوليدي بعد أول 12 ساعة تدريب: perplexity **14.0** على نصوص ما شافها. يكتب عربي سليم، لكنه **ما يسولف بعد** ومعلوماته لحاله غير موثوقة، والمعلومة الدقيقة تجي دائماً من الأدوات.
+
+## شغّله على جهازك
+
+**ويندوز:** اضغط مرتين على `launch_platform.bat`.
+
+**يدوياً:**
 
 ```bash
-py -m pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
-py -m core.trainer          # ~10 s micro-training -> checkpoints/nexus_brain.pt
-py app.py                   # http://localhost:8000
+pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+python app.py          # http://localhost:8000
 ```
 
-## Security
+**تدريب العقل التوليدي** (مجاناً على كروت Kaggle): التفاصيل خطوة بخطوة في [`gpu/README.md`](gpu/README.md).
 
-No sign-in is needed. Real Python and system-command execution is allowed only for
-requests made from the machine running the server. Requests arriving through a tunnel
-or a cloud proxy are always treated as public. `NEXUS_SAFE_MODE=1` (the Docker default)
-disables execution entirely.
+## الخصوصية والأمان
 
-## Permanent cloud link
+- لا تسجيل دخول، ولا تتبّع، ولا إعلانات.
+- المحادثات تنحفظ في متصفحك فقط.
+- ملفات السيرة الذاتية تُقرأ في الذاكرة ولا تُحفظ.
+- تشغيل الأكواد وأوامر النظام متاح فقط لصاحب الجهاز؛ الزوار يحصلون حاسبة آمنة (AST).
 
-See [deploy/DEPLOY.md](deploy/DEPLOY.md).
+## القاعدة الأساسية
+
+> عقل نَوْل مملوك 100% ومُدرَّب من الصفر. ممنوع ربطه بأي نموذج خارجي أو تحميل أوزان جاهزة، حتى لو كان أبطأ أو أصغر.
+
+---
+
+<a id="english"></a>
+
+## English
+
+**NAWL** (نَوْل, the loom that weaves Bedouin *Al Sadu*) is an Arabic AI assistant whose brain is **built and trained entirely from scratch**: no ChatGPT, no Gemini, no pretrained weights, no external AI API.
+
+- **Live:** https://nexus-1-ai.onrender.com
+- **How it works:** a from-scratch Transformer routes each question to one of 12 skills; precise tools (Wikidata, Wikipedia, a local knowledge library, live markets, weather, prayer times, a safe math engine, a coding brain) produce the answer, checked before and after execution.
+- **In training:** a 335M-parameter GPT trained from scratch on Arabic Wikipedia on free Kaggle GPUs (`core/gpt.py`, `gpu/`), to write the replies itself.
+- **Run locally:** `pip install -r requirements.txt` then `python app.py` → http://localhost:8000
+- **Stack:** Python, PyTorch, FastAPI, vanilla HTML/CSS/JS (RTL first).
