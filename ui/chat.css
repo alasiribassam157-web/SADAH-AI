@@ -1,43 +1,44 @@
-/* Conversation: your question as a black woven tag, NAWL's answer on open wool. */
-.thread { display: none; max-width: 780px; margin: 0 auto; flex-direction: column; gap: 32px; padding: 24px 0 12px; }
+/* Conversation: your question as a night tag edged in gold, SADAH's answer set like a printed page. */
+.thread { display: none; max-width: 760px; margin: 0 auto; flex-direction: column; gap: 34px; padding: 28px 0 12px; }
 body.chatting .thread { display: flex; }
-.msg-user { align-self: flex-end; max-width: 82%; padding: 10px 18px; background: var(--ink); color: var(--wool); font-weight: 500;
-  white-space: pre-wrap; box-shadow: 4px 4px 0 var(--accent); animation: rise .25s both; }
+.msg-user { align-self: flex-end; max-width: 82%; padding: 11px 18px; background: var(--tag-bg); color: var(--tag-ink); font-weight: 400;
+  white-space: pre-wrap; border: 1px solid var(--rule); border-inline-end: 2px solid var(--gold); animation: rise .25s both; }
 .msg-bot { display: flex; flex-direction: column; gap: 8px; animation: rise .3s both; }
-.bot-meta { display: flex; align-items: center; gap: 10px; font: 400 18px var(--f-display); letter-spacing: .06em; color: var(--accent); }
-.avatar { width: 28px; height: 28px; }
+.bot-meta { display: flex; align-items: center; gap: 10px; font: 600 17px var(--f-display); color: var(--accent); }
+html[lang="en"] .bot-meta { letter-spacing: .2em; }
+.avatar { width: 26px; height: 26px; }
 .bot-body { min-width: 0; }
-.answer { font: 500 17.5px/2 var(--f-ui); color: var(--ink); }
-.answer b { font-weight: 800; color: var(--accent); }
+.answer { font: 400 17.5px/2 var(--f-ui); color: var(--ink); }
+.answer b { font-weight: 600; color: var(--accent); }
 .answer code { font: .84em var(--f-mono); padding: 1px 6px; background: var(--sunk); direction: ltr; unicode-bidi: isolate; }
 
-/* Skill badge: rectangular tag, one thread colour per skill, always with its label */
-.badge { --c: var(--ink-2); font: 800 12px var(--f-ui); letter-spacing: 0; color: var(--c); padding: 0 8px; line-height: 22px; border: 1.5px solid var(--c); }
-.badge[data-i="web"] { --c: #2f5d8a; } .badge[data-i="code"] { --c: #5a3f8f; } .badge[data-i="weather"] { --c: #1f6f8b; }
-.badge[data-i="currency"], .badge[data-i="python"] { --c: var(--ochre-text); } .badge[data-i="prayer"] { --c: var(--olive); }
+/* Skill badge: a hairline tag, one jewel tone per skill, always with its label */
+.badge { --c: var(--ink-2); font: 600 11.5px var(--f-ui); letter-spacing: 0; color: var(--c); padding: 0 8px; line-height: 22px; border: 1px solid var(--c); }
+.badge[data-i="web"] { --c: #2f4f7a; } .badge[data-i="code"] { --c: #5b3f86; } .badge[data-i="weather"] { --c: #1f6170; }
+.badge[data-i="currency"], .badge[data-i="python"] { --c: var(--gold-text); } .badge[data-i="prayer"] { --c: var(--olive); }
 .badge[data-i="translate"] { --c: var(--accent); } .badge[data-i="datetime"], .badge[data-i="units"] { --c: #6d4c2a; }
 [data-theme="dark"] .badge[data-i="web"] { --c: #8cb6e0; } [data-theme="dark"] .badge[data-i="code"] { --c: #b9a2ea; }
 [data-theme="dark"] .badge[data-i="weather"] { --c: #7cc6df; } [data-theme="dark"] .badge[data-i="datetime"], [data-theme="dark"] .badge[data-i="units"] { --c: #d9b98c; }
 
-.code { margin: 14px 0; border: 2px solid var(--rule); background: #1c1214; color: #f3ece4; direction: ltr; overflow: hidden; }
+.code { margin: 14px 0; border: 1px solid #3b3029; background: #15110f; color: #efe6d8; direction: ltr; overflow: hidden; }
 .code header { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 4px 14px; font: 500 12px var(--f-mono);
-  color: #d9a441; border-bottom: 1px solid #4a3a3c; }
-.code header .mini { color: #cdbdb3; } .code header .mini:hover { background: #2a1d20; color: #f3ece4; }
+  color: #d4b26a; border-bottom: 1px solid #3b3029; }
+.code header .mini { color: #bfb09c; } .code header .mini:hover { background: #201915; color: #efe6d8; }
 .code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 13.5px/1.7 var(--f-mono); text-align: left; }
-.src { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 2px 12px; font: 700 13px var(--f-ui);
-  color: var(--ink); text-decoration: none; border: 2px solid var(--rule); background: var(--surface); }
-.src:hover { box-shadow: var(--hard-s); }
-.src svg { width: 14px; height: 14px; }
-.actions { display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+.src { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 3px 12px; font: 500 13px var(--f-ui);
+  color: var(--ink); text-decoration: none; border: 1px solid var(--line); background: var(--surface); transition: border-color .2s; }
+.src:hover { border-color: var(--gold); }
+.src svg { width: 14px; height: 14px; color: var(--gold); }
+.actions { display: flex; gap: 4px; opacity: 0; transition: opacity .2s; }
 .msg-bot:hover .actions, .msg-bot:focus-within .actions { opacity: 1; }
-.mini { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; font-size: 13px; font-weight: 700; color: var(--ink-2); padding: 0 10px; }
+.mini { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; font-size: 13px; font-weight: 500; color: var(--ink-2); padding: 0 10px; }
 .mini svg { width: 15px; height: 15px; }
 .mini:hover { background: var(--sunk); color: var(--ink); }
 
-/* Thinking: weaving shuttle */
-.typing { display: flex; align-items: center; gap: 5px; color: var(--ink-2); font-size: 14px; font-weight: 700; }
-.typing i { width: 10px; height: 10px; clip-path: polygon(50% 0, 100% 100%, 0 100%); background: var(--accent); animation: weave 1.2s infinite; }
-.typing i:nth-child(2) { background: var(--ink); animation-delay: .15s; } .typing i:nth-child(3) { background: var(--ochre); animation-delay: .3s; }
+/* Thinking: three gold diamonds passing like a shuttle */
+.typing { display: flex; align-items: center; gap: 6px; color: var(--ink-2); font-size: 14px; font-weight: 500; }
+.typing i { width: 8px; height: 8px; background: var(--gold); transform: rotate(45deg); animation: weave 1.3s infinite; }
+.typing i:nth-child(2) { animation-delay: .18s; } .typing i:nth-child(3) { animation-delay: .36s; }
 .typing span { margin-inline-start: 8px; }
-@keyframes weave { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+@keyframes weave { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
 @media (max-width: 640px) { .msg-user { max-width: 92%; } .actions { opacity: 1; } .answer { font-size: 17px; } }

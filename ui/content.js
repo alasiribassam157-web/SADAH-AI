@@ -1,4 +1,4 @@
-// NAWL user page: texts, icons, cities and popular questions (loaded first).
+// SADAH user page: texts, icons, cities and popular questions (loaded first).
 const ICONS = {
   web: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
   code: '<path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/>',
@@ -19,30 +19,30 @@ const ICONS = {
 const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ""}</svg>`;
 
 const T = {
-  ar: { brand: "نَوْل", tagline: "NAWL · عقل عربي من الصفر", own: "عقل نَوْل عربي ومبني من الصفر، بدون أي نموذج ذكاء خارجي.",
+  ar: { brand: "سَداة", tagline: "SADAH · عقل عربي من الصفر", own: "عقل سَداة عربي ومبني من الصفر، بدون أي نموذج ذكاء خارجي.",
         morning: "صباح الخير", evening: "مساء الخير", ask: "وش تبي تعرف؟", city: "المدينة",
         placeholder: "اسأل عن أي شيء…", try: "جرّب تسأل",
         board: "لوح اليوم", weatherNow: "الطقس الآن", nextPrayer: "الصلاة القادمة", dollar: "الدولار", sar: "ريال",
         after: "بعد", unavailable: "ما قدرنا نجيبها الحين", popular: "أسئلة مشهورة",
         cv: "سوِّ سيرتك الذاتية", history: "المحادثات", menu: "القائمة", newChat: "محادثة جديدة", today: "اليوم", earlier: "قبل",
         empty: "ما عندك محادثات للحين. اسأل أي سؤال وتنحفظ هنا تلقائياً.", localOnly: "المحادثات محفوظة في جهازك فقط، ما تنرفع لأي مكان.",
-        hint: "نَوْل ممكن يغلط، تأكد من المعلومات المهمة.", error: "ما وصلنا للخادم. تأكد من الإنترنت وجرّب مرة ثانية.",
+        hint: "سَداة ممكن تغلط، تأكد من المعلومات المهمة.", error: "ما وصلنا للخادم. تأكد من الإنترنت وجرّب مرة ثانية.",
         copy: "نسخ", copied: "تم النسخ", source: "المصدر", dark: "الوضع الليلي", light: "الوضع النهاري", langBtn: "EN",
-        thinking: "يفكّر…", waking: "نَوْل يصحى…", wakingNote: "الخادم المجاني ينام إذا ما أحد استخدمه. دقيقة ويكون جاهز.",
+        thinking: "تفكّر…", waking: "سَداة تصحى…", wakingNote: "الخادم المجاني ينام إذا ما أحد استخدمه. دقيقة ويكون جاهز.",
         del: "احذف المحادثة", close: "إغلاق", send: "أرسل",
         cats: { web: "معرفة", code: "برمجة", weather: "طقس", currency: "عملات", python: "حساب", datetime: "الوقت",
                 units: "تحويل", prayer: "الصلاة", translate: "ترجمة" },
         skills: { chat: "محادثة", file: "ملفات", system: "نظام" } },
-  en: { brand: "NAWL", tagline: "نَوْل · An Arabic mind, built from scratch", own: "NAWL runs on its own Arabic AI, built from scratch with no outside model.",
+  en: { brand: "SADAH", tagline: "سَداة · An Arabic mind, built from scratch", own: "SADAH runs on its own Arabic AI, built from scratch with no outside model.",
         morning: "Good morning", evening: "Good evening", ask: "What do you want to know?", city: "City",
         placeholder: "Ask about anything…", try: "Try asking",
         board: "Today", weatherNow: "Weather now", nextPrayer: "Next prayer", dollar: "US dollar", sar: "SAR",
         after: "in", unavailable: "Not available right now", popular: "Popular questions",
         cv: "Build your CV", history: "Conversations", menu: "Menu", newChat: "New chat", today: "Today", earlier: "Earlier",
         empty: "No conversations yet. Ask anything and it is saved here.", localOnly: "Chats are saved on this device only.",
-        hint: "NAWL can make mistakes. Check important information.", error: "Couldn't reach the server. Check your connection and try again.",
+        hint: "SADAH can make mistakes. Check important information.", error: "Couldn't reach the server. Check your connection and try again.",
         copy: "Copy", copied: "Copied", source: "Source", dark: "Dark mode", light: "Light mode", langBtn: "ع",
-        thinking: "Thinking…", waking: "NAWL is waking up…", wakingNote: "The free server sleeps when nobody uses it. It will be ready in about a minute.",
+        thinking: "Thinking…", waking: "SADAH is waking up…", wakingNote: "The free server sleeps when nobody uses it. It will be ready in about a minute.",
         del: "Delete chat", close: "Close", send: "Send",
         cats: { web: "Knowledge", code: "Code", weather: "Weather", currency: "Currency", python: "Math", datetime: "Time",
                 units: "Units", prayer: "Prayer", translate: "Translate" },

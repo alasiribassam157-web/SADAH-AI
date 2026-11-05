@@ -1,9 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <title>NAWL · نَوْل</title>
-  <!-- NAWL (نَوْل, the loom that weaves Al Sadu). The letter ن as a woven chevron (the bowl) with its dot as an ochre diamond,
-       on a maroon square edged by two ochre weft lines, as in Al Sadu weaving. -->
-  <rect width="64" height="64" fill="#8E1B2C"/>
-  <path d="M0 7.5H64M0 56.5H64" stroke="#D9A441" stroke-width="2.2"/>
-  <path d="M14 25L32 45.5L50 25" fill="none" stroke="#F3ECE4" stroke-width="8.5" stroke-linejoin="miter" stroke-miterlimit="10"/>
-  <path d="M32 12.5L38 18.5L32 24.5L26 18.5Z" fill="#D9A441"/>
+  <title>SADAH · سَداة</title>
+  <!-- SADAH (سَداة, the warp of the loom). Three warp threads hang from the loom beam and become the letter س,
+       drawn in gold on night, between the upper and lower beams. -->
+  <defs>
+    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="58">
+      <stop offset="0" stop-color="#E8CF95"/><stop offset=".55" stop-color="#C9A45C"/><stop offset="1" stop-color="#A47E3C"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" fill="#15110F"/>
+  <path d="M6 6.5H58M6 57.5H58" stroke="url(#gold)" stroke-width="1.2"/>
+  <path d="M49.5 6V36H35.5M42.5 6V36M35.5 6V41A10.5 10.5 0 0 1 14.5 41V31" fill="none" stroke="url(#gold)" stroke-width="3.4"/>
 </svg>
