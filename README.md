@@ -11,7 +11,7 @@ pinned: false
 <p align="center"><img src="docs/banner.svg" alt="سَداة · SADAH — عقل عربي مبني من الصفر" width="100%"></p>
 
 <p align="center">
-  <a href="https://nexus-1-ai.onrender.com"><b>🌐 جرّب سَداة الآن</b></a> ·
+  <a href="https://sadah-app.vercel.app"><b>🌐 جرّب سَداة الآن</b></a> ·
   <a href="#كيف-يشتغل">كيف يشتغل</a> ·
   <a href="#شغّله-على-جهازك">شغّله على جهازك</a> ·
   <a href="#english">English</a>
@@ -56,7 +56,7 @@ flowchart RL
 | **الوكيل** | المخطّط والمدقّق وكل الأدوات الدقيقة (حقائق، بحث، رياضيات، أسواق، صلاة، ترجمة) | `agent/` |
 | **السيرة الذاتية** | استخراج الحقول من PDF/Word وتوليد سيرة عربية أو إنجليزية | `cv/` |
 | **الواجهة** | HTML/CSS/JS بدون مكتبات، عربي أولاً، فاتح وداكن، بهوية فاخرة (ليلي وذهبي) مستوحاة من السدو | `ui/` |
-| **الخادم** | FastAPI · `app.py` | الجذر |
+| **الخادم** | FastAPI · `app.py`، منشور على Vercel، والعقل يشتغل فيه بـ NumPy بدون PyTorch | الجذر · `core/fast_brain.py` |
 
 ### أرقام صادقة
 
@@ -70,9 +70,11 @@ flowchart RL
 **يدوياً:**
 
 ```bash
-pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements-train.txt --extra-index-url https://download.pytorch.org/whl/cpu
 python app.py          # http://localhost:8000
 ```
+
+للخادم بس بدون تدريب: `pip install -r requirements.txt`. هذي النسخة بدون PyTorch، والعقل يشتغل بـ NumPy بنفس النتائج، وهي اللي تنشر على Vercel.
 
 **تدريب العقل التوليدي** (مجاناً على كروت Kaggle): التفاصيل خطوة بخطوة في [`gpu/README.md`](gpu/README.md).
 
@@ -95,8 +97,8 @@ python app.py          # http://localhost:8000
 
 **SADAH** (سَداة, the warp threads of the loom that every Bedouin *Al Sadu* pattern is woven on) is an Arabic AI assistant whose brain is **built and trained entirely from scratch**: no ChatGPT, no Gemini, no pretrained weights, no external AI API.
 
-- **Live:** https://nexus-1-ai.onrender.com
+- **Live:** https://sadah-app.vercel.app
 - **How it works:** a from-scratch Transformer routes each question to one of 12 skills; precise tools (Wikidata, Wikipedia, a local knowledge library, live markets, weather, prayer times, a safe math engine, a coding brain) produce the answer, checked before and after execution.
 - **In training:** a 335M-parameter GPT trained from scratch on Arabic Wikipedia on free Kaggle GPUs (`core/gpt.py`, `gpu/`), to write the replies itself.
-- **Run locally:** `pip install -r requirements.txt` then `python app.py` → http://localhost:8000
-- **Stack:** Python, PyTorch, FastAPI, vanilla HTML/CSS/JS (RTL first).
+- **Run locally:** `pip install -r requirements-train.txt` then `python app.py` → http://localhost:8000 (server only, no PyTorch: `requirements.txt`; the brains then run on NumPy, as on Vercel)
+- **Stack:** Python, PyTorch (training), NumPy (serving), FastAPI on Vercel, vanilla HTML/CSS/JS (RTL first).
