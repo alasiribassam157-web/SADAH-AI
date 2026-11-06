@@ -3,6 +3,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -13,8 +14,13 @@ from agent.facts import answer_fact
 from agent.research import lookup
 
 WORKSPACE = Path(__file__).resolve().parent.parent / "workspace"
-WORKSPACE.mkdir(exist_ok=True)
-SAFE_MODE = os.getenv("NEXUS_SAFE_MODE", "0") == "1"
+try:
+    WORKSPACE.mkdir(exist_ok=True)
+except OSError:  # read-only deployments (Vercel): only the temp folder is writable
+    WORKSPACE = Path(tempfile.gettempdir()) / "sadah-workspace"
+    WORKSPACE.mkdir(exist_ok=True)
+# Safe mode (no code or system execution) is the default on Vercel, which sets VERCEL=1
+SAFE_MODE = os.getenv("NEXUS_SAFE_MODE", "1" if os.getenv("VERCEL") else "0") == "1"
 _BLOCKED = re.compile(r"\b(format|shutdown|diskpart|rmdir\s+/s|rd\s+/s|del\s+/s|reg\s+delete|"
                       r"rm\s+-rf|mkfs|bcdedit|cipher\s+/w)\b", re.IGNORECASE)
 
