@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "app.py": {
+      "excludeFiles": "{gpu/**,tests/**,docs/**,deploy/**,devtools/**,checkpoints/**,workspace/**,*.bat,Dockerfile,render.yaml}"
+    }
+  }
+}
