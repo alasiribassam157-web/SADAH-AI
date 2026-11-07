@@ -19,12 +19,13 @@ _PARENS = re.compile(r"\s*[(（][^()（）]{0,150}[)）]")
 _SENTENCE_END = re.compile(r"(?<=[.!؟?])\s+")
 _PERSON = re.compile(r"(ولد|وُلد|مواليد|توفي|تُوفي|المتوفى)")
 _SKIP_TITLE = re.compile(r"^(قائمة|تصنيف|بوابة|ويكيبيديا|قالب)|توضيح|[:/0-9]")
+_ARABIC = re.compile(r"[\u0621-\u064A]{2}")  # titles must be Arabic words (skips «A», «F»…)
 
 
 def make_pair(title: str, text: str) -> tuple[str, str] | None:
     """(question, answer) from one article, or None when the article is a list, stub or badly formed."""
     title = title.strip()
-    if not title or len(title) > 40 or _SKIP_TITLE.search(title):
+    if not title or len(title) > 40 or _SKIP_TITLE.search(title) or not _ARABIC.search(title):
         return None
     lead = _PARENS.sub("", text.strip().split("\n", 1)[0]).strip()
     if not lead.startswith(title.split()[0]):  # the opening sentence must be about the title
