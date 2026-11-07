@@ -2,6 +2,7 @@
 
 Kaggle (CPU is enough, no GPU hours):  python gpu/sample_gpt.py
 Same prompts and seed every time, so two checkpoints can be compared line by line.
+QUESTIONS use the chat tokens the Q→A training teaches (<|user|> … <|assistant|>), to check real answers.
 """
 import argparse
 import glob
@@ -17,6 +18,8 @@ from core.gpt import NexusGPT  # noqa: E402
 
 PROMPTS = ["عاصمة المملكة العربية السعودية هي", "الذكاء الاصطناعي هو", "في عام 1945", "تقع مدينة مكة المكرمة",
            "كرة القدم هي", "The capital of France is", "القهوة العربية", "مرحبا، كيف حالك؟"]
+QUESTIONS = ["ما هي الرياض؟", "من هو ابن سينا؟", "ما هي كرة القدم؟", "ماذا تعرف عن القهوة العربية؟",
+             "ما هي عاصمة اليابان؟", "من هو المتنبي؟", "ما هو الذكاء الاصطناعي؟", "ما هي مكة المكرمة؟"]
 
 
 def main() -> None:
@@ -25,6 +28,7 @@ def main() -> None:
     ap.add_argument("--tokenizer", default="/kaggle/input/**/tokenizer.json")
     ap.add_argument("--max-new", type=int, default=100)
     ap.add_argument("--temperature", type=float, default=0.8)
+    ap.add_argument("--chat", action="store_true", help="also ask QUESTIONS in the Q→A format")
     args = ap.parse_args()
 
     ckpt = glob.glob(args.ckpt, recursive=True)[0]
@@ -37,7 +41,8 @@ def main() -> None:
     tok = Tokenizer.from_file(glob.glob(args.tokenizer, recursive=True)[0])
     stop = tok.token_to_id("<|endoftext|>")
 
-    for prompt in PROMPTS:
+    prompts = PROMPTS + [f"<|user|>{q}<|assistant|>" for q in QUESTIONS] if args.chat else PROMPTS
+    for prompt in prompts:
         torch.manual_seed(0)
         t0 = time.time()
         with torch.no_grad():
