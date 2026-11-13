@@ -75,7 +75,7 @@ check("safe code passes", scan_code("def f(x):\n    return x * 2") == [])
 bad = scan_code("import os\nos.system('x')\neval('1')\ny.__class__")
 check("os / eval / dunder are caught", len(bad) == 3, bad)
 check("syntax error reported", scan_code("def f(:")[0].startswith("خطأ"))
-check("sandbox closed to the public", not crit.allowed({"primary": "Sandbox"}, Task("x"))[0])
+check("sandbox closed to the public", not crit.allowed({"primary": "Sandbox", "intent": "system"}, Task("x"))[0])
 check("knowledge needs a source", not crit.verify(AgentResult("Wiki", True, "x", 0.9))[0])
 wd = fake("Wikidata", "عاصمة اليابان هي **طوكيو**.", 0.9, ["https://www.wikidata.org/wiki/Q17"],
           {"kind": "wikibase-entityid", "value": "طوكيو", "prop": "P36"})

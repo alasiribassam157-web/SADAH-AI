@@ -4,8 +4,8 @@
 CASES_V3 = [
     # --- chat (12)
     ("مرحبا", "chat", "أهلاً"), ("السلام عليكم", "chat", "وعليكم"), ("شكرا لك", "chat", "العفو"), ("كيف حالك", "chat", "بخير"),
-    ("صباح الخير", "chat", "صباح النور"), ("من انت", "chat", "NEXUS"), ("hello", "chat", "Hi"), ("thanks a lot", "chat", "welcome"),
-    ("how are you", "chat", "great"), ("what can you do", "chat", "NEXUS"), ("مع السلامة", "chat", "السلامة"), ("good evening", "chat", "evening"),
+    ("صباح الخير", "chat", "صباح النور"), ("من انت", "chat", "سَداة"), ("hello", "chat", "Hi"), ("thanks a lot", "chat", "welcome"),
+    ("how are you", "chat", "great"), ("what can you do", "chat", "SADAH"), ("مع السلامة", "chat", "السلامة"), ("good evening", "chat", "evening"),
     # --- facts & encyclopedia (40)
     ("ما هي عاصمة فرنسا؟", "web", "باريس"), ("عاصمة اليابان", "web", "طوكيو"), ("ما هي عاصمة مصر", "web", "القاهرة"),
     ("What is the capital of Japan?", "web", "Tokyo"), ("capital of Germany", "web", "Berlin"), ("capital of Canada", "web", "Ottawa"),
@@ -70,5 +70,5 @@ CASES_V3 = [
     ("سوي لي كود حلقة for في بايثون", "code", "range"), ("عطني كود اقرا ملف بالجافاسكربت", "code", "readFileSync"),
     ("وش ناتج 45 زائد 55", "python", "100"),
     # --- system, public visitors get a safe refusal (2)
-    ("run command `whoami`", "system", "developer's machine"), ("نفذ الامر `hostname`", "system", "developer's machine"),
+    ("run command `whoami`", "system", "developer's machine"), ("نفذ الامر `hostname`", "system", "جهاز المطوّر"),
 ]
