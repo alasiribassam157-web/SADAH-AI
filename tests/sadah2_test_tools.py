@@ -60,6 +60,39 @@ if REAL_SYMPY:
 else:
     print("SKIP  symbolic math (sympy is not installed here)")
 
+# --- phase 6: live data checks (offline: fixed rates and real answer formats) and code agents
+from agent import live_skills  # noqa: E402
+from agent.code_architect_agent import CodeArchitectAgent  # noqa: E402
+from agent.code_synthesizer_agent import CodeSynthesizerAgent  # noqa: E402
+from agent.env_prayer_agent import in_order, plausible  # noqa: E402
+from agent.forex_agent import rate_check  # noqa: E402
+from agent.markets_agent import consistent  # noqa: E402
+from agent.sandbox_agent import SandboxAgent  # noqa: E402
+
+live_skills._RATES["USD"] = (9e18, {"SAR": 3.7502})
+check("dollar→riyal matches the official peg", rate_check("USD", "SAR")[0] is True)
+live_skills._RATES["USD"] = (9e18, {"SAR": 4.2})
+check("a broken peg is caught", rate_check("USD", "SAR")[0] is False)
+g24 = 2650 * 3.75 / 31.1035
+gold = f"**سعر الذهب الآن:** 2,650.00 دولار للأونصة\n• عيار 24: **{g24:,.2f} ريال** للجرام"
+check("gram prices follow from the ounce price", consistent(gold)[0] is True)
+check("a wrong karat price is caught", consistent(gold.replace(f"{g24:,.2f}", "330.00"))[0] is False)
+times = "الفجر **4:55 ص** الشروق **6:15 ص** الظهر **11:50 ص** العصر **2:55 م** المغرب **5:20 م** العشاء **6:50 م**"
+check("prayer times in their natural order", in_order(times) is True and in_order(times.replace("6:50 م", "4:00 م")) is False)
+check("temperatures physically plausible", plausible("**30°م** · العظمى 35°") and plausible("900°") is False)
+architect = CodeArchitectAgent()
+r = architect.run(Task("كيف أعكس نص في بايثون", intent="code"))
+check("code answer from the verified library, syntax-checked", r.ok and "[::-1]" in r.answer and r.confidence >= 0.9)
+r = CodeSynthesizerAgent(architect.coder).run(Task("اكتب برنامج بايثون يقرأ ملف ثم يرتب قائمة ثم يكتب في ملف"))
+check("multi-step program assembled from three blocks", r.ok and r.data["tasks"] == ["read_file", "sort_list", "write_file"]
+      and "def main():" in r.answer, r.answer[:120])
+sandbox = SandboxAgent()
+check("no code execution for public visitors", not sandbox.run(Task("run command `whoami`", intent="system")).ok)
+check("files still work inside workspace", "Created" in sandbox.run(Task("create file _t.txt with content ok", intent="file")).answer
+      and "Deleted" in sandbox.run(Task("delete _t.txt", intent="file")).answer)
+check("dangerous code refused even locally", not sandbox.run(Task("```python\nimport subprocess\n```", intent="python",
+                                                                   allow_exec=True)).ok)
+
 print(f"\n{'All SADAH 2.0 tool checks passed' if not failures else f'{len(failures)} failed'}")
 for f in failures:
     print("  ✗", f)
