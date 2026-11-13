@@ -2,6 +2,7 @@
 from agent import composer, date_math, live_skills, markets, math_engine, prayer, safe_math, translate, units
 from agent.coder import CoderSkill
 from agent.tools import FileManagerTool, PythonExecutorTool, SystemTaskTool, ToolResult, WebResearchTool
+from agents import supervisor
 
 EXEC_ONLY_LOCAL = "This needs code/system execution, which is available only on the developer's machine."
 TOOL_NAMES = {"python": "PythonExecutorTool", "file": "FileManagerTool", "web": "WebResearchTool",
@@ -32,7 +33,7 @@ class Dispatcher:
         if tool == "file":
             return getattr(self.files, action)(**args)
         if tool == "web":
-            return self.web.search(args["query"])
+            return supervisor.research(args["query"])  # agents cross-check each other (agents/)
         if tool == "system":
             return self.system.run(args["command"]) if allow_exec else ToolResult(False, EXEC_ONLY_LOCAL)
         if tool == "code":

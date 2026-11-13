@@ -48,6 +48,8 @@ def _strip_al(topic: str) -> str:
 def _query(http: httpx.Client, lang: str, params: dict, sentences: int = 3) -> dict | None:
     base = {"action": "query", "format": "json", "redirects": 1, "prop": "extracts|info|pageprops",
             "exintro": 1, "explaintext": 1, "exsentences": sentences, "inprop": "url"}
+    if not sentences:  # 0 = the whole introduction (used to cross-check a fact)
+        base.pop("exsentences")
     pages = http.get(f"https://{lang}.wikipedia.org/w/api.php", params={**base, **params}).json()
     for page in (pages.get("query", {}).get("pages") or {}).values():
         if "missing" in page or "disambiguation" in page.get("pageprops", {}):
@@ -99,3 +101,11 @@ def _english_fallback(http: httpx.Client, topic: str, sentences: int) -> dict | 
     if page:
         page["extract"] = "(من ويكيبيديا الإنجليزية) " + page["extract"]
     return page
+
+
+def intro(topic: str, lang: str, timeout: float = 6) -> tuple[str, str, str] | None:
+    """(title, whole introduction, url) of the article about `topic`: the second witness for a fact."""
+    with httpx.Client(timeout=timeout, headers=HEADERS, follow_redirects=True) as http:
+        page = _query(http, lang, {"titles": topic}, 0) or _query(
+            http, lang, {"generator": "search", "gsrsearch": topic, "gsrlimit": 1}, 0)
+    return (page["title"], page["extract"], page.get("fullurl", "")) if page else None

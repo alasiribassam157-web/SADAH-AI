@@ -91,6 +91,7 @@ class NexusAgent:
 
         # 4. Act, then verify; one self-correcting retry for Python runtime errors
         result = self.tools.execute(plan, allow_exec)
+        steps.extend(result.trace)  # the agents' conversation (request → answers → critic)
         valid, verdict = critic.review_result(plan, result)
         if not valid and allow_exec and plan["tool"] == "python" and "Traceback" in result.output:
             step("critic", "Self-correction", "Runtime error — retrying with standard imports.", "warn")
