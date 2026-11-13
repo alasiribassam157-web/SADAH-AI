@@ -60,8 +60,9 @@ class CriticSecurityAgent(BaseAgent):
 
     def allowed(self, plan: dict, task: Task) -> tuple[bool, str]:
         """Pre-execution gate: code/system work only on the developer's machine, and only if safe."""
-        if plan["primary"] == "Sandbox" and not task.allow_exec:
-            return False, "تنفيذ الأوامر والملفات متاح على جهاز المطوّر فقط."
+        if plan["primary"] == "Sandbox" and plan["intent"] != "file" and not task.allow_exec:
+            return False, ("تنفيذ الكود والأوامر متاح على جهاز المطوّر فقط." if task.lang == "ar" else
+                           "This needs code/system execution, which is available only on the developer's machine.")
         code = task.context.get("code", "")
         issues = scan_code(code) if code else self.check_command(task.context.get("command", ""))
         return (False, "؛ ".join(issues)) if issues else (True, "اجتاز الفحص الأمني")
