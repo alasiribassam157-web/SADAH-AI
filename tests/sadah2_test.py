@@ -92,6 +92,24 @@ best, _ = sup.execute(bus, Task("ما هو شيء"), {"text": "ما هو شيء"
                                                  "witnesses": [], "fallback": ["Wiki"]})
 check("critic falls back to another agent", best.agent == "Wiki" and best.ok, best.agent)
 
+# --- phase 3: knowledge agents (the library works offline; Wikipedia is replaced by a real intro)
+import agent.wiki_agent as wiki_mod  # noqa: E402
+from agent.local_kb_agent import LocalKBAgent  # noqa: E402
+from agent.wiki_agent import WikiAgent  # noqa: E402
+from agent.wikidata_agent import WikidataAgent  # noqa: E402
+
+kb_agent = LocalKBAgent()
+hit = kb_agent.run(Task("ما هو التعلم الآلي"))
+check("library answers offline with a source", hit.ok and "تعلم الآلة" in hit.answer and hit.sources, hit.answer[:60])
+check("library admits a missing topic", not kb_agent.run(Task("كيف أطبخ الكبسة")).ok)
+check("library ranks paragraphs for synthesis", len(kb_agent.passages("الذكاء الاصطناعي في الطب", "ar", 3)) == 3)
+check("wikidata only takes fact questions", WikidataAgent().can_handle(Task("ما هو الذهب")) == 0.0)
+FRANCE = "فرنسا جمهورية في أوروبا الغربية. يبلغ عدد سكانها 68.6 مليون نسمة، وعاصمتها وأكبر مدنها هي باريس."
+wiki_mod.intro = lambda topic, lang, timeout=5: ("فرنسا", FRANCE, "https://ar.wikipedia.org/wiki/x")
+witness = WikiAgent().run(Task("ما هي عاصمة فرنسا"))
+check("wikipedia witness reads the whole intro", witness.ok and witness.data["text"] == FRANCE, witness.answer)
+check("witness answer quotes the capital sentence", "باريس" in witness.answer and "أوروبا" not in witness.answer)
+
 print(f"\n{'All SADAH 2.0 checks passed' if not failures else f'{len(failures)} failed'}")
 for f in failures:
     print("  ✗", f)
