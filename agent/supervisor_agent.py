@@ -64,11 +64,11 @@ class SupervisorAgent(BaseAgent):
         elif _NEWS.search(text):
             primary, witnesses, fallback = "OpenWeb", [], ["Wiki"]
         elif composer.is_comparison(text) or _OPEN.search(text.strip()):
-            primary, witnesses, fallback = "Synthesis", [], ["LocalKB", "Wiki", "OpenWeb"]
+            primary, witnesses, fallback = "Synthesis", [], ["LocalKB", "Wiki"]
         elif match_relation(text):
             primary, witnesses, fallback = "Wikidata", ["Wiki"], ["LocalKB", "Wiki"]
-        else:
-            primary, witnesses, fallback = "LocalKB", [], ["Wiki", "Wikidata", "OpenWeb"]
+        else:   # news headlines are no answer to a general question, so OpenWeb is not a fallback here
+            primary, witnesses, fallback = "LocalKB", [], ["Wiki", "Wikidata"]
         return {"text": text, "intent": intent, "primary": primary, "witnesses": witnesses, "fallback": fallback}
 
     def handle(self, task: Task) -> AgentResult:

@@ -15,7 +15,7 @@ BANNED_IMPORTS = {"os", "sys", "subprocess", "shutil", "socket", "ctypes", "pick
                   "multiprocessing", "threading", "signal", "pty", "requests", "httpx", "urllib", "builtins"}
 BANNED_CALLS = {"eval", "exec", "compile", "__import__", "open", "input", "globals", "locals", "vars",
                 "getattr", "setattr", "delattr", "breakpoint", "exit", "quit"}
-FALLBACKS = {"Wikidata": ["Wiki", "LocalKB"], "Wiki": ["LocalKB", "OpenWeb"], "LocalKB": ["Wiki", "OpenWeb"],
+FALLBACKS = {"Wikidata": ["Wiki", "LocalKB"], "Wiki": ["LocalKB", "Wikidata"], "LocalKB": ["Wiki", "Wikidata"],
              "OpenWeb": ["Wiki", "LocalKB"], "Synthesis": ["Wiki", "LocalKB"], "SymbolicMath": ["NumericMath"],
              "NumericMath": ["SymbolicMath"], "Forex": ["Markets"], "Markets": ["Forex"], "Units": ["NumericMath"],
              "CodeArchitect": ["CodeSynthesizer"], "CodeSynthesizer": ["CodeArchitect"], "Translation": ["Wiki"]}

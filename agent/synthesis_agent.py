@@ -106,9 +106,10 @@ class SynthesisAgent(BaseAgent):
         if kind == "compare" and any(re.search(p, task.text, re.I) for p, *_ in composer.PROPERTIES):
             self.step("مقارنة رقمية: سَداة تجلب القيمتين من Wikidata")
             res = composer.compare(task.text)
-            if res.ok:
-                url = re.findall(r"https?://\S+", res.output)
-                return self.ok(res.output, 0.85, url, {"kind": kind}, entity=res.entity)
+            if not res.ok:   # a numeric comparison without both numbers: no sentence-picking guesswork
+                return self.fail(res.output)
+            url = re.findall(r"https?://\S+", res.output)
+            return self.ok(res.output, 0.85, url, {"kind": kind}, entity=res.entity)
         topic, plan = axes(task.text, kind)
         count = {1: "محور واحد", 2: "محورين"}.get(len(plan), f"{len(plan)} محاور")
         self.step(f"سَداة قسّمت السؤال إلى {count}", " | ".join(q for _, q in plan))
