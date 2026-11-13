@@ -110,6 +110,30 @@ witness = WikiAgent().run(Task("ما هي عاصمة فرنسا"))
 check("wikipedia witness reads the whole intro", witness.ok and witness.data["text"] == FRANCE, witness.answer)
 check("witness answer quotes the capital sentence", "باريس" in witness.answer and "أوروبا" not in witness.answer)
 
+# --- phase 4: open web, synthesis, stylist, translation (offline: library + parsing only)
+from agent.open_web_agent import parse_rss, rank  # noqa: E402
+from agent.stylist_agent import dedupe, polish  # noqa: E402
+from agent.synthesis_agent import SynthesisAgent, axes, kind_of  # noqa: E402
+from agent.translation_agent import TranslationAgent, term  # noqa: E402
+
+RSS = ("<rss><channel><item><title>إطلاق مشروع للطاقة الشمسية في السعودية</title><link>https://x/a</link>"
+       "<pubDate>Fri, 13 Nov 2026 08:00:00 GMT</pubDate><source>واس</source></item>"
+       "<item><title>نتائج الدوري الإسباني</title><link>https://x/b</link></item></channel></rss>")
+news = rank(parse_rss(RSS), "آخر أخبار الطاقة الشمسية")
+check("RSS parsed and ranked by the question", len(news) == 1 and news[0]["source"] == "واس", news)
+check("comparison split into two axes", [q for _, q in axes("قارن بين الذكاء الاصطناعي وتعلم الآلة", "compare")[1]]
+      == ["الذكاء الاصطناعي", "تعلم الآلة"])
+check("analysis topic cleaned", axes("حلل أهمية الذكاء الاصطناعي", kind_of("حلل أهمية الذكاء الاصطناعي"))[0]
+      == "الذكاء الاصطناعي")
+open_answer = SynthesisAgent().run(Task("كيف يعمل التعلم المعزز"))
+check("synthesis answers an open question from sources", open_answer.ok and open_answer.sources
+      and "•" in open_answer.answer and "التعلم المعزز" in open_answer.answer, open_answer.answer[:120])
+SUN = "الطاقة الشمسية مصدر متجدد للكهرباء"
+check("stylist removes repeats and citation marks", dedupe([polish(SUN + " (Solar energy)[1]"), polish(SUN)])
+      == [SUN + "."], dedupe([polish(SUN + " (Solar energy)[1]"), polish(SUN)]))
+check("dictionary translation", "cat" in TranslationAgent().run(Task("ترجم قطة للانجليزي")).answer)
+check("offline term lookup", term("قطة") == "cat" and term("water") == "ماء")
+
 print(f"\n{'All SADAH 2.0 checks passed' if not failures else f'{len(failures)} failed'}")
 for f in failures:
     print("  ✗", f)
