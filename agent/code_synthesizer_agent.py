@@ -19,6 +19,10 @@ _LEAD = re.compile(r"^(?:اكتب|سو|سوي|ابي|أبي|ابغى|أبغى|ا
                    r"(?:python\s+)?(?:برنامج|سكربت|كود|program|script|code)?\s*(?:بايثون|python)?\s*"
                    r"(?:يقوم ب|that|which|to)?\s*", re.I)
 MAX_STEPS = 6
+# «يطبع النتيجة» is not «Hello World»: every verified block already prints its own result
+_SHOW_RESULT = re.compile(r"^(?:ي|ت)?(?:طبع|عرض|ظهر)\S*\s+(?:ال)?(?:نتيج|ناتج|مخرج|خرج)|"
+                          r"^(?:print|show|display|output)s?\s+(?:the\s+)?(?:result|output|answer|count)", re.I)
+_HELLO = re.compile(r"hello|مرحب|اهلا|أهلا", re.I)
 # «يرتب قائمة» → «ترتيب قائمة»: the coder brain learned task names, so verbs are turned into nouns
 MASDAR = {"قرأ": "قراءة", "كتب": "الكتابة", "رتب": "ترتيب", "عكس": "عكس", "حذف": "حذف", "حسب": "حساب", "طبع": "طباعة",
           "قسم": "تقسيم", "دمج": "دمج", "بحث": "بحث", "جمع": "جمع", "حول": "تحويل", "نشئ": "إنشاء", "قارن": "مقارنة",
@@ -86,6 +90,9 @@ class CodeSynthesizerAgent(BaseAgent):
             return self.fail("عقل البرمجة غير جاهز")
         blocks, seen = [], set()
         for clause in clauses:
+            if _SHOW_RESULT.search(clause) and not _HELLO.search(clause):
+                self.step(f"«{clause}» ← كل خطوة تطبع ناتجها أصلًا", "لا حاجة لكتلة إضافية", confidence=0.9)
+                continue
             kind, conf, _ = max((self.coder.brain.predict(p) for p in phrasings(clause)), key=lambda r: r[1])
             code = snippet(kind, "python") if conf >= CONFIDENCE_FLOOR else None
             self.step(f"«{clause}» ← {TASKS.get(kind, (kind,))[0]}", f"ثقة {conf:.0%}",
