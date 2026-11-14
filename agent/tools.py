@@ -31,6 +31,7 @@ class ToolResult:
     output: str
     files: list[str] = field(default_factory=list)
     entity: str = ""  # main subject of the answer, remembered for follow-up questions
+    trace: list[dict] = field(default_factory=list)  # messages between agents (agents/bus.py), shown as steps
 
 
 def _safe_path(name: str) -> Path:

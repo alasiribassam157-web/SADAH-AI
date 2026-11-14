@@ -66,25 +66,38 @@ def _format(value: dict, claim: dict, http: httpx.Client, lang: str) -> tuple[st
     return str(value["value"]), ""
 
 
-def answer_fact(question: str, lang: str) -> tuple[str, str, str] | None:
-    """Return (answer markdown, source url, entity name) or None if not a known relation."""
+def match_relation(question: str) -> tuple[str, str, str, str] | None:
+    """(property, subject, Arabic template, English template) for a supported question, else None."""
     # Common spelling: a final «ه» written for «ة» (عاصمه، مكه) should still match the patterns.
     if re.search(r"(?:عاصمه|مساحه|عمله|اللغه)", question):
         question = re.sub(r"(?<=\w)ه\b", "ة", question)
     for prop, pattern, tpl_ar, tpl_en in RELATIONS:
         m = re.search(pattern, question, re.IGNORECASE)
-        if not m:
-            continue
-        entity = _clean_entity(next(g for g in m.groups() if g))
-        for _attempt in range(2):  # one retry: Wikidata sometimes answers slowly
-            try:
-                return _lookup(prop, entity, tpl_ar if lang == "ar" else tpl_en, lang)
-            except httpx.TimeoutException:
-                continue
-            except (httpx.HTTPError, KeyError, ValueError, StopIteration, AttributeError):
-                return None
-        return None
+        if m:
+            return prop, _clean_entity(next(g for g in m.groups() if g)), tpl_ar, tpl_en
     return None
+
+
+def fact_details(question: str, lang: str) -> dict | None:
+    """Like answer_fact, plus the raw value and its kind so another agent can cross-check it."""
+    rel = match_relation(question)
+    if not rel:
+        return None
+    prop, entity, tpl_ar, tpl_en = rel
+    for _attempt in range(2):  # one retry: Wikidata sometimes answers slowly
+        try:
+            return _lookup(prop, entity, tpl_ar if lang == "ar" else tpl_en, lang)
+        except httpx.TimeoutException:
+            continue
+        except (httpx.HTTPError, KeyError, ValueError, StopIteration, AttributeError):
+            return None
+    return None
+
+
+def answer_fact(question: str, lang: str) -> tuple[str, str, str] | None:
+    """Return (answer markdown, source url, entity name) or None if not a known relation."""
+    d = fact_details(question, lang)
+    return (d["answer"], d["url"], d["name"]) if d else None
 
 
 def numeric_fact(entity: str, prop: str, lang: str) -> tuple[str, float, str, str] | None:
@@ -104,7 +117,7 @@ def numeric_fact(entity: str, prop: str, lang: str) -> tuple[str, float, str, st
     return None
 
 
-def _lookup(prop: str, entity: str, tpl: str, lang: str) -> tuple[str, str, str] | None:
+def _lookup(prop: str, entity: str, tpl: str, lang: str) -> dict | None:
     with httpx.Client(timeout=10, headers=HEADERS) as http:
         hits = http.get(API, params={"action": "wbsearchentities", "search": entity, "language": lang,
                                      "uselang": lang, "type": "item", "limit": 3, "format": "json"}).json()
@@ -122,5 +135,8 @@ def _lookup(prop: str, entity: str, tpl: str, lang: str) -> tuple[str, str, str]
                 value = ("، " if lang == "ar" else ", ").join(
                     _format(c["mainsnak"]["datavalue"], c, http, lang)[0] for c in values)
             name = _label(http, qid, lang)
-            return tpl.format(e=name, v=value, d=detail), f"https://www.wikidata.org/wiki/{qid}", name
+            raw = claim["mainsnak"]["datavalue"]
+            amount = raw["value"].get("amount") if raw["type"] == "quantity" else None
+            return {"answer": tpl.format(e=name, v=value, d=detail), "url": f"https://www.wikidata.org/wiki/{qid}",
+                    "name": name, "value": value, "kind": raw["type"], "amount": amount, "prop": found}
     return None
