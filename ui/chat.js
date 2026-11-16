@@ -1,8 +1,7 @@
 // NAWL user chat: bento home (home.js) and a focused conversation, with saved chats (history.js).
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
-const sharedQuestion = params.get("q");  // shareable links: /?q=...  and  /?theme=dark
-if (["dark", "light"].includes(params.get("theme"))) store.set("nexus_theme", params.get("theme"));
+const sharedQuestion = params.get("q");  // shareable links: /?q=...
 if (location.search) history.replaceState(null, "", "/");
 let lang = store.get("nexus_lang", "ar");
 let busy = false, cat = "web";
@@ -37,7 +36,6 @@ function applyLang() {
   $("btn-lang").textContent = t("langBtn");
   document.querySelectorAll("[data-label]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.label)));
   $("send").setAttribute("aria-label", t("send")); $("btn-lang").setAttribute("aria-label", lang === "ar" ? "English" : "العربية");
-  applyTheme(document.documentElement.dataset.theme || "light");
   renderHello(); renderCats(); renderHistory(chatId); loadHome();
 }
 function renderCats() {
@@ -50,12 +48,12 @@ function renderCats() {
     `<button class="example" data-q="${esc(q)}">${svg(cat)}<span>${esc(q)}</span>${svg("arrow").replace("<svg", '<svg class="go"')}</button>`).join("");
 }
 function userBubble(text) { return `<div class="msg-user" dir="auto">${esc(text)}</div>`; }
-function botBubble(answer, intent) {
+function botBubble(answer, intent, trace) {
   const skill = t("cats")[intent] || t("skills")[intent];
   return `<div class="msg-bot"><div class="bot-meta"><img class="avatar" src="/ui/logo.svg" alt="" />${t("brand")}${skill
     ? `<span class="badge" data-i="${esc(intent)}">${skill}</span>` : ""}</div><div class="bot-body">
     <div class="answer" dir="auto">${md(answer)}</div>
-    <div class="actions"><button class="mini" data-copy-answer>${svg("copy")}${t("copy")}</button></div></div></div>`;
+    <div class="actions"><button class="mini" data-copy-answer>${svg("copy")}${t("copy")}</button></div>${traceHtml(trace)}</div></div>`;
 }
 function setMode(chatting) {
   document.body.classList.toggle("chatting", chatting);
@@ -84,8 +82,9 @@ async function send(text) {
                                            body: JSON.stringify({ message: text, session: chatId }) });
     if (!res.ok) throw new Error(res.statusText);
     const data = await res.json();
-    pending.outerHTML = botBubble(data.answer, data.intent);
-    History.add(chatId, { role: "bot", text: data.answer, intent: data.intent });
+    const trace = buildTrace(data);
+    pending.outerHTML = botBubble(data.answer, data.intent, trace);
+    History.add(chatId, { role: "bot", text: data.answer, intent: data.intent, trace });
   } catch {
     pending.outerHTML = botBubble(t("error"), "");
   } finally {
@@ -97,7 +96,7 @@ function openChat(id) {
   const chat = History.get(id);
   if (!chat) return;
   chatId = id;
-  $("thread").innerHTML = chat.messages.map((m) => (m.role === "user" ? userBubble(m.text) : botBubble(m.text, m.intent))).join("");
+  $("thread").innerHTML = chat.messages.map((m) => (m.role === "user" ? userBubble(m.text) : botBubble(m.text, m.intent, m.trace))).join("");
   setMode(true); toggleDrawer(false); renderHistory(chatId); scrollDown();
 }
 function newChat() {
@@ -139,11 +138,9 @@ $("input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shif
 $("composer").onsubmit = (e) => { e.preventDefault(); send($("input").value); };
 $("city").onchange = () => { store.set("nexus_city", $("city").value); loadHome(); };
 document.querySelectorAll("[data-new]").forEach((b) => (b.onclick = newChat));
-$("btn-theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 $("btn-lang").onclick = () => { lang = lang === "ar" ? "en" : "ar"; store.set("nexus_lang", lang); applyLang(); };
 $("btn-history").onclick = () => toggleDrawer(!document.body.classList.contains("drawer-open"));
 $("scrim").onclick = () => toggleDrawer(false);
 
-document.documentElement.dataset.theme = store.get("nexus_theme", matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 applyLang(); setMode(false); refreshSend();
 if (sharedQuestion) send(sharedQuestion);

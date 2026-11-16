@@ -32,7 +32,9 @@ const T = {
         del: "احذف المحادثة", close: "إغلاق", send: "أرسل",
         cats: { web: "معرفة", code: "برمجة", weather: "طقس", currency: "عملات", python: "حساب", datetime: "الوقت",
                 units: "تحويل", prayer: "الصلاة", translate: "ترجمة" },
-        skills: { chat: "محادثة", file: "ملفات", system: "نظام" } },
+        skills: { chat: "محادثة", file: "ملفات", system: "نظام" },
+        tr: { title: "مسار الوكلاء", primary: "الوكيل الأساسي", witness: "الشهود", consensus: "الإجماع", conf: "الثقة", latency: "الزمن", none: "—",
+              verified: "✓ مصدران متفقان (تم التحقق)", math: "✓ تحقق رياضي عكسي مطابق", own: "✓ تحقق ذاتي مطابق", single: "مصدر واحد فقط", conflict: "⚠ المصادر مختلفة" } },
   en: { brand: "SADAH", tagline: "سَداة · An Arabic mind, built from scratch", own: "SADAH runs on its own Arabic AI, built from scratch with no outside model.",
         morning: "Good morning", evening: "Good evening", ask: "What do you want to know?", city: "City",
         placeholder: "Ask about anything…", try: "Try asking",
@@ -46,7 +48,9 @@ const T = {
         del: "Delete chat", close: "Close", send: "Send",
         cats: { web: "Knowledge", code: "Code", weather: "Weather", currency: "Currency", python: "Math", datetime: "Time",
                 units: "Units", prayer: "Prayer", translate: "Translate" },
-        skills: { chat: "Chat", file: "Files", system: "System" } },
+        skills: { chat: "Chat", file: "Files", system: "System" },
+        tr: { title: "Agent trace", primary: "Primary agent", witness: "Witnesses", consensus: "Consensus", conf: "Confidence", latency: "Latency", none: "—",
+              verified: "✓ Two sources agree (verified)", math: "✓ Inverse math check matches", own: "✓ Self-check matches", single: "Single source", conflict: "⚠ Sources disagree" } },
 };
 
 // [Arabic, English] names used for the dashboard city picker (sent to the geocoder as-is)

@@ -1,31 +1,27 @@
 /* SADAH · سَداة, the warp of the loom. A quiet luxury system: ivory or night ground, oxblood and gold,
    hairline gold rules, warp threads as the signature band, Reem Kufi for display. One reading column. */
-:root, [data-theme="light"] {
-  --wool: #f6f1e8; --surface: #fffcf6; --sunk: #eee6d8; --line: #e0d5c3; --rule: #a08454;
-  --ink: #1a1512; --ink-2: #5b5049; --ink-3: #74685e;
-  --accent: #6e1a26; --accent-deep: #521219; --accent-wash: #f1e3df; --gold: #b8924a; --gold-text: #7a5a1e; --ochre-text: #7a5a1e; --olive: #4f5e30;
-  --btn: #1a1512; --btn-hover: #33291f; --on-btn: #f6f1e8; --danger: #a3271b; --focus: #6e1a26;
-  --tag-bg: #1a1512; --tag-ink: #f6f1e8;
-  --night: #15110f; --night-2: #201915; --night-line: #3b3029; --night-ink: #efe6d8; --night-mute: #bfb09c; --night-gold: #d4b26a;
-  --shadow: 0 1px 0 rgba(26,21,18,.04), 0 22px 44px -28px rgba(26,21,18,.38);
+/* Royal Obsidian: one identity, no theme switch. Obsidian void, carbon surfaces on 1px hairlines, champagne gold, a crimson pulse. */
+:root {
+  --wool: #080706; --surface: #12100E; --sunk: #1a1613; --line: #26211D; --rule: #5a4a1f;
+  --ink: #F4EFE6; --ink-2: #8C8275; --ink-3: #8C8275;
+  --accent: #D4AF37; --accent-deep: #F3E5AB; --accent-wash: #1c1608; --gold: #D4AF37; --gold-text: #E0C068; --ochre-text: #E0C068; --olive: #a8b77f;
+  --btn: #D4AF37; --btn-hover: #F3E5AB; --on-btn: #080706; --danger: #F0A0A8; --focus: #F3E5AB;
+  --tag-bg: #12100E; --tag-ink: #F4EFE6; --crimson: #4A0E17;
+  --night: #12100E; --night-2: #1a1613; --night-line: #26211D; --night-ink: #F4EFE6; --night-mute: #8C8275; --night-gold: #D4AF37;
+  --shadow: 0 22px 48px -26px rgba(0,0,0,.9);
   --warp: repeating-linear-gradient(90deg, var(--gold) 0 1px, transparent 1px 6px);
-  --diamond: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0L10 5L5 10L0 5Z' fill='%23C9A45C'/%3E%3C/svg%3E");
-  --f-display: "Cormorant Garamond", "Reem Kufi", "Amiri", serif;
+  --diamond: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0L10 5L5 10L0 5Z' fill='%23D4AF37'/%3E%3C/svg%3E");
+  --f-display: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
   --f-ui: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
-  color-scheme: light;
-}
-[data-theme="dark"] {
-  --wool: #0f0c0a; --surface: #171210; --sunk: #211a16; --line: #2f261f; --rule: #7d6640;
-  --ink: #f2ebdf; --ink-2: #c7b9a6; --ink-3: #9e8f7d;
-  --accent: #d8b873; --accent-deep: #e8cf95; --accent-wash: #2a1f14; --gold: #c9a45c; --gold-text: #d9bc7a; --ochre-text: #d9bc7a; --olive: #a8b77f;
-  --btn: #c9a45c; --btn-hover: #d8b873; --on-btn: #15110f; --danger: #f08070; --focus: #d8b873;
-  --tag-bg: #241c17; --tag-ink: #f2ebdf;
-  --shadow: 0 22px 48px -26px rgba(0,0,0,.85);
   color-scheme: dark;
 }
 * { box-sizing: border-box; margin: 0; }
 html, body { height: 100%; background: var(--wool); color: var(--ink); }
+/* Deep Crimson Pulse: a slow glow behind everything */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; animation: pulse 8s ease-in-out infinite;
+  background: radial-gradient(70% 50% at 50% -5%, rgba(74,14,23,.65), transparent 72%); }
+@keyframes pulse { 50% { opacity: .45; } }
 body { font: 400 16px/1.85 var(--f-ui); -webkit-font-smoothing: antialiased; overflow: hidden; display: flex; flex-direction: column; transition: background .3s, color .3s; }
 button, select { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
@@ -95,7 +91,7 @@ main { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 clamp(16px, 4vw
 body.chatting .dock { display: block; } body.chatting .home { display: none; }
 
 /* Waking screen: night and gold in both themes */
-.wake { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: #0f0c0a; text-align: center; padding: 24px; }
+.wake { position: fixed; inset: 0; z-index: 80; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: #080706; text-align: center; padding: 24px; }
 .wake.on { display: flex; }
 .wake::before, .wake::after { content: ""; position: absolute; inset-inline: 0; height: 9px; background: repeating-linear-gradient(90deg, #c9a45c 0 1px, transparent 1px 6px); opacity: .7; }
 .wake::before { top: 0; border-top: 2px solid #c9a45c; } .wake::after { bottom: 0; border-bottom: 2px solid #c9a45c; }
