@@ -1,4 +1,4 @@
-"""Java snippets for the NEXUS-6 tasks (part 1). Java 17+."""
+"""Java snippets for the SADAH v6 tasks (part 1). Java 17+."""
 
 SNIPPETS = {
     "inheritance": r'''

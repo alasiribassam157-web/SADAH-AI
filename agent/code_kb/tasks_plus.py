@@ -1,4 +1,4 @@
-"""NEXUS-6 coding tasks (Python and Java): titles and the phrasings the coder brain learns from."""
+"""SADAH v6 coding tasks (Python and Java): titles and the phrasings the coder brain learns from."""
 
 TASKS_PLUS = {
     "inheritance": ("الوراثة بين الكلاسات", "Class inheritance"),

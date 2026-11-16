@@ -1,4 +1,4 @@
-"""Python snippets for the NEXUS-6 tasks (part 1)."""
+"""Python snippets for the SADAH v6 tasks (part 1)."""
 
 SNIPPETS = {
     "inheritance": r'''

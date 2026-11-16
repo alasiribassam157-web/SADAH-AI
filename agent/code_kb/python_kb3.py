@@ -1,4 +1,4 @@
-"""Python snippets for the NEXUS-6 tasks (part 2)."""
+"""Python snippets for the SADAH v6 tasks (part 2)."""
 
 SNIPPETS = {
     "unit_test": r'''
