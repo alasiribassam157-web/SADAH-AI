@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BIN = ROOT / "deploy" / "bin"
 PORT = int(os.getenv("PORT", "8000"))
 LOCAL = f"http://localhost:{PORT}"
-CLOUD = "https://nexus-1-ai.onrender.com"
+CLOUD = "https://sadah-app.vercel.app"
 CLOUDFLARED_URL = ("https://github.com/cloudflare/cloudflared/releases/latest/download/"
                    "cloudflared-windows-amd64.exe")
 
@@ -42,7 +42,7 @@ def desktop_dir() -> Path:
 
 
 def save_links(public_url: str | None) -> None:
-    lines = ["NEXUS-1 links", "=" * 40,
+    lines = ["SADAH links", "=" * 40,
              f"Permanent (everyone, 24/7):  {CLOUD}",
              f"This PC:                     {LOCAL}",
              f"Developer (this PC only):    {LOCAL}/dev"]
@@ -90,9 +90,9 @@ def cloudflare() -> tuple[subprocess.Popen, str] | None:
 
 
 def main() -> int:
-    print(f"Waiting for NEXUS-1 on {LOCAL} ...")
+    print(f"Waiting for SADAH on {LOCAL} ...")
     if not wait_for_server():
-        print("Server did not start. Check the 'NEXUS-1 Server' window for errors.")
+        print("Server did not start. Check the 'SADAH Server' window for errors.")
         return 1
     tunnel = cloudflare()
     save_links(tunnel[1] if tunnel else None)
