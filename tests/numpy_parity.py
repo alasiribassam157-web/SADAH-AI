@@ -3,7 +3,7 @@
 Run where PyTorch is installed:  py -m tests.numpy_parity
 1. router + coder: same top label and near-identical logits on every benchmark question
 2. app.py imports with PyTorch blocked, as on Vercel, and answers through the NumPy brains
-The full benchmark on the NumPy brains:  NEXUS_NUMPY=1 py -m tests.benchmark
+The full benchmark on the NumPy brains:  SADAH_NUMPY=1 py -m tests.benchmark
 """
 import subprocess
 import sys

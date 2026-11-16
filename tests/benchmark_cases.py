@@ -1,4 +1,4 @@
-"""Benchmark questions for NEXUS-2/3 (146 + 24). NEXUS-4 additions live in benchmark_cases_v4.py."""
+"""Benchmark questions for SADAH v2/3 (146 + 24). SADAH v4 additions live in benchmark_cases_v4.py."""
 
 # (question, expected intent, text the answer must contain)
 CASES_V3 = [
@@ -59,7 +59,7 @@ CASES_V3 = [
     ("create file bench_note.txt with content benchmark ok", "file", "Created"), ("read bench_note.txt", "file", "benchmark ok"),
     ("list files", "file", "bench_note.txt"), ("انشئ ملف ideas_bench.txt", "file", "Created"), ("اعرض الملفات", "file", "ideas_bench.txt"),
     ("delete file bench_note.txt", "file", "Deleted"),
-    # --- NEXUS-3: new facts, answer length, English fallback, Gulf dialect (24)
+    # --- SADAH v3: new facts, answer length, English fallback, Gulf dialect (24)
     ("متى ولد ابن خلدون", "web", "1332"), ("كم ارتفاع برج خليفة", "web", "828"), ("كم مساحة السعودية", "web", "كم²"),
     ("من مؤسس جوجل", "web", "لاري بايج"), ("who founded Tesla", "web", "Eberhard"), ("في اي قارة تقع البرازيل", "web", "أمريكا الجنوبية"),
     ("how tall is Mount Everest", "web", "8,849"), ("when was Steve Jobs born", "web", "1955"), ("من رئيس فرنسا", "web", "ماكرون"),

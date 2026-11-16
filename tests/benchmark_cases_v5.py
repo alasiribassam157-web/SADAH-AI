@@ -1,4 +1,4 @@
-"""NEXUS-5 benchmark additions: symbolic math, date reasoning, comparisons, compound questions (26)."""
+"""SADAH v5 benchmark additions: symbolic math, date reasoning, comparisons, compound questions (26)."""
 
 CASES_V5 = [
     # --- symbolic math (12)

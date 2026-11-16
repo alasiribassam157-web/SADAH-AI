@@ -7,10 +7,10 @@ for _brain in ("router", "coder"):
     if not trainer.checkpoint(_brain).exists():
         trainer.train(brain=_brain)
 
-from agent.orchestrator import NexusAgent  # noqa: E402  (needs the checkpoint)
+from agent.orchestrator import SadahAgent  # noqa: E402  (needs the checkpoint)
 from agent.tools import SAFE_MODE, WORKSPACE  # noqa: E402
 
-agent = NexusAgent()
+agent = SadahAgent()
 failures = []
 
 

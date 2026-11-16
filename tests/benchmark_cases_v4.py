@@ -1,4 +1,4 @@
-"""NEXUS-4 benchmark additions: prayer times, translation, sports, dialects, typos, more skills (84)."""
+"""SADAH v4 benchmark additions: prayer times, translation, sports, dialects, typos, more skills (84)."""
 
 CASES_V4 = [
     # --- prayer times (11)

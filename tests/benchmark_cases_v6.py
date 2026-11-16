@@ -1,4 +1,4 @@
-"""NEXUS-6 benchmark additions: markets, world currencies, conversation, knowledge library, new code tasks (30)."""
+"""SADAH v6 benchmark additions: markets, world currencies, conversation, knowledge library, new code tasks (30)."""
 
 CASES_V6 = [
     # --- live markets (4)
