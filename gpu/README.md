@@ -1,4 +1,4 @@
-# تدريب عقل NEXUS التوليدي على Kaggle
+# تدريب عقل SADAH التوليدي على Kaggle
 
 عقل يكتب جملاً بنفسه (مو يختار من قوالب)، يتدرب من الصفر على بيانات عربية + إنجليزية (ويكيبيديا كاملة
 بالعربي + جزء إنجليزي)، بدون أي اتصال بنموذج خارجي.
@@ -11,8 +11,8 @@
 4. في أول خلية (Cell) الصق:
 
 ```python
-!git clone --depth 1 https://github.com/alasiribassam157-web/NEXUS-1-AI.git
-%cd NEXUS-1-AI
+!git clone --depth 1 https://github.com/alasiribassam157-web/SADAH-AI.git
+%cd SADAH-AI
 !pip install -q -r gpu/requirements.txt
 ```
 

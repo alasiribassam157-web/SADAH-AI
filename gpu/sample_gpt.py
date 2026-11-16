@@ -13,7 +13,7 @@ import torch
 from tokenizers import Tokenizer
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from core.gpt import NexusGPT  # noqa: E402
+from core.gpt import SadahGPT  # noqa: E402
 
 PROMPTS = ["عاصمة المملكة العربية السعودية هي", "الذكاء الاصطناعي هو", "في عام 1945", "تقع مدينة مكة المكرمة",
            "كرة القدم هي", "The capital of France is", "القهوة العربية", "مرحبا، كيف حالك؟"]
@@ -30,7 +30,7 @@ def main() -> None:
     ckpt = glob.glob(args.ckpt, recursive=True)[0]
     state = torch.load(ckpt, map_location="cpu", weights_only=False)
     print(f"{ckpt}  step {state['step']}", flush=True)
-    model = NexusGPT(**state["config"])
+    model = SadahGPT(**state["config"])
     model.load_state_dict(state["model"])
     model.eval()
     del state  # the optimizer state is half the file; free it before generating
