@@ -1,4 +1,4 @@
-// Conversation drawer: chats saved in this browser only (localStorage), plus theme control.
+// Conversation drawer: chats saved in this browser only (localStorage), one identity (Royal Obsidian), so there is no theme control.
 const store = {
   get: (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
   set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
@@ -37,12 +37,6 @@ function renderHistory(activeId) {
   $("history").innerHTML = !chats.length ? `<p class="hist-empty">${t("empty")}</p>`
     : (today.length ? `<p class="hist-group">${t("today")}</p>${today.map(row).join("")}` : "")
       + (earlier.length ? `<p class="hist-group">${t("earlier")}</p>${earlier.map(row).join("")}` : "");
-}
-
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  store.set("nexus_theme", theme);
-  $("btn-theme").title = theme === "dark" ? t("light") : t("dark");
 }
 
 function toggleDrawer(open) { document.body.classList.toggle("drawer-open", open); }

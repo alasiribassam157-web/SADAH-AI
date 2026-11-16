@@ -14,11 +14,9 @@ html[lang="en"] .bot-meta { letter-spacing: .2em; }
 
 /* Skill badge: a hairline tag, one jewel tone per skill, always with its label */
 .badge { --c: var(--ink-2); font: 600 11.5px var(--f-ui); letter-spacing: 0; color: var(--c); padding: 0 8px; line-height: 22px; border: 1px solid var(--c); }
-.badge[data-i="web"] { --c: #2f4f7a; } .badge[data-i="code"] { --c: #5b3f86; } .badge[data-i="weather"] { --c: #1f6170; }
+.badge[data-i="web"] { --c: #8cb6e0; } .badge[data-i="code"] { --c: #b9a2ea; } .badge[data-i="weather"] { --c: #7cc6df; }
 .badge[data-i="currency"], .badge[data-i="python"] { --c: var(--gold-text); } .badge[data-i="prayer"] { --c: var(--olive); }
-.badge[data-i="translate"] { --c: var(--accent); } .badge[data-i="datetime"], .badge[data-i="units"] { --c: #6d4c2a; }
-[data-theme="dark"] .badge[data-i="web"] { --c: #8cb6e0; } [data-theme="dark"] .badge[data-i="code"] { --c: #b9a2ea; }
-[data-theme="dark"] .badge[data-i="weather"] { --c: #7cc6df; } [data-theme="dark"] .badge[data-i="datetime"], [data-theme="dark"] .badge[data-i="units"] { --c: #d9b98c; }
+.badge[data-i="translate"] { --c: var(--accent); } .badge[data-i="datetime"], .badge[data-i="units"] { --c: #d9b98c; }
 
 .code { margin: 14px 0; border: 1px solid #3b3029; background: #15110f; color: #efe6d8; direction: ltr; overflow: hidden; }
 .code header { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 4px 14px; font: 500 12px var(--f-mono);

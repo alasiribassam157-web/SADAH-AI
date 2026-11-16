@@ -1,0 +1,22 @@
+/* Intro sequence, 2.2 s on the compositor (transform / opacity only, so it holds 60 fps):
+   0.0–0.7 s the gold threads are drawn · 0.7–1.5 s the diamond core forms with a pulse · 1.5–2.2 s the name appears. */
+.intro-screen { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  background: #080706; transition: opacity .4s ease; cursor: pointer; }
+.intro-screen.out { opacity: 0; pointer-events: none; }
+.loom { width: min(46vw, 210px); height: auto; overflow: visible; }
+.loom .th { fill: none; stroke: url(#ig); stroke-width: 1.5; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .34s cubic-bezier(.4,0,.2,1) calc(var(--i) * .06s) forwards; }
+.loom .core path { transform-box: fill-box; transform-origin: center; opacity: 0; animation: form .55s cubic-bezier(.2,.9,.25,1.2) forwards; }
+.loom .d-out { animation-delay: .7s; } .loom .d-in { animation-delay: .95s; } .loom .d-dot { animation-delay: 1.2s; }
+.loom .pulse { transform-box: fill-box; transform-origin: center; opacity: 0; animation: bloom .9s ease-out .7s forwards, beat 1.6s ease-in-out 1.6s infinite; }
+.loom { filter: drop-shadow(0 0 0 rgba(212,175,55,0)); animation: glow .8s ease-out .8s forwards; }
+.intro-name { display: flex; align-items: center; gap: 14px; opacity: 0; transform: translateY(8px); animation: name .7s ease-out 1.5s forwards; color: #F4EFE6; }
+.intro-name b { font: 600 34px/1 "IBM Plex Sans Arabic", sans-serif; color: #D4AF37; }
+.intro-name i { width: 1px; height: 26px; background: #8A6D1B; }
+.intro-name span { font: 500 22px/1 "JetBrains Mono", monospace; letter-spacing: .32em; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes form { from { opacity: 0; transform: scale(.2) rotate(45deg); } to { opacity: 1; transform: none; } }
+@keyframes bloom { to { opacity: .9; transform: scale(1.1); } }
+@keyframes beat { 50% { opacity: .55; transform: scale(1.04); } }
+@keyframes glow { to { filter: drop-shadow(0 0 10px rgba(212,175,55,.45)); } }
+@keyframes name { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .intro-screen { display: none; } }

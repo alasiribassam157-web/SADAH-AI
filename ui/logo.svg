@@ -1,13 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <title>SADAH · سَداة</title>
-  <!-- SADAH (سَداة, the warp of the loom). Three warp threads hang from the loom beam and become the letter س,
-       drawn in gold on night, between the upper and lower beams. -->
+  <!-- The Loom Core: seven gold warp threads cross a double-edged diamond (the twenty agents meeting at one verified truth),
+       over a faint crimson pulse. No letters. -->
   <defs>
-    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="58">
-      <stop offset="0" stop-color="#E8CF95"/><stop offset=".55" stop-color="#C9A45C"/><stop offset="1" stop-color="#A47E3C"/>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="58">
+      <stop offset="0" stop-color="#F3E5AB"/><stop offset=".5" stop-color="#D4AF37"/><stop offset="1" stop-color="#8A6D1B"/>
     </linearGradient>
+    <radialGradient id="p"><stop offset="0" stop-color="#4A0E17" stop-opacity=".95"/><stop offset="1" stop-color="#4A0E17" stop-opacity="0"/></radialGradient>
   </defs>
-  <rect width="64" height="64" fill="#15110F"/>
-  <path d="M6 6.5H58M6 57.5H58" stroke="url(#gold)" stroke-width="1.2"/>
-  <path d="M49.5 6V36H35.5M42.5 6V36M35.5 6V41A10.5 10.5 0 0 1 14.5 41V31" fill="none" stroke="url(#gold)" stroke-width="3.4"/>
+  <rect width="64" height="64" fill="#080706"/>
+  <circle cx="32" cy="32" r="31" fill="url(#p)"/>
+  <path d="M14 6V58M20 6V58M26 6V58M32 4V60M38 6V58M44 6V58M50 6V58" stroke="url(#g)" stroke-width="1.5" fill="none"/>
+  <path d="M32 17 47 32 32 47 17 32Z" fill="#080706" stroke="url(#g)" stroke-width="1.6"/>
+  <path d="M32 24 40 32 32 40 24 32Z" fill="url(#g)"/>
+  <path d="M32 29 35 32 32 35 29 32Z" fill="#080706"/>
 </svg>

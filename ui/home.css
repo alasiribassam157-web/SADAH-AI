@@ -48,7 +48,7 @@ html[dir="ltr"] .example .go { transform: scaleX(-1); }
 .cell:hover { background: var(--night-2); }
 .cell .lbl { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 500; color: var(--night-mute); }
 .cell .lbl svg { width: 16px; height: 16px; color: var(--night-gold); }
-.cell .val { font: 500 42px/1.2 var(--f-display); color: var(--night-gold); font-variant-numeric: lining-nums tabular-nums; margin-top: 6px; }
+.cell .val { font: 500 36px/1.3 var(--f-mono); color: var(--night-gold); font-variant-numeric: lining-nums tabular-nums; margin-top: 6px; }
 .cell .val.gold { color: var(--night-ink); }
 .cell .sub { font-size: 13px; color: var(--night-mute); }
 .cell .sub bdi { direction: ltr; unicode-bidi: isolate; }

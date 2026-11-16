@@ -4,18 +4,41 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="google" content="notranslate" />
-  <meta name="theme-color" content="#15110F" />
+  <meta name="theme-color" content="#080706" />
   <title>سَداة · SADAH</title>
   <link rel="icon" href="/ui/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/ui/style.css" />
   <link rel="stylesheet" href="/ui/home.css" />
   <link rel="stylesheet" href="/ui/chat.css" />
   <link rel="stylesheet" href="/ui/cv.css" />
+  <link rel="stylesheet" href="/ui/trace.css" />
+  <link rel="stylesheet" href="/ui/intro.css" />
 </head>
 <body>
+  <div id="intro" class="intro-screen" aria-hidden="true">
+    <svg class="loom" viewBox="0 0 64 64">
+      <defs>
+        <linearGradient id="ig" gradientUnits="userSpaceOnUse" x1="0" y1="6" x2="0" y2="58"><stop offset="0" stop-color="#F3E5AB"/><stop offset=".5" stop-color="#D4AF37"/><stop offset="1" stop-color="#8A6D1B"/></linearGradient>
+        <radialGradient id="ip"><stop offset="0" stop-color="#4A0E17" stop-opacity=".95"/><stop offset="1" stop-color="#4A0E17" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle class="pulse" cx="32" cy="32" r="31" fill="url(#ip)" stroke="none"/>
+      <g>
+        <path class="th" pathLength="1" style="--i:0" d="M14 6V58"/><path class="th" pathLength="1" style="--i:1" d="M20 6V58"/>
+        <path class="th" pathLength="1" style="--i:2" d="M26 6V58"/><path class="th" pathLength="1" style="--i:3" d="M32 4V60"/>
+        <path class="th" pathLength="1" style="--i:4" d="M38 6V58"/><path class="th" pathLength="1" style="--i:5" d="M44 6V58"/>
+        <path class="th" pathLength="1" style="--i:6" d="M50 6V58"/>
+      </g>
+      <g class="core">
+        <path class="d-out" d="M32 17 47 32 32 47 17 32Z" fill="#080706" stroke="url(#ig)" stroke-width="1.6"/>
+        <path class="d-in" d="M32 24 40 32 32 40 24 32Z" fill="url(#ig)" stroke="none"/>
+        <path class="d-dot" d="M32 29 35 32 32 35 29 32Z" fill="#080706" stroke="none"/>
+      </g>
+    </svg>
+    <p class="intro-name"><b>سَداة</b><i></i><span>SADAH</span></p>
+  </div>
   <div class="band" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="/" aria-label="SADAH سَداة">
@@ -24,7 +47,6 @@
     </a>
     <div class="top-actions">
       <button class="tb-new" data-new><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
-      <button id="btn-theme" class="tb-icon"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
       <button id="btn-lang" class="tb-icon lang"></button>
       <button id="btn-history" class="tb-icon" data-label="menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
     </div>
@@ -79,7 +101,9 @@
     <b data-t="waking"></b><span data-t="wakingNote"></span>
   </div>
 
+  <script src="/ui/intro.js"></script>
   <script src="/ui/content.js"></script>
+  <script src="/ui/trace.js"></script>
   <script src="/ui/history.js"></script>
   <script src="/ui/home.js"></script>
   <script src="/ui/chat.js"></script>
