@@ -19,8 +19,8 @@ BRAINS = {
     "coder": (templates_code.CODE_TASKS, templates_code.TEMPLATES, templates_code.SLOTS, 700),
 }
 
-_PREFIXES = ["", "", "", "", "please ", "can you ", "nexus ", "من فضلك ", "لو سمحت ", "ابغى ", "ابي ", "i want to ",
-             "hey ", "يا nexus ", "سؤال: ", "quick question: "]
+_PREFIXES = ["", "", "", "", "please ", "can you ", "sadah ", "من فضلك ", "لو سمحت ", "ابغى ", "ابي ", "i want to ",
+             "hey ", "يا sadah ", "سؤال: ", "quick question: "]
 _SUFFIXES = ["", "", "", "", " please", " now", " ?", "؟", " الان", " بسرعة", " لو سمحت", " الله يعافيك", " thanks", "!"]
 
 

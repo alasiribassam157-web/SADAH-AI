@@ -1,4 +1,4 @@
-"""Collect plain-text Wikipedia paragraphs for self-supervised pre-training (NEXUS-5).
+"""Collect plain-text Wikipedia paragraphs for self-supervised pre-training (SADAH v5).
 
 Run:  py -m core.corpus ar 250     ->  data/corpus/ar.txt
       py -m core.corpus en 150     ->  data/corpus/en.txt
@@ -12,7 +12,7 @@ from pathlib import Path
 import httpx
 
 CORPUS = Path(__file__).resolve().parent.parent / "data" / "corpus"
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai) python-httpx"}
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
 _CLUTTER = re.compile(r"\s*\([^()]*\)")            # pronunciations and dates in brackets
 _DIACRITICS = re.compile(r"[ً-ْٰـ]")
 MIN_CHARS = 60

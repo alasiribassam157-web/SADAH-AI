@@ -1,8 +1,8 @@
-"""Self-supervised pre-training (NEXUS-5): the brain learns Arabic/English by filling in hidden pieces.
+"""Self-supervised pre-training (SADAH v5): the brain learns Arabic/English by filling in hidden pieces.
 
 Run:  py -m core.pretrain [steps]        (resumes automatically from checkpoints/base_pretrain.pt)
 Reads data/corpus/*.txt (Wikipedia, see core/corpus.py) plus the task templates, trains a BPE tokenizer
-once, then trains a NexusMLM. The encoder later initialises the router/coder brains (transfer learning).
+once, then trains a SadahMLM. The encoder later initialises the router/coder brains (transfer learning).
 """
 import json
 import math
@@ -16,7 +16,7 @@ import torch.nn.functional as F
 
 from core.bpe import BPETokenizer
 from core.dataset_builder import BRAINS, build_dataset
-from core.neural_net import NexusMLM
+from core.neural_net import SadahMLM
 
 ROOT = Path(__file__).resolve().parent.parent
 CORPUS = ROOT / "data" / "corpus"
@@ -24,7 +24,7 @@ CKPT = ROOT / "checkpoints" / "base_pretrain.pt"      # full state for resuming 
 LOG = ROOT / "checkpoints" / "pretrain_log.json"       # progress shown on the developer dashboard
 BASE = dict(d_model=256, n_heads=8, n_layers=6, d_ff=1024, max_len=48, dropout=0.1)
 VOCAB_SIZE, BATCH, LR, WARMUP, MASK_RATE = 8000, 32, 6e-4, 400, 0.15
-MAX_HOURS = float(os.getenv("NEXUS_PRETRAIN_HOURS", "6"))
+MAX_HOURS = float(os.getenv("SADAH_PRETRAIN_HOURS", "6"))
 CPU_THREADS = 2
 
 
@@ -78,7 +78,7 @@ def pretrain(total_steps: int = 8000) -> dict:
     tok = BPETokenizer.from_json(state["tokenizer"]) if state else BPETokenizer(max_len=BASE["max_len"]).train(
         texts, vocab_size=VOCAB_SIZE)
     data = _windows(tok, texts)
-    model = NexusMLM(vocab_size=len(tok.vocab), pad_id=tok.pad_id, **BASE)
+    model = SadahMLM(vocab_size=len(tok.vocab), pad_id=tok.pad_id, **BASE)
     opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=0.01)
     step, history = 0, []
     if state:

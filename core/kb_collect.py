@@ -15,7 +15,7 @@ import httpx
 from core.kb_topics import DOMAINS
 
 OUT = Path(__file__).resolve().parent.parent / "data" / "kb" / "kb.jsonl.gz"
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai) python-httpx"}
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
 MAX_CHARS = 16_000
 SKIP = re.compile(r"^(references|see also|external links|further reading|notes|bibliography|sources|"
                   r"citations|المراجع|مراجع|انظر أيضا|انظر أيضًا|وصلات خارجية|روابط خارجية|مصادر|ملاحظات|"

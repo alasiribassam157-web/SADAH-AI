@@ -2,7 +2,7 @@
 
 Reads the same models/*.pt files the trainer writes. torch.save writes a zip holding a pickle plus the raw
 tensor bytes; a strict unpickler that knows only tensors and plain containers turns them into NumPy arrays.
-The forward pass mirrors core/neural_net.NexusBrain exactly (pre-LayerNorm encoder, masked mean pooling).
+The forward pass mirrors core/neural_net.SadahBrain exactly (pre-LayerNorm encoder, masked mean pooling).
 """
 import collections
 import math
@@ -60,7 +60,7 @@ def _gelu(x: np.ndarray) -> np.ndarray:
 
 
 class NumpyBrain:
-    """Same maths as NexusBrain.forward for one sentence; returns the class logits."""
+    """Same maths as SadahBrain.forward for one sentence; returns the class logits."""
 
     def __init__(self, config: dict, state: dict):
         self.config = config

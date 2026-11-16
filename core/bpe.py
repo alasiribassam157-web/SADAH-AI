@@ -1,7 +1,7 @@
-"""Byte-Pair-Encoding tokenizer trained from scratch (NEXUS-5).
+"""Byte-Pair-Encoding tokenizer trained from scratch (SADAH v5).
 
 Words are split into learned sub-word pieces, so unseen words, typos and dialect forms still map to
-known parts: «والمدرسة» -> «وال», «مدرس», «ة</w>». Same interface as core.tokenizer.NexusTokenizer.
+known parts: «والمدرسة» -> «وال», «مدرس», «ة</w>». Same interface as core.tokenizer.SadahTokenizer.
 """
 import heapq
 import json
