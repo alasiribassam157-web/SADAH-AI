@@ -22,6 +22,20 @@ _FOLLOW_UPS = [
     (r"^(?:can you )?(?:explain|go on|continue)(?: more| in more detail| further)?\s*$", "{e} in detail"),
 ]
 
+# A question that points back with «ـها / ـه» or «its / his / her» at something never named:
+# «وكم عدد سكانها؟» «ما هي عاصمتها؟» «كم مساحته؟» «what is its capital»
+_PROPS = (r"عاصمت|سكان|عملت|لغت|مساحت|ارتفاع|عمر|طول|وزن|موقع|رئيس|مؤسس|حجم|عدد|تاريخ|مدين|مناخ|اقتصاد|علم|تأسيس|ميلاد")
+_DANGLING_AR = re.compile(rf"^(?:و\s*)?(?:(?:ما|كم|متى|اين|أين|وين|من)\s+)?(?:(?:هي|هو|هم)\s+)?(?:\S+\s+)?"
+                          rf"((?:{_PROPS})\S*?)(?:ها|ه|هم)(?:\s+الرسمية)?$")
+_DANGLING_EN = re.compile(r"\b(?:its|his|her|their)\s+(?:capital|population|currency|area|size|height|age|language|founder|"
+                          r"president|weather|location)\b|\blive there\b|\bweather there\b", re.I)
+
+
+def is_dangling(message: str) -> bool:
+    """True for a short question that depends on a subject mentioned before (the caller checks the memory)."""
+    text = re.sub(r"[؟?!.،,]+\s*$", "", message.strip())
+    return len(text.split()) <= 6 and bool(_DANGLING_AR.search(text) or _DANGLING_EN.search(text))
+
 
 class ConversationMemory:
     def __init__(self):
@@ -48,4 +62,13 @@ class ConversationMemory:
         for pattern, rewrite in _FOLLOW_UPS:
             if re.search(pattern, text, re.IGNORECASE):
                 return re.sub(pattern, rewrite.format(e=entity), text, count=1, flags=re.IGNORECASE)
+        m = _DANGLING_AR.search(text)   # «كم مساحته» -> «كم مساحة اليابان»
+        if m:
+            word = m.group(0).split()[-1]
+            stem = re.sub(r"(?:ها|ه|هم)$", "", word)
+            return text[:len(text) - len(word)] + (stem[:-1] + "ة" if stem.endswith("ت") else stem) + f" {entity}"
         return message
+
+    def dangling(self, session: str, message: str) -> bool:
+        """A pointing-back question while this conversation has no subject yet: it must not become a search."""
+        return not self.subject(session) and is_dangling(message)

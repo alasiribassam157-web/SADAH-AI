@@ -19,6 +19,8 @@ _FEMININE = [(re.compile(r"(?<!\w)أنا مساعد(?!\w)"), "أنا مساعد�
              (re.compile(r"(?<!\w)عقل صغير دربناه(?!\w)"), "عقل صغير درّبناه")]
 NO_ANSWER = {"ar": "بحثتُ في المصادر المتاحة ولم أجد إجابة موثوقة لهذا السؤال، فأفضّل ألا أخمّن. 🤍",
              "en": "I searched the sources I have and found no reliable answer, so I'd rather not guess. 🤍"}
+DANGLING = {"ar": "يبدو أن سؤالك يعتمد على موضوع سابق، عن أي دولة أو شيء تسأل تحديدًا لأعطيك الإجابة الدقيقة؟",
+            "en": "Your question seems to refer to something earlier. Which country or topic do you mean, so I can answer exactly?"}
 
 
 def speak_as_sadah(text: str, lang: str) -> str:
@@ -54,6 +56,10 @@ class CompanionAgent(BaseAgent):
             task.context["followup"] = f"{task.text} → {resolved}"
             task.text = resolved
         return task
+
+    def dangling(self, task: Task) -> str:
+        """The clarifying question when «وكم عدد سكانها؟» arrives with nothing to refer to (else an empty string)."""
+        return DANGLING[task.lang] if self.memory.dangling(task.session, task.text) else ""
 
     def remember(self, task: Task, result: AgentResult) -> None:
         self.memory.remember(task.session, result.entity)

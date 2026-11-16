@@ -80,6 +80,10 @@ class NexusAgent:
         neural, conf, dist = self.supervisor.perceive(task.text)
         top = " · ".join(f"{k} {v:.0%}" for k, v in sorted(dist.items(), key=lambda kv: -kv[1])[:4])
         step("plan", f"العقل الموجّه: {neural} ({conf:.0%})", top)
+        ask_back = self.companion.dangling(task)
+        if ask_back:   # a pronoun with no earlier subject: ask instead of searching at random
+            step("result", "سؤال يعتمد على موضوع سابق", "لا يوجد كيان في الذاكرة", "warn")
+            return done(ask_back, "chat", conf)
         talk = self.companion.talk.respond(session, task.text, task.lang)
         if talk:
             step("result", "سَداة تردّ بشكل شخصي", "تتذكر الاسم والمزاج وآخر خمس رسائل")

@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 
-from agent import composer, kb
+from agent import causal, composer, kb
 from agent.base_agent import AgentResult, BaseAgent, Task
 from agent.local_kb_agent import LocalKBAgent
 from agent.research import to_topic
@@ -46,8 +46,8 @@ def axes(question: str, kind: str) -> tuple[str, list[tuple[str, str]]]:
     while topic != previous:  # «حلل أهمية الذكاء الاصطناعي» -> «الذكاء الاصطناعي»
         previous, topic = topic, _TRAIL.sub("", _VERBS.sub("", _LEAD.sub("", topic))).strip()
     topic = topic or question
-    if kind == "why":
-        return topic, [("", topic), ("الأسباب", f"أسباب {topic}")]
+    if kind == "why":   # one causal axis: the search is widened by causal.expand when the sources are read
+        return topic, [("الأسباب", topic)]
     if kind == "analyze":
         return topic, [("", topic), ("التأثير والأهمية", f"تأثير {topic}")]
     return topic, [("", topic)]
@@ -58,8 +58,9 @@ def sentences(text: str) -> list[str]:
     return [p.strip() for p in parts if 40 <= len(p.strip()) <= 400]
 
 
-def textrank(items: list[str], query: list[str], damping: float = 0.85) -> np.ndarray:
-    """Score = 0.5 × centrality in the sentence-similarity graph + 0.5 × relevance to the question."""
+def textrank(items: list[str], query: list[str], damping: float = 0.85, boost: np.ndarray | None = None) -> np.ndarray:
+    """Score = 0.5 × centrality in the sentence-similarity graph + 0.5 × relevance to the question,
+    times `boost` (2.5 for causal sentences in «why» questions)."""
     bags = [set(kb.terms(s)) for s in items]
     n = len(items)
     sim = np.zeros((n, n))
@@ -75,7 +76,8 @@ def textrank(items: list[str], query: list[str], damping: float = 0.85) -> np.nd
     df = {t: sum(t in b for b in bags) for t in set(query)}
     rel = np.array([sum(math.log(1 + n / (1 + df[t])) for t in set(query) if t in b) for b in bags])
     norm = (lambda v: v / v.max() if v.max() > 0 else v)
-    return 0.5 * norm(rank) + 0.5 * norm(rel)
+    score = 0.5 * norm(rank) + 0.5 * norm(rel)
+    return score if boost is None else score * boost
 
 
 class SynthesisAgent(BaseAgent):
@@ -89,17 +91,20 @@ class SynthesisAgent(BaseAgent):
         super().__init__()
         self.local, self.wiki = local or LocalKBAgent(), wiki or WikiAgent()
 
-    def gather(self, query: str, lang: str) -> list[tuple[str, str]]:
-        """[(sentence, source url)] for one axis: library paragraphs plus the Wikipedia article."""
-        found = [(s, p["url"]) for p in self.local.passages(query, lang, 4) if p["coverage"] >= 0.5
-                 for s in sentences(p["text"])]
+    def gather(self, query: str, lang: str, why: bool = False) -> list[tuple[str, str]]:
+        """[(sentence, source url)] for one axis: library paragraphs plus the Wikipedia article.
+        A «why» axis is also searched with the reason words added (causal.expand)."""
+        found = []
+        for q in ([query, causal.expand(query, lang)] if why else [query]):
+            found += [(s, p["url"]) for p in self.local.passages(q, lang, 4) if p["coverage"] >= 0.5
+                      for s in sentences(p["text"])]
         try:
             page = self.wiki.search(query, lang, 10)
         except Exception:  # Wikipedia down: the library alone still answers
             page = None
         if page:
             found += [(s, page[2]) for s in sentences(page[1])]
-        return found
+        return list(dict.fromkeys(found))
 
     def handle(self, task: Task) -> AgentResult:
         kind = kind_of(task.text)
@@ -114,17 +119,19 @@ class SynthesisAgent(BaseAgent):
         count = {1: "محور واحد", 2: "محورين"}.get(len(plan), f"{len(plan)} محاور")
         self.step(f"سَداة قسّمت السؤال إلى {count}", " | ".join(q for _, q in plan))
         with ThreadPoolExecutor(max_workers=len(plan)) as pool:
-            pools = list(pool.map(lambda ax: self.gather(ax[1], task.lang), plan))
+            pools = list(pool.map(lambda ax: self.gather(ax[1], task.lang, kind == "why"), plan))
         sections, sources, used = [], [], set()
         for (heading, query), found in zip(plan, pools):
             need = set(kb.terms(query))
+            why = kind == "why"
             found = [(s, u) for s, u in found if s not in used
                      and len(need & set(kb.terms(s))) >= max(1, math.ceil(len(need) / 2))]   # stay on the axis
             if not found:
                 continue
             texts = [s for s, _ in found]
-            scores = textrank(texts, kb.terms(f"{task.text} {query}"))
-            best = sorted(np.argsort(-scores)[:PER_AXIS])          # best sentences, in their original order
+            scores = textrank(texts, kb.terms(f"{task.text} {causal.expand(query, task.lang) if why else query}"),
+                              boost=causal.weights(texts) if why else None)
+            best = causal.pick(texts, scores, PER_AXIS) if why else sorted(np.argsort(-scores)[:PER_AXIS])  # reading order
             sections.append((heading or (query if kind == "compare" else ""), [texts[i] for i in best]))
             used.update(texts[i] for i in best)
             sources += [found[i][1] for i in best]
@@ -134,4 +141,6 @@ class SynthesisAgent(BaseAgent):
         if not text:
             return self.fail("لم أجد في المصادر جملًا كافية للإجابة عن هذا السؤال المفتوح")
         conf = 0.75 if len(sections) == len(plan) else 0.6
+        if kind == "why" and not any(causal.is_causal(x) for _, sec in sections for x in sec):
+            conf = 0.5   # no sentence states a reason: the answer is only background, and its confidence says so
         return self.ok(text, conf, list(dict.fromkeys(sources)), {"kind": kind, "sections": sections}, entity=topic)
