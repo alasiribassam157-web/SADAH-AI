@@ -31,3 +31,7 @@ node_modules/
 .vscode/
 .idea/
 data/corpus/
+
+# SADAH private keys (the old names stay ignored on purpose)
+.sadah_cloud.json
+.sadah_token
