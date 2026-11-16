@@ -3,11 +3,12 @@ import re
 
 import httpx
 
+from agent.core_facts import number as core_number
 from agent.facts_relations import MULTI_VALUED, RELATIONS, UNITS
 from agent.wd_guard import get as wd_get
 
 API = "https://www.wikidata.org/w/api.php"
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai) python-httpx"}
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
 AR_MONTHS = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر",
              "أكتوبر", "نوفمبر", "ديسمبر"]
 EN_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September",
@@ -103,6 +104,8 @@ def answer_fact(question: str, lang: str) -> tuple[str, str, str] | None:
 
 def numeric_fact(entity: str, prop: str, lang: str) -> tuple[str, float, str, str] | None:
     """(name, number, unit, source url) for quantities such as population (P1082) or area (P2046)."""
+    if hit := core_number(_clean_entity(entity), prop, lang):  # pre-baked core facts: no network
+        return hit
     with httpx.Client(timeout=12, headers=HEADERS) as http:
         hits = wd_get(http, {"action": "wbsearchentities", "search": _clean_entity(entity), "language": lang,
                              "uselang": lang, "type": "item", "limit": 3, "format": "json"})

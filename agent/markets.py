@@ -9,7 +9,7 @@ import httpx
 
 from agent.tools import ToolResult
 
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai)"}
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI)"}
 OUNCE_G = 31.1035
 USD_SAR = 3.75                     # the riyal is pegged to the dollar
 KARATS = (24, 22, 21, 18)

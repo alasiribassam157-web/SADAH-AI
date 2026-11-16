@@ -5,7 +5,8 @@ The answer carries the raw value and its kind, so the critic can compare it with
 import httpx
 
 from agent.base_agent import AgentResult, BaseAgent, Task
-from agent.facts import fact_details, match_relation, numeric_fact
+from agent.fact_resolver import resolve
+from agent.facts import match_relation, numeric_fact
 
 LABELS = {"P36": "العاصمة", "P1082": "عدد السكان", "P571": "تاريخ التأسيس", "P38": "العملة", "P37": "اللغة الرسمية",
           "P569": "تاريخ الميلاد", "P19": "مكان الميلاد", "P2046": "المساحة", "P112": "المؤسس", "P286": "المدرب",
@@ -37,7 +38,7 @@ class WikidataAgent(BaseAgent):
         label = LABELS.get(prop.split("|")[0], prop)
         self.step("سَداة تسأل Wikidata", f"الكيان: {entity} · الخاصية: {label} ({prop})")
         try:
-            fact = fact_details(task.text, task.lang)
+            fact = resolve(task.text, task.lang)
         except (httpx.HTTPError, KeyError, ValueError) as exc:
             return self.fail(f"تعذّر الاتصال بـ Wikidata: {exc}")
         if not fact:

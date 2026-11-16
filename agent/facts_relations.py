@@ -1,4 +1,4 @@
-"""Question patterns NEXUS answers directly from Wikidata.
+"""Question patterns SADAH answers directly from Wikidata.
 
 Each entry: (property id, regex capturing the subject, Arabic answer template, English answer template).
 Templates receive {e} = subject name, {v} = value, {d} = extra detail (e.g. the population year).
@@ -26,7 +26,7 @@ RELATIONS = [
     ("P2046", r"(?:كم )?مساحة\s+(.+)|area of\s+(.+)|how big is\s+(.+)", "مساحة {e}: **{v}**.", "The area of {e} is **{v}**."),
     ("P112", r"(?:من )?(?:مؤسس|اسس|أسس)\s+(.+)|who founded\s+(.+)|founder of\s+(.+)",
      "مؤسس {e}: **{v}**.", "{e} was founded by **{v}**."),
-    # --- sports (NEXUS-4)
+    # --- sports (SADAH v4)
     ("P286", r"(?:من )?(?:مدرب|يدرب)\s+(?:نادي\s+|فريق\s+)?(.+)|(?:who is the )?(?:head )?coach of\s+(.+)|who coaches\s+(.+)",
      "مدرب {e}: **{v}**.", "The head coach of {e} is **{v}**."),
     ("P115", r"(?:ملعب|استاد)\s+(?:نادي\s+|فريق\s+)?(.+)|(?:home )?stadium of\s+(.+)|where does (.+?) play home games",

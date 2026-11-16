@@ -14,6 +14,8 @@ API = "https://www.wikidata.org/w/api.php"
 DELAYS = (0.4, 0.8)            # exponential back-off: 0.4 s, then 0.8 s
 RETRY_STATUS = {429, 500, 502, 503, 504}
 _GATE = threading.Semaphore(2)
+TRIP_FOR = 20.0                # after the retries all fail, skip Wikidata for 20 s so the text fallback answers at once
+_tripped_until = 0.0
 
 
 class TTLCache:
@@ -50,6 +52,8 @@ def get(http: httpx.Client, params: dict) -> dict:
     cached = CACHE.get(key)
     if cached is not None:
         return cached
+    if time.time() < _tripped_until:                  # Wikidata recently refused everything: fail fast
+        raise httpx.HTTPError("Wikidata متوقف مؤقتًا بسبب كثرة الطلبات")
     for attempt in range(len(DELAYS) + 1):
         with _GATE:                                   # the wait below happens outside the gate
             try:
@@ -62,4 +66,10 @@ def get(http: httpx.Client, params: dict) -> dict:
                 pass
         if attempt < len(DELAYS):
             time.sleep(DELAYS[attempt])
+    _trip()
     raise httpx.HTTPError("Wikidata لم يردّ بعد إعادة المحاولة")
+
+
+def _trip() -> None:
+    global _tripped_until
+    _tripped_until = time.time() + TRIP_FOR

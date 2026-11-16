@@ -1,4 +1,4 @@
-"""Date reasoning (NEXUS-5): days until events (Ramadan, Eid, national days), ages, gaps between dates,
+"""Date reasoning (SADAH v5): days until events (Ramadan, Eid, national days), ages, gaps between dates,
 dates N days from now, and the weekday of any date. Hijri dates come from api.aladhan.com."""
 import re
 from datetime import date, datetime, timedelta

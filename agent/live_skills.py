@@ -10,8 +10,8 @@ import httpx
 from agent.currencies import CURRENCIES
 from agent.tools import ToolResult
 
-TZ = ZoneInfo(os.getenv("NEXUS_TZ", "Asia/Riyadh"))
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai)"}
+TZ = ZoneInfo(os.getenv("SADAH_TZ", "Asia/Riyadh"))
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI)"}
 _WMO = [((0,), "صافٍ ☀️", "Clear ☀️"), ((1, 2), "غائم جزئياً ⛅", "Partly cloudy ⛅"), ((3,), "غائم ☁️", "Overcast ☁️"),
         ((45, 48), "ضباب 🌫", "Fog 🌫"), ((51, 53, 55, 56, 57), "رذاذ 🌦", "Drizzle 🌦"),
         ((61, 63, 65, 66, 67, 80, 81, 82), "مطر 🌧", "Rain 🌧"), ((71, 73, 75, 77, 85, 86), "ثلج ❄️", "Snow ❄️"),
