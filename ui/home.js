@@ -2,7 +2,7 @@
 let homeData = null;
 
 function cityName() {
-  const pair = CITIES[Number(store.get("nexus_city", "0"))] || CITIES[0];
+  const pair = CITIES[Number(store.get("sadah_city", "0"))] || CITIES[0];
   return lang === "ar" ? pair[0] : pair[1];
 }
 
@@ -18,7 +18,7 @@ function renderHello() {
   $("hello").textContent = new Date().getHours() < 12 ? t("morning") : t("evening");
   $("hijri").textContent = hijriToday();
   $("city").innerHTML = CITIES.map(([ar, en], i) => `<option value="${i}">${esc(lang === "ar" ? ar : en)}</option>`).join("");
-  $("city").value = store.get("nexus_city", "0");
+  $("city").value = store.get("sadah_city", "0");
 }
 
 // «بعد ساعتين و10 دقائق» / "in 2h 10m"

@@ -3,7 +3,7 @@ const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 const sharedQuestion = params.get("q");  // shareable links: /?q=...
 if (location.search) history.replaceState(null, "", "/");
-let lang = store.get("nexus_lang", "ar");
+let lang = store.get("sadah_lang", "ar");
 let busy = false, cat = "web";
 let chatId = newId();
 const t = (k) => T[lang][k];
@@ -136,9 +136,9 @@ document.addEventListener("keydown", (e) => {
 $("input").addEventListener("input", () => { autosize(); refreshSend(); });
 $("input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(e.target.value); } });
 $("composer").onsubmit = (e) => { e.preventDefault(); send($("input").value); };
-$("city").onchange = () => { store.set("nexus_city", $("city").value); loadHome(); };
+$("city").onchange = () => { store.set("sadah_city", $("city").value); loadHome(); };
 document.querySelectorAll("[data-new]").forEach((b) => (b.onclick = newChat));
-$("btn-lang").onclick = () => { lang = lang === "ar" ? "en" : "ar"; store.set("nexus_lang", lang); applyLang(); };
+$("btn-lang").onclick = () => { lang = lang === "ar" ? "en" : "ar"; store.set("sadah_lang", lang); applyLang(); };
 $("btn-history").onclick = () => toggleDrawer(!document.body.classList.contains("drawer-open"));
 $("scrim").onclick = () => toggleDrawer(false);
 

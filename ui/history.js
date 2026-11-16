@@ -4,12 +4,16 @@ const store = {
   set: (k, v) => { try { localStorage.setItem(k, v); } catch {} },
 };
 const MAX_CHATS = 40;
+// One-time move of this browser's saved data from the pre-SADAH key names, so nobody loses chats, language or city.
+for (const [from, to] of [["nexus_chats", "sadah_chats"], ["nexus_lang", "sadah_lang"], ["nexus_city", "sadah_city"]]) {
+  if (store.get(to, null) === null && store.get(from, null) !== null) store.set(to, store.get(from, ""));
+}
 
 const History = {
   all() {
-    try { return JSON.parse(store.get("nexus_chats", "[]")); } catch { return []; }
+    try { return JSON.parse(store.get("sadah_chats", "[]")); } catch { return []; }
   },
-  save(chats) { store.set("nexus_chats", JSON.stringify(chats.slice(0, MAX_CHATS))); },
+  save(chats) { store.set("sadah_chats", JSON.stringify(chats.slice(0, MAX_CHATS))); },
   get(id) { return this.all().find((c) => c.id === id); },
   // Append one message to a conversation, creating it (titled by its first question) if needed.
   add(id, message) {
