@@ -2,7 +2,7 @@
 
 Anyone else (the public cloud link, the tunnel) gets 404, as if it did not exist.
 The laptop can also read the cloud's stats through /api/dev/cloud using a private key
-kept in .nexus_cloud.json (gitignored); the same key is set on Render as NEXUS_ACCESS_TOKEN.
+kept in .sadah_cloud.json (gitignored); the same key is set on Render as SADAH_ACCESS_TOKEN.
 """
 import json
 import os
@@ -19,8 +19,8 @@ from core.dataset_builder import BRAINS, INTENTS, add_custom, load_auto_labels, 
 from core.pretrain import LOG as PRETRAIN_LOG
 
 ROOT = Path(__file__).resolve().parent
-CLOUD_KEY = os.getenv("NEXUS_ACCESS_TOKEN", "").strip()
-CLOUD_CFG = ROOT / ".nexus_cloud.json"
+CLOUD_KEY = os.getenv("SADAH_ACCESS_TOKEN", "").strip()
+CLOUD_CFG = ROOT / ".sadah_cloud.json"
 # Every question people asked online, kept on the laptop (gitignored: the repo is public, questions are private).
 ARCHIVE = ROOT / "data" / "cloud_questions.jsonl"
 # Tunnels and cloud proxies add these; a request carrying any of them is not from this machine.
@@ -33,7 +33,7 @@ def is_local(request: Request) -> bool:
 
 
 def require_dev(request: Request):
-    key = request.headers.get("x-nexus-key", "").strip()
+    key = request.headers.get("x-sadah-key", "").strip()
     if is_local(request) or (CLOUD_KEY and key and secrets.compare_digest(key, CLOUD_KEY)):
         return
     raise HTTPException(status_code=404)
@@ -90,7 +90,7 @@ def build_router(agent, stats, job) -> APIRouter:
 
     @router.get("/learning")
     def learning():
-        """NEXUS-5 learning metrics: pre-training progress, honest held-out score, self-training size."""
+        """SADAH v5 learning metrics: pre-training progress, honest held-out score, self-training size."""
         return {"pretrain": _read_json(PRETRAIN_LOG) or None, "heldout": _read_json(trainer.MODELS / "heldout.json") or None,
                 "brain_alone": _benchmark().get("brain_alone"), "auto_labels": len(load_auto_labels()),
                 "pretrained_ready": finetune.available()}
@@ -128,7 +128,7 @@ def build_router(agent, stats, job) -> APIRouter:
             return {"configured": False}
         try:
             res = httpx.get(cfg["url"].rstrip("/") + "/api/dev/overview",
-                            headers={"x-nexus-key": cfg["key"]}, timeout=70)
+                            headers={"x-sadah-key": cfg["key"]}, timeout=70)
             res.raise_for_status()
         except httpx.HTTPError as exc:
             return {"configured": True, "url": cfg["url"], "error": str(exc)}
