@@ -38,7 +38,7 @@ SLOTS = {
 
 TEMPLATES = {
     "chat": [
-        "hello", "hi there", "hey nexus", "good morning", "how are you", "who are you",
+        "hello", "hi there", "hey sadah", "good morning", "how are you", "who are you",
         "what can you do", "thanks", "thank you so much", "help", "tell me about yourself",
         "مرحبا", "اهلا", "السلام عليكم", "كيف حالك", "من انت", "ماذا تستطيع ان تفعل",
         "شكرا", "شكرا جزيلا", "ساعدني", "صباح الخير", "عرفني بنفسك",
@@ -125,7 +125,7 @@ TEMPLATES = {
     ],
 }
 
-# NEXUS-4: prayer times, translation, sports and Levantine/Egyptian dialects (core/templates_extra.py)
+# SADAH v4: prayer times, translation, sports and Levantine/Egyptian dialects (core/templates_extra.py)
 SLOTS.update(templates_extra.SLOTS)
 for _intent, _extra in templates_extra.TEMPLATES.items():
     TEMPLATES.setdefault(_intent, []).extend(_extra)

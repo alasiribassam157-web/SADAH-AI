@@ -49,7 +49,7 @@ def detect_language(text: str) -> str | None:
 
 
 def snippet(task: str, lang: str) -> str | None:
-    for part in ("", "2", "3"):  # NEXUS-6 tasks live in <lang>_kb2 / <lang>_kb3 (Python and Java)
+    for part in ("", "2", "3"):  # SADAH v6 tasks live in <lang>_kb2 / <lang>_kb3 (Python and Java)
         try:
             module = import_module(f"agent.code_kb.{lang}_kb{part}")
         except ModuleNotFoundError:

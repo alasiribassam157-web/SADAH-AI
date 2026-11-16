@@ -83,7 +83,7 @@ class CriticSecurityAgent(BaseAgent):
     def cross_check(self, primary: AgentResult, witnesses: list[AgentResult], lang: str) -> tuple[str, str]:
         """(status, badge) comparing a fact with independent witnesses' texts."""
         texts = " ".join(w.data.get("text", w.answer) for w in witnesses if w.ok)
-        if not primary.data or not texts:
+        if not primary.data or not texts or primary.data.get("source") == "fallback":   # fallback text comes from Wikipedia itself
             return consensus.SINGLE, BADGE[lang][consensus.SINGLE] if primary.agent in KNOWLEDGE else ""
         status, seen = consensus.judge(primary.data, texts)
         value = re.sub(r"\*", "", str(primary.data.get("value", "")))

@@ -14,7 +14,7 @@ def review_intent(msg: str, intent: str, confidence: float) -> tuple[str, str]:
     """Return (final_intent, note). Overrides the network only when it is unsure or implausible."""
     final, note = _review_confidence(msg, intent, confidence)
     text = msg.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789"))
-    # NEXUS-5 reasoning skills take precedence when the question clearly needs them.
+    # SADAH v5 reasoning skills take precedence when the question clearly needs them.
     op = math_engine.detect(msg)
     if op and math_engine.has_math(msg) and final != "code" and (op in math_engine.STRONG_OPS or final not in ("units", "currency")):
         return "python", note + " Symbolic math problem — solving it step by step."
@@ -86,12 +86,12 @@ def review_plan(plan: dict) -> tuple[bool, dict, list[str]]:
             args["code"] = code = code.replace("^", "**")
             notes.append("Semantic fix: '^' interpreted as power (**), not bitwise XOR.")
         try:
-            compile(code, "<nexus>", "exec")
+            compile(code, "<sadah>", "exec")
             notes.append("Syntax check passed.")
         except SyntaxError as err:
             fixed, fixes = _repair_python(code)
             try:
-                compile(fixed, "<nexus>", "exec")
+                compile(fixed, "<sadah>", "exec")
                 args["code"] = fixed
                 notes.append(f"Syntax error ({err.msg}) self-corrected: " + "; ".join(fixes))
             except SyntaxError:

@@ -112,6 +112,7 @@ try:
 except Exception as exc:
     check("persistent 429 ends in an error after 3 attempts", dead.calls == 3 and naps == [0.4, 0.8], (dead.calls, exc))
 wd_guard.time.sleep = real_sleep
+wd_guard._tripped_until = 0.0     # the breaker (PR #8) opened above; close it for the next test
 busy = Http([])
 threads = [threading.Thread(target=wd_guard.get, args=(busy, {"ids": f"Q{i}"})) for i in range(8)]
 [t.start() for t in threads]

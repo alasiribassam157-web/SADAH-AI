@@ -7,7 +7,7 @@ from agent.dictionary_ar_en import PAIRS
 from agent.tools import ToolResult
 
 API = "https://www.wikidata.org/w/api.php"
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai) python-httpx"}
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
 _DIACRITICS = re.compile(r"[ً-ْـ]")
 
 

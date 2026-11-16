@@ -10,9 +10,8 @@ from agent.chat_replies import chat_reply, is_small_talk
 from agent.companion import Companion
 from agent.memory import ConversationMemory
 
-# Old identity in the reply banks -> the current one (the stored browser keys stay nexus_*).
-_IDENTITY = [(re.compile(r"\*\*NEXUS(?:-1)?\*\*"), "**سَداة**"), (re.compile(r"منصة NEXUS|مشروع NEXUS"), "مشروع سَداة"),
-             (re.compile(r"NEXUS team"), "SADAH team"), (re.compile(r"NEXUS(?:-1)?"), "سَداة")]
+# Arabic banks already say «سَداة»; English replies say SADAH.
+_IDENTITY: list = []
 _EN_IDENTITY = [(re.compile(r"\*\*سَداة\*\*"), "**SADAH**"), (re.compile(r"سَداة"), "SADAH")]
 # Masculine self-references in the old banks -> feminine (SADAH is «she»).
 _FEMININE = [(re.compile(r"(?<!\w)أنا مساعد(?!\w)"), "أنا مساعدة"), (re.compile(r"(?<!\w)مساعد ذكي(?!\w)"), "مساعدة ذكية"),

@@ -83,7 +83,7 @@ class Companion:
         ar = lang == "ar"
         if m := _NAME.match(text):
             st["name"] = next(g for g in m.groups() if g).strip().title()
-            return f"تشرفنا يا {st['name']}! 🌟 أنا NEXUS. كيف أقدر أساعدك اليوم؟" if ar else \
+            return f"تشرفنا يا {st['name']}! 🌟 أنا سَداة. كيف أقدر أساعدك اليوم؟" if ar else \
                 f"Nice to meet you, {st['name']}! 🌟 How can I help today?"
         if m := _CITY.match(text):
             st["city"] = next(g for g in m.groups() if g).strip()

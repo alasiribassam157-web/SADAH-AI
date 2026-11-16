@@ -1,5 +1,5 @@
 """[19] Sandbox agent: files (confined to workspace/, as before, for everyone) and — only on the
-developer's own machine (localhost:8000, execution allowed, NEXUS_SAFE_MODE off) — Python and system tasks.
+developer's own machine (localhost:8000, execution allowed, SADAH_SAFE_MODE off) — Python and system tasks.
 
 Before anything runs, the critic reads the code (AST) or the command.
 """

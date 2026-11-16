@@ -20,7 +20,7 @@ except OSError:  # read-only deployments (Vercel): only the temp folder is writa
     WORKSPACE = Path(tempfile.gettempdir()) / "sadah-workspace"
     WORKSPACE.mkdir(exist_ok=True)
 # Safe mode (no code or system execution) is the default on Vercel, which sets VERCEL=1
-SAFE_MODE = os.getenv("NEXUS_SAFE_MODE", "1" if os.getenv("VERCEL") else "0") == "1"
+SAFE_MODE = os.getenv("SADAH_SAFE_MODE", "1" if os.getenv("VERCEL") else "0") == "1"
 _BLOCKED = re.compile(r"\b(format|shutdown|diskpart|rmdir\s+/s|rd\s+/s|del\s+/s|reg\s+delete|"
                       r"rm\s+-rf|mkfs|bcdedit|cipher\s+/w)\b", re.IGNORECASE)
 
@@ -51,7 +51,7 @@ class PythonExecutorTool:
 
     def run(self, code: str, timeout: int = 10) -> ToolResult:
         if SAFE_MODE:
-            return ToolResult(False, "Python execution is disabled (NEXUS_SAFE_MODE=1).")
+            return ToolResult(False, "Python execution is disabled (SADAH_SAFE_MODE=1).")
         script = WORKSPACE / f"run_{int(time.time() * 1000)}.py"
         script.write_text(code, encoding="utf-8")
         try:
@@ -126,7 +126,7 @@ class SystemTaskTool:
 
     def run(self, command: str, timeout: int = 15) -> ToolResult:
         if SAFE_MODE:
-            return ToolResult(False, "System commands are disabled (NEXUS_SAFE_MODE=1).")
+            return ToolResult(False, "System commands are disabled (SADAH_SAFE_MODE=1).")
         if _BLOCKED.search(command):
             return ToolResult(False, f"Blocked potentially destructive command: {command}")
         try:

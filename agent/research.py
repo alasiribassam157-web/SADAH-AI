@@ -5,10 +5,10 @@ import httpx
 
 from agent import kb
 
-HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai) python-httpx"}
+HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
 _DIACRITICS = re.compile(r"[ً-ْٰـ]")
 _PREFIXES = re.compile(
-    r"^(?:من فضلك|لو سمحت|please|can you|could you|nexus|"
+    r"^(?:من فضلك|لو سمحت|please|can you|could you|sadah|سداة|سَداة|"
     r"ابحث(?: في (?:الانترنت|الإنترنت|النت))? عن|ابحث|اعطني معلومات عن|أعطني معلومات عن|عطني معلومات عن|"
     r"ماذا تعرف عن|ماذا تعرفين عن|ما الذي تعرفه عن|وش تعرف عن|ايش تعرف عن|شو تعرف عن|شو بتعرف عن|"
     r"معلومات عن|قلي عن|قل لي عن|ابغى اعرف عن|ابي اعرف عن|"

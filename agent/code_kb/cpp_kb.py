@@ -1,5 +1,4 @@
 """C++ snippets (C++17). Statements go inside main() with #include <iostream> and <string>."""
-
 SNIPPETS = {
     "hello_world": r'''
 #include <iostream>

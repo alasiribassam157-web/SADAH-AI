@@ -23,7 +23,7 @@ def split_words(text: str) -> list[str]:
     return tokens
 
 
-class NexusTokenizer:
+class SadahTokenizer:
     def __init__(self, vocab: dict[str, int] | None = None, max_len: int = 32):
         self.vocab = vocab or {PAD: 0, UNK: 1, CLS: 2}
         self.max_len = max_len
@@ -32,7 +32,7 @@ class NexusTokenizer:
     def pad_id(self) -> int:
         return self.vocab[PAD]
 
-    def fit(self, texts: list[str], min_freq: int = 1) -> "NexusTokenizer":
+    def fit(self, texts: list[str], min_freq: int = 1) -> "SadahTokenizer":
         counts = Counter(tok for t in texts for tok in split_words(t))
         for tok, freq in counts.most_common():
             if freq >= min_freq and tok not in self.vocab:
@@ -50,6 +50,6 @@ class NexusTokenizer:
         return json.dumps({"vocab": self.vocab, "max_len": self.max_len}, ensure_ascii=False)
 
     @classmethod
-    def from_json(cls, raw: str) -> "NexusTokenizer":
+    def from_json(cls, raw: str) -> "SadahTokenizer":
         data = json.loads(raw)
         return cls(data["vocab"], data["max_len"])

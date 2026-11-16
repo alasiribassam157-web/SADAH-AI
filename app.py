@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from agent import home_feed
-from agent.orchestrator import NexusAgent
+from agent.orchestrator import SadahAgent
 from agent.stats import UsageStats
 from agent.tools import SAFE_MODE
 from cv import api as cv_api
@@ -29,7 +29,7 @@ DEVTOOLS = ROOT / "devtools"  # developer dashboard: kept on the laptop only (gi
 
 app = FastAPI(title="SADAH", version="3.1")
 app.mount("/ui", StaticFiles(directory=ROOT / "ui"), name="ui")
-agent = NexusAgent()
+agent = SadahAgent()
 stats = UsageStats()
 job = TrainingJob(on_done=lambda name: agent.brains[name].reload()) if TrainingJob else None
 if dev_api:

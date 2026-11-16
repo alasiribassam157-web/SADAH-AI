@@ -1,10 +1,10 @@
-"""Short conversational replies for greetings, thanks and questions about NEXUS-1 itself."""
+"""Short conversational replies for greetings, thanks and questions about SADAH herself."""
 import re
 
 ABOUT = {
-    "ar": "أنا **NEXUS-1**، مساعد ذكي بعقل مُدرَّب ذاتياً. اسألني عن أي معلومة، أو اطلب مني حساباً "
+    "ar": "أنا **سَداة**، مساعدة ذكية بعقل مُدرَّب ذاتياً. اسألني عن أي معلومة، أو اطلب مني حساباً "
           "(مثل `احسب 15 ضرب 7`)، أو أنشئ لك ملاحظة (مثل `انشئ ملف ideas.txt`).",
-    "en": "I'm **NEXUS-1**, an assistant with a self-trained brain. Ask me about any topic, give me a "
+    "en": "I'm **SADAH**, an assistant with a self-trained brain. Ask me about any topic, give me a "
           "calculation (like `15 times 7`), or have me save a note (like `create file ideas.txt`).",
 }
 
@@ -26,7 +26,7 @@ RULES = [
 ]
 
 
-GREETINGS = ("مرحبا", "اهلا", "أهلا", "هلا", "هلا والله", "ياهلا", "اهلين", "مرحبتين", "صباحو", "هاي", "hello", "hi", "hey", "hey there", "nexus")
+GREETINGS = ("مرحبا", "اهلا", "أهلا", "هلا", "هلا والله", "ياهلا", "اهلين", "مرحبتين", "صباحو", "هاي", "hello", "hi", "hey", "hey there", "sadah", "سداة", "سَداة")
 
 
 def _has(text: str, word: str) -> bool:

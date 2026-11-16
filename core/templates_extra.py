@@ -1,4 +1,4 @@
-"""NEXUS-4 additions to the router data: prayer times, translation, sports, and more dialects.
+"""SADAH v4 additions to the router data: prayer times, translation, sports, and more dialects.
 
 Merged into templates_router.TEMPLATES / SLOTS at import time.
 """

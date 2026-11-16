@@ -1,4 +1,4 @@
-"""CPU-friendly training loop for NEXUS brains (time cap, limited threads).
+"""CPU-friendly training loop for SADAH brains (time cap, limited threads).
 
 Run directly:  py -m core.trainer [router|coder|all] [small|medium|large|xlarge] [epochs]
 Trained weights live in models/ and are committed, so the cloud serves the exact brain you tested.
@@ -15,14 +15,14 @@ import torch.nn as nn
 
 from core import finetune
 from core.dataset_builder import BRAINS, build_dataset, train_val_split
-from core.neural_net import NexusBrain
-from core.tokenizer import NexusTokenizer
+from core.neural_net import SadahBrain
+from core.tokenizer import SadahTokenizer
 
 MODELS = Path(__file__).resolve().parent.parent / "models"
 VERSIONS = MODELS / "versions.json"
-MAX_SECONDS = float(os.getenv("NEXUS_MAX_TRAIN_SECONDS", "2700"))  # per brain; protects the laptop
+MAX_SECONDS = float(os.getenv("SADAH_MAX_TRAIN_SECONDS", "2700"))  # per brain; protects the laptop
 CPU_THREADS = 2      # keep CPU load (and heat) low
-# Goals agreed with the developer: ~1M (NEXUS-2), ~2.5M (NEXUS-3), then ~5M (NEXUS-4).
+# Goals agreed with the developer: ~1M (SADAH v2), ~2.5M (SADAH v3), then ~5M (SADAH v4).
 TARGET_PARAMS = 5_000_000
 SIZES = {
     "small": dict(d_model=64, n_heads=4, n_layers=2, d_ff=128),
@@ -73,8 +73,8 @@ def train(brain: str = "router", size: str = "medium", epochs: int = 12, batch_s
         lr = min(lr, 5e-4)
     else:
         # min_freq=2 keeps one-off typos out of the vocabulary; the brain learns to read them as <unk>.
-        tok = NexusTokenizer(max_len=32).fit([t for t, _ in train_pairs], min_freq=2)
-        model = NexusBrain(len(tok.vocab), len(labels), max_len=tok.max_len, pad_id=tok.pad_id, **SIZES[size])
+        tok = SadahTokenizer(max_len=32).fit([t for t, _ in train_pairs], min_freq=2)
+        model = SadahBrain(len(tok.vocab), len(labels), max_len=tok.max_len, pad_id=tok.pad_id, **SIZES[size])
     x_tr, y_tr = _tensors(train_pairs, tok)
     x_va, y_va = _tensors(val_pairs, tok)
     steps_per_epoch = (len(x_tr) + batch_size - 1) // batch_size

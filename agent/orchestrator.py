@@ -34,7 +34,7 @@ from agent.wiki_agent import WikiAgent
 from agent.wikidata_agent import WikidataAgent
 
 
-class NexusAgent:
+class SadahAgent:
     """Kept under its old name: app.py, the tests and the developer tools import it."""
 
     def __init__(self):

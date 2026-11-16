@@ -12,8 +12,8 @@ pinned: false
 
 <p align="center">
   <a href="https://sadah-app.vercel.app"><b>🌐 جرّب سَداة الآن</b></a> ·
-  <a href="#كيف-يشتغل">كيف يشتغل</a> ·
-  <a href="#شغّله-على-جهازك">شغّله على جهازك</a> ·
+  <a href="#البنية-سَداة-20">البنية</a> ·
+  <a href="#شغّلها-على-جهازك">شغّلها على جهازك</a> ·
   <a href="#english">English</a>
 </p>
 
@@ -21,73 +21,75 @@ pinned: false
 
 ## وش هي سَداة؟
 
-**سَداة** مساعدة ذكاء اصطناعي عربية، **عقلها مبني ومُدرَّب من الصفر بالكامل**: ما تستخدم ChatGPT ولا Gemini ولا أي نموذج جاهز أو واجهة ذكاء خارجية. كل معامل في عقلها تدرّب هنا، والكود كله في هذا المستودع.
+**سَداة** مساعدة ذكاء اصطناعي عربية، **عقلها مبني ومُدرَّب من الصفر بالكامل**: لا نماذج خارجية ولا واجهات ذكاء اصطناعي جاهزة، والنص كله يمرّ من كود نملكه.
 
-الاسم من **السَّداة**: الخيوط الطولية اللي تنشدّ على النول قبل النسج، وعليها يقوم كل نقش في **السدو** البدوي. وكذا سَداة: أساس متين تنسج عليه الإجابة، تفهم السؤال بعقلها الخاص ثم تجيب المعلومة من أدوات موثوقة.
+الاسم من **السَّداة**: الخيوط الطولية اللي تنشدّ على النول قبل النسج، وعليها يقوم كل نقش في **السدو** البدوي. وكذا سَداة: خيوط معرفة تنشدّ أولاً، ثم تُنسج منها الإجابة.
 
-| تسأل | سَداة ترد |
+## البنية: سَداة 2.0
+
+عشرون وكيلاً صغيراً، لكل وكيل قطاع، يتكلمون عبر **ناقل رسائل** (`agents/bus.py`) ويشتغلون بالتوازي مع مهلة لكل وكيل. المشرفة تخطّط، والباقي ينفّذ ويتحقق.
+
+| القطاع | الوكلاء |
 |---|---|
-| كيف الجو في الرياض؟ | الطقس الحالي والعظمى والصغرى |
-| متى أذان المغرب في جدة؟ | مواقيت الصلاة اليوم |
-| كم 100 دولار بالريال؟ | سعر الصرف الحي (49 عملة) |
-| كم سعر الذهب عيار 21؟ | أسعار الذهب والفضة والعملات الرقمية لحظياً |
-| حل x² − 5x + 6 = 0 | الحل مع التحقق بالتعويض |
-| كيف أعكس نص في بايثون؟ | كود جاهز ومختبر (45 مهمة × 6 لغات) |
-| ما هي عاصمة اليابان؟ | إجابة من Wikidata وويكيبيديا ومكتبة معرفة محلية |
-| سوّ لي سيرة ذاتية | يقرأ ملفاتك (بدون حفظها) ويطلع سيرة جاهزة للطباعة |
+| القيادة والتواصل | المشرفة (Supervisor) · المرافقة (Companion) · المنسّقة (Stylist) |
+| الأمان والنقد | المدقّق الأمني (Critic/Security) · بيئة التنفيذ المعزولة (Sandbox) |
+| المعرفة والبحث | المكتبة المحلية (LocalKB) · ويكيبيديا · Wikidata · الويب المفتوح · التركيب (Synthesis) · الترجمة |
+| الحساب | الرياضيات الرمزية · الرياضيات العددية · الوحدات · التاريخ والوقت |
+| البيانات الحية | الصرف (Forex) · الأسواق (Markets) · الطقس والصلاة |
+| البرمجة | مهندسة الكود (CodeArchitect) · مركّبة الكود (CodeSynthesizer) |
 
-## كيف يشتغل
+### كيف نضمن الجواب
 
-```mermaid
-flowchart RL
-  Q["📝 سؤالك"] --> T["🔤 Tokenizer عربي"]
-  T --> B["🧠 عقل التوجيه<br/>(Transformer من الصفر)"]
-  B --> C["🔍 المدقّق يراجع النوع"]
-  C --> P["🗺 المخطّط يختار الأداة"]
-  P --> X["⚙️ التنفيذ<br/>Wikidata · طقس · صلاة · عملات · حاسبة · كود"]
-  X --> V["🔎 تحقّق بعد التنفيذ"]
-  V --> A["💬 الإجابة"]
-```
+- **الشهود (`agents/consensus.py`):** كل حقيقة تُقارن بمصدر ثانٍ مستقل (Wikidata × ويكيبيديا). النتيجة: ✅ مصدران متفقان، أو ℹ️ مصدر واحد، أو ⚠️ تعارض نقوله بصراحة.
+- **التحقق العكسي:** كل وكيل يتأكد من نتيجته بطريقة ثانية: المعادلة تُعوَّض في نفسها، المشتقة تُقارن عددياً، التحويل يُعاد للوحدة الأصلية، والتواريخ تُعدّ مرتين.
+- **محرك الأسباب (`agent/causal.py`):** أسئلة «ليش/لماذا» تُجاب بجمل تذكر السبب فعلاً، وإذا ما وُجد سبب مصرّح به تنخفض الثقة وتنكشف.
+- **الذاكرة والضمائر (`agent/memory.py`):** «كم مساحته؟» بعد سؤال عن اليابان تتحول إلى «كم مساحة اليابان؟»، وإذا ما فيه موضوع سابق تسأل سَداة بدل أن تخمّن.
+- **درع الحقائق:** قاموس محلي لأهم الدول والكيانات (`data/kb/facts_cache.json`) يجيب في أقل من ميلي ثانية بدون شبكة؛ وغير ذلك يمرّ على Wikidata عبر حارس (`agent/wd_guard.py`: ذاكرة مؤقتة، طلبان كحد أقصى، تراجع أُسّي، وقاطع دائرة)، وإذا تعذّر تقرأ سَداة الحقيقة بصمت من مقدمة ويكيبيديا أو المكتبة المحلية. ما فيه «بلا جواب» لسؤال معروف.
 
-| الجزء | وش يسوي | المجلد |
-|---|---|---|
-| **عقلا التصنيف** | عقل يحدد نوع السؤال (12 مهارة) وعقل للبرمجة. 13.58 مليون معامل، تعلّم مسبق ذاتي (BPE + MLM) على ويكيبيديا ثم نقل تعلّم | `core/` |
-| **العقل التوليدي** | GPT بحجم **335 مليون معامل** يتدرّب الآن من الصفر على ويكيبيديا العربية، ليكتب الردود بنفسه | `core/gpt.py` · `gpu/` |
-| **الوكيل** | المخطّط والمدقّق وكل الأدوات الدقيقة (حقائق، بحث، رياضيات، أسواق، صلاة، ترجمة) | `agent/` |
-| **السيرة الذاتية** | استخراج الحقول من PDF/Word وتوليد سيرة عربية أو إنجليزية | `cv/` |
-| **الواجهة** | HTML/CSS/JS بدون مكتبات، عربي أولاً، فاتح وداكن، بهوية فاخرة (ليلي وذهبي) مستوحاة من السدو | `ui/` |
-| **الخادم** | FastAPI · `app.py`، منشور على Vercel، والعقل يشتغل فيه بـ NumPy بدون PyTorch | الجذر · `core/fast_brain.py` |
+### العقول
 
-### أرقام صادقة
+عقل لتصنيف الطلب (12 مهارة) وعقل للبرمجة، ترانسفورمر مبني من الصفر مع محلّل BPE عربي وتعلّم مسبق ذاتي. تشتغل على الخادم بـ NumPy فقط، بنفس نتائج التدريب.
 
-- الاختبار الرسمي: **310 / 310** · الاختبار المخفي (صيغ ما شافها العقل): **87.9%**
-- العقل التوليدي بعد أول 12 ساعة تدريب: perplexity **14.0** على نصوص ما شافها. يكتب عربي سليم، لكنه **ما يسولف بعد** ومعلوماته لحاله غير موثوقة، والمعلومة الدقيقة تجي دائماً من الأدوات.
+### الهوية: Royal Obsidian
 
-## شغّله على جهازك
+واجهة HTML/CSS/JS بلا مكتبات، عربية أولاً: أسود حبري (`#080706`) وذهب (`#D4AF37`) وعنّابي (`#4A0E17`)، خط IBM Plex Sans Arabic، شعار **Loom Core** (خيوط وماسة بلا أي حرف)، ومقدمة 2.2 ثانية على المعالج الرسومي (`transform`/`opacity` فقط). تحت كل إجابة لوحة **مسار التفكير** تعرض من اشتغل، وكم كانت الثقة، وهل تحقق مصدران.
+
+## بنية المجلدات
+
+| المجلد | المحتوى |
+|---|---|
+| `agent/` | مهارات ووكلاء: الحقائق، الأسباب، الذاكرة، الرياضيات، الأسواق، الصلاة، الكود |
+| `agents/` | الناقل والرسائل والمشرفة واتفاق الشهود |
+| `core/` | العقول والمحلّل ومسار التدريب |
+| `ui/` | الواجهة والمقدمة ولوحة المسار |
+| `cv/` | السيرة الذاتية: قراءة الملفات وتوليد السيرة |
+| `tests/` | اختبارات بلا شبكة (`shield_test`, `agents_test`, `sadah2_test*`, `sadah3_test`) والاختبار الرسمي `benchmark` |
+
+كل ملف بايثون أقل من 150 سطراً.
+
+## شغّلها على جهازك
 
 **ويندوز:** اضغط مرتين على `launch_platform.bat`.
 
 **يدوياً:**
 
 ```bash
-pip install -r requirements-train.txt --extra-index-url https://download.pytorch.org/whl/cpu
+pip install -r requirements.txt
 python app.py          # http://localhost:8000
 ```
 
-للخادم بس بدون تدريب: `pip install -r requirements.txt`. هذي النسخة بدون PyTorch، والعقل يشتغل بـ NumPy بنفس النتائج، وهي اللي تنشر على Vercel.
-
-**تدريب العقل التوليدي** (مجاناً على كروت Kaggle): التفاصيل خطوة بخطوة في [`gpu/README.md`](gpu/README.md).
+الاختبارات: `python -m tests.shield_test` و`python -m tests.agents_test` و`python -m tests.sadah3_test`، والاختبار الرسمي `python -m tests.benchmark`.
 
 ## الخصوصية والأمان
 
 - لا تسجيل دخول، ولا تتبّع، ولا إعلانات.
-- المحادثات تنحفظ في متصفحك فقط.
+- المحادثات تنحفظ في متصفحك فقط، وأسئلة الزوار لا تُستخدم للتدريب أبداً.
 - ملفات السيرة الذاتية تُقرأ في الذاكرة ولا تُحفظ.
-- تشغيل الأكواد وأوامر النظام متاح فقط لصاحب الجهاز؛ الزوار يحصلون حاسبة آمنة (AST).
+- تشغيل الأكواد وأوامر النظام متاح فقط لصاحب الجهاز؛ الزوار يحصلون حاسبة آمنة (AST) بلا `eval`.
 
 ## القاعدة الأساسية
 
-> عقل سَداة مملوك 100% ومُدرَّب من الصفر. ممنوع ربطه بأي نموذج خارجي أو تحميل أوزان جاهزة، حتى لو كان أبطأ أو أصغر.
+> عقل سَداة مملوك 100% ومُدرَّب من الصفر. ممنوع ربطه بأي نموذج خارجي أو واجهة ذكاء اصطناعي جاهزة، حتى لو كان أبطأ أو أصغر.
 
 ---
 
@@ -95,10 +97,10 @@ python app.py          # http://localhost:8000
 
 ## English
 
-**SADAH** (سَداة, the warp threads of the loom that every Bedouin *Al Sadu* pattern is woven on) is an Arabic AI assistant whose brain is **built and trained entirely from scratch**: no ChatGPT, no Gemini, no pretrained weights, no external AI API.
+**SADAH** (سَداة, the warp threads of the loom on which every Bedouin *Al Sadu* pattern is woven) is an Arabic AI assistant whose brain is **built and trained entirely from scratch**: no external models, no third-party AI APIs.
 
 - **Live:** https://sadah-app.vercel.app
-- **How it works:** a from-scratch Transformer routes each question to one of 12 skills; precise tools (Wikidata, Wikipedia, a local knowledge library, live markets, weather, prayer times, a safe math engine, a coding brain) produce the answer, checked before and after execution.
-- **In training:** a 335M-parameter GPT trained from scratch on Arabic Wikipedia on free Kaggle GPUs (`core/gpt.py`, `gpu/`), to write the replies itself.
-- **Run locally:** `pip install -r requirements-train.txt` then `python app.py` → http://localhost:8000 (server only, no PyTorch: `requirements.txt`; the brains then run on NumPy, as on Vercel)
-- **Stack:** Python, PyTorch (training), NumPy (serving), FastAPI on Vercel, vanilla HTML/CSS/JS (RTL first).
+- **Architecture (SADAH 2.0):** 20 micro-agents on a message bus run in parallel with per-agent deadlines. Facts are cross-checked by independent witnesses (Wikidata × Wikipedia, `agents/consensus.py`); every agent re-verifies its own result a second way (inverse math, round-trip units, recounted dates); `agent/causal.py` answers «why» questions with sentences that actually state a reason; conversation memory resolves pronouns or asks instead of guessing.
+- **Fact shield:** a pre-baked core-facts dictionary answers the most common questions locally in under a millisecond; everything else goes through a Wikidata guard (cache, throttle, exponential back-off, circuit breaker) with a silent fallback that reads the fact from Wikipedia's introduction or the local knowledge base.
+- **Identity:** Royal Obsidian (void black, gold, crimson), Loom Core logo, a 2.2 s compositor-only intro and a reasoning-trace panel under each answer.
+- **Run locally:** `pip install -r requirements.txt` then `python app.py` → http://localhost:8000. All Python files stay under 150 lines.

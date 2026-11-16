@@ -1,4 +1,4 @@
-"""Train the NEXUS generative brain from scratch on a GPU (Kaggle / Colab / rented), resumable.
+"""Train the SADAH generative brain from scratch on a GPU (Kaggle / Colab / rented), resumable.
 
 Kaggle:  python -m gpu.train_gpt --size small --hours 11.5
 Laptop:  python -m gpu.train_gpt --size tiny --local --steps 30        (pipeline smoke test)
@@ -15,7 +15,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from core.gpt import SIZES, NexusGPT
+from core.gpt import SIZES, SadahGPT
 from gpu.data import build
 
 
@@ -40,7 +40,7 @@ def find_resume(out: Path) -> Path | None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--size", default="small", choices=list(SIZES))
-    ap.add_argument("--out", default="/kaggle/working/nexus_gpt" if Path("/kaggle").exists() else "checkpoints/gpt")
+    ap.add_argument("--out", default="/kaggle/working/sadah_gpt" if Path("/kaggle").exists() else "checkpoints/gpt")
     ap.add_argument("--hours", type=float, default=11.5)
     ap.add_argument("--steps", type=int, default=200_000)
     ap.add_argument("--batch", type=int, default=2)           # Reduced from 4 to 2 to fit "large" on T4
@@ -64,7 +64,7 @@ def main() -> None:
     # for much less VRAM, which is what lets "large" (350M) fit on a 16GB T4
     grad_checkpoint = device == "cuda" and not args.no_checkpoint
     print("Loading model onto device...", flush=True)
-    model = NexusGPT(info["vocab"], context=args.context, grad_checkpoint=grad_checkpoint,
+    model = SadahGPT(info["vocab"], context=args.context, grad_checkpoint=grad_checkpoint,
                      **SIZES[args.size]).to(device)
     print("Model loaded successfully.", flush=True)
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, betas=(0.9, 0.95), weight_decay=0.1)
@@ -75,7 +75,7 @@ def main() -> None:
         opt.load_state_dict(state["opt"])
         step = state["step"]
         print(f"resumed from {resume} at step {step}")
-    print(f"NEXUS-GPT {args.size}: {model.params():,} parameters on {device}")
+    print(f"SADAH-GPT {args.size}: {model.params():,} parameters on {device}")
 
     use_amp = device == "cuda"
     scaler = torch.amp.GradScaler("cuda", enabled=use_amp)

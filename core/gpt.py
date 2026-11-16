@@ -1,4 +1,4 @@
-"""NEXUS generative brain: a decoder-only transformer trained from scratch (no external weights).
+"""SADAH generative brain: a decoder-only transformer trained from scratch (no external weights).
 
 It writes text one token at a time.  Sizes (vocab 32k, context 512):
   small  d=512  layers 8   ≈ 42M      medium d=768 layers 12  ≈ 110M      large d=1024 layers 24 ≈ 350M
@@ -39,7 +39,7 @@ class Block(nn.Module):
         return x + self.drop(self.mlp(self.ln2(x)))
 
 
-class NexusGPT(nn.Module):
+class SadahGPT(nn.Module):
     def __init__(self, vocab_size: int, d_model: int, n_layers: int, n_heads: int,
                  context: int = 512, dropout: float = 0.0, grad_checkpoint: bool = False):
         super().__init__()

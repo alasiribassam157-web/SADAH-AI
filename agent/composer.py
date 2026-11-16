@@ -1,4 +1,4 @@
-"""Multi-step reasoning (NEXUS-5): comparisons («قارن بين سكان مصر والسعودية») and compound questions
+"""Multi-step reasoning (SADAH v5): comparisons («قارن بين سكان مصر والسعودية») and compound questions
 («ما هي عاصمة اليابان وكم عدد سكانها») answered by chaining several lookups."""
 import re
 

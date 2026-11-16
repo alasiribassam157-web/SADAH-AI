@@ -1,4 +1,4 @@
-"""Symbolic math (NEXUS-5): equations, derivatives, integrals, factoring, statistics, number theory.
+"""Symbolic math (SADAH v5): equations, derivatives, integrals, factoring, statistics, number theory.
 
 Every expression is checked against a whitelist of names and a size limit before sympy reads it,
 so no user code can run (sympy's parser evaluates its input).

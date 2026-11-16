@@ -1,7 +1,7 @@
 """Load a trained brain checkpoint and predict labels.
 
 Uses PyTorch when it is installed (training, the laptop, Docker). Without it — the Vercel server, or with
-NEXUS_NUMPY=1 — the same checkpoint runs on NumPy through core.fast_brain, with the same predictions.
+SADAH_NUMPY=1 — the same checkpoint runs on NumPy through core.fast_brain, with the same predictions.
 """
 import json
 import os
@@ -10,15 +10,15 @@ from pathlib import Path
 import numpy as np
 
 from core.bpe import BPETokenizer
-from core.tokenizer import NexusTokenizer
+from core.tokenizer import SadahTokenizer
 
 try:
-    if os.getenv("NEXUS_NUMPY") == "1":
+    if os.getenv("SADAH_NUMPY") == "1":
         raise ImportError("NumPy backend requested")
     import torch
     import torch.nn.functional as F
 
-    from core.neural_net import NexusBrain
+    from core.neural_net import SadahBrain
 except ImportError:
     torch = None
 from core.fast_brain import NumpyBrain, load_checkpoint
@@ -50,7 +50,7 @@ class BrainInference:
             return False
         if torch:
             ckpt = torch.load(self.path, map_location="cpu", weights_only=True)
-            model = NexusBrain(**ckpt["config"])
+            model = SadahBrain(**ckpt["config"])
             model.load_state_dict(ckpt["state_dict"])
             model.eval()
             params = sum(p.numel() for p in model.parameters())
@@ -60,7 +60,7 @@ class BrainInference:
             params = model.params()
         self.model, self.intents = model, ckpt["intents"]
         raw = ckpt["tokenizer"]
-        self.tok = (BPETokenizer if json.loads(raw).get("kind") == "bpe" else NexusTokenizer).from_json(raw)
+        self.tok = (BPETokenizer if json.loads(raw).get("kind") == "bpe" else SadahTokenizer).from_json(raw)
         self.info = {**ckpt.get("info", {}), **ckpt["config"], "params": params, "backend": BACKEND}
         return True
 

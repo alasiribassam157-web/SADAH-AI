@@ -1,4 +1,4 @@
-"""NEXUS-1 brain: a compact Transformer encoder built from scratch for intent routing."""
+"""SADAH brain: a compact Transformer encoder built from scratch for intent routing."""
 import math
 
 import torch
@@ -68,7 +68,7 @@ class EncoderBlock(nn.Module):
         return x + self.drop(self.ff(self.ln2(x)))
 
 
-class NexusBrain(nn.Module):
+class SadahBrain(nn.Module):
     def __init__(self, vocab_size: int, n_classes: int, d_model: int = 64, n_heads: int = 4,
                  n_layers: int = 2, d_ff: int = 128, max_len: int = 32, dropout: float = 0.1,
                  pad_id: int = 0):
@@ -101,16 +101,16 @@ class NexusBrain(nn.Module):
         return self.head(pooled)
 
 
-class NexusMLM(nn.Module):
+class SadahMLM(nn.Module):
     """Self-supervised pre-training: predict hidden (masked) pieces from their context, like BERT.
 
-    The encoder is a NexusBrain, so its weights transfer directly into the router/coder brains.
+    The encoder is a SadahBrain, so its weights transfer directly into the router/coder brains.
     The output layer reuses the input embedding matrix (weight tying), which saves parameters.
     """
 
     def __init__(self, **config):
         super().__init__()
-        self.brain = NexusBrain(n_classes=1, **config)
+        self.brain = SadahBrain(n_classes=1, **config)
         d = config.get("d_model", 64)
         self.transform = nn.Sequential(nn.Linear(d, d), nn.GELU(), nn.LayerNorm(d))
         self.bias = nn.Parameter(torch.zeros(config["vocab_size"]))

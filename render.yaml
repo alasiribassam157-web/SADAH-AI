@@ -1,12 +1,12 @@
 services:
   - type: web
-    name: nexus-1-ai
+    name: sadah
     runtime: docker
     plan: free
     autoDeploy: true
     healthCheckPath: /api/health
     envVars:
-      - key: NEXUS_ACCESS_TOKEN
+      - key: SADAH_ACCESS_TOKEN
         sync: false              # Render asks for this value during setup (never stored in git)
-      - key: NEXUS_SAFE_MODE
+      - key: SADAH_SAFE_MODE
         value: "1"
