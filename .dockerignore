@@ -12,3 +12,7 @@ deploy/bin/
 .nexus_token
 PERMANENT_LINK.txt
 data/corpus/
+
+# SADAH private keys (the old names stay ignored on purpose)
+.sadah_cloud.json
+.sadah_token
