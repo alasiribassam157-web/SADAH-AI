@@ -86,6 +86,8 @@ check("code answer from the verified library, syntax-checked", r.ok and "[::-1]"
 r = CodeSynthesizerAgent(architect.coder).run(Task("اكتب برنامج بايثون يقرأ ملف ثم يرتب قائمة ثم يكتب في ملف"))
 check("multi-step program assembled from three blocks", r.ok and r.data["tasks"] == ["read_file", "sort_list", "write_file"]
       and "def main():" in r.answer, r.answer[:120])
+r = CodeSynthesizerAgent(architect.coder).run(Task("اكتب برنامج يقرأ ملف ثم يعد الكلمات ثم يطبع النتيجة"))
+check("«يطبع النتيجة» is not Hello World", r.ok and "hello_world" not in r.data["tasks"], r.answer[:120])
 sandbox = SandboxAgent()
 check("no code execution for public visitors", not sandbox.run(Task("run command `whoami`", intent="system")).ok)
 check("files still work inside workspace", "Created" in sandbox.run(Task("create file _t.txt with content ok", intent="file")).answer
