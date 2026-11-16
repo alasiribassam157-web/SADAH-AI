@@ -8,3 +8,7 @@ workspace/
 logs/
 deploy/bin/
 .nexus_token
+
+# SADAH private keys (the old names stay ignored on purpose)
+.sadah_cloud.json
+.sadah_token
