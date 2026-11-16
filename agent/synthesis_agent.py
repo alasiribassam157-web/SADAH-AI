@@ -124,8 +124,8 @@ class SynthesisAgent(BaseAgent):
         for (heading, query), found in zip(plan, pools):
             need = set(kb.terms(query))
             why = kind == "why"
-            found = [(s, u) for s, u in found if s not in used and (   # stay on the axis; a reason may not repeat the topic
-                len(need & set(kb.terms(s))) >= max(1, math.ceil(len(need) / 2)) or (why and causal.is_causal(s)))]
+            found = [(s, u) for s, u in found if s not in used
+                     and len(need & set(kb.terms(s))) >= max(1, math.ceil(len(need) / 2))]   # stay on the axis
             if not found:
                 continue
             texts = [s for s, _ in found]
@@ -141,4 +141,6 @@ class SynthesisAgent(BaseAgent):
         if not text:
             return self.fail("لم أجد في المصادر جملًا كافية للإجابة عن هذا السؤال المفتوح")
         conf = 0.75 if len(sections) == len(plan) else 0.6
+        if kind == "why" and not any(causal.is_causal(x) for _, sec in sections for x in sec):
+            conf = 0.5   # no sentence states a reason: the answer is only background, and its confidence says so
         return self.ok(text, conf, list(dict.fromkeys(sources)), {"kind": kind, "sections": sections}, entity=topic)
