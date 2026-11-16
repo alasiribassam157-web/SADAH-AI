@@ -4,6 +4,7 @@ import re
 import httpx
 
 from agent.facts_relations import MULTI_VALUED, RELATIONS, UNITS
+from agent.wd_guard import get as wd_get
 
 API = "https://www.wikidata.org/w/api.php"
 HEADERS = {"User-Agent": "NEXUS-1-Agent/1.0 (https://github.com/topics/nexus-1-ai) python-httpx"}
@@ -20,8 +21,8 @@ def _clean_entity(text: str) -> str:
 
 
 def _label(http: httpx.Client, qid: str, lang: str) -> str:
-    data = http.get(API, params={"action": "wbgetentities", "ids": qid, "props": "labels",
-                                 "languages": f"{lang}|en", "format": "json"}).json()
+    data = wd_get(http, {"action": "wbgetentities", "ids": qid, "props": "labels",
+                         "languages": f"{lang}|en", "format": "json"})
     labels = data["entities"][qid]["labels"]
     value = (labels.get(lang) or labels.get("en") or {"value": qid})["value"]
     return re.sub(r"[‎‏]", "", value)  # some Arabic labels carry invisible direction marks
@@ -103,11 +104,11 @@ def answer_fact(question: str, lang: str) -> tuple[str, str, str] | None:
 def numeric_fact(entity: str, prop: str, lang: str) -> tuple[str, float, str, str] | None:
     """(name, number, unit, source url) for quantities such as population (P1082) or area (P2046)."""
     with httpx.Client(timeout=12, headers=HEADERS) as http:
-        hits = http.get(API, params={"action": "wbsearchentities", "search": _clean_entity(entity), "language": lang,
-                                     "uselang": lang, "type": "item", "limit": 3, "format": "json"}).json()
+        hits = wd_get(http, {"action": "wbsearchentities", "search": _clean_entity(entity), "language": lang,
+                             "uselang": lang, "type": "item", "limit": 3, "format": "json"})
         for hit in hits.get("search", []):
-            claims = http.get(API, params={"action": "wbgetentities", "ids": hit["id"], "props": "claims",
-                                           "format": "json"}).json()["entities"][hit["id"]]["claims"]
+            claims = wd_get(http, {"action": "wbgetentities", "ids": hit["id"], "props": "claims",
+                                   "format": "json"})["entities"][hit["id"]]["claims"]
             found = next((p for p in prop.split("|") if _best_claim(claims.get(p, []))), None)
             claim = _best_claim(claims.get(found, [])) if found else None
             value = claim and claim["mainsnak"].get("datavalue", {}).get("value")
@@ -119,12 +120,12 @@ def numeric_fact(entity: str, prop: str, lang: str) -> tuple[str, float, str, st
 
 def _lookup(prop: str, entity: str, tpl: str, lang: str) -> dict | None:
     with httpx.Client(timeout=10, headers=HEADERS) as http:
-        hits = http.get(API, params={"action": "wbsearchentities", "search": entity, "language": lang,
-                                     "uselang": lang, "type": "item", "limit": 3, "format": "json"}).json()
+        hits = wd_get(http, {"action": "wbsearchentities", "search": entity, "language": lang,
+                             "uselang": lang, "type": "item", "limit": 3, "format": "json"})
         for hit in hits.get("search", []):
             qid = hit["id"]
-            claims = http.get(API, params={"action": "wbgetentities", "ids": qid, "props": "claims",
-                                           "format": "json"}).json()["entities"][qid]["claims"]
+            claims = wd_get(http, {"action": "wbgetentities", "ids": qid, "props": "claims",
+                                   "format": "json"})["entities"][qid]["claims"]
             found = next((p for p in prop.split("|") if _best_claim(claims.get(p, []))), None)
             claim = _best_claim(claims.get(found, [])) if found else None
             if not claim or "datavalue" not in claim["mainsnak"]:
