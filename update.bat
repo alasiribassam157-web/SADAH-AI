@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-title NEXUS-1 Update
+title SADAH Update
 chcp 65001 >nul
 set "GIT=git"
 where git >nul 2>nul || set "GIT=C:\Program Files\Git\cmd\git.exe"
@@ -16,7 +16,7 @@ if errorlevel 1 (
 
 echo [2/3] Saving changes...
 set /p "MSG=Describe your change: "
-if "%MSG%"=="" set "MSG=Update NEXUS-1"
+if "%MSG%"=="" set "MSG=Update SADAH v1"
 "%GIT%" add -A
 "%GIT%" commit -m "%MSG%"
 
