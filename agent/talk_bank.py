@@ -79,3 +79,19 @@ TALK = [
      ["أحب الرياضيات والبرمجة، وأستانس لما أحل مسألة صعبة 🧮 وأنت وش هواياتك؟"],
      ["I love math and coding, solving a hard problem is the best feeling 🧮 What about you?"]),
 ]
+
+MOODS = {  # mood -> (pattern, Arabic reply, English reply)
+    "sad": (r"زعلان|زعلانه|حزين|حزينة|متضايق|متضايقة|مقهور|مكتئب|ضايق|خاطري مكسور|sad|depressed|upset|down",
+            "سلامة قلبك{n} 🤍 أنا هنا أسمعك. تحب تقول لي وش اللي ضايقك؟",
+            "I'm sorry you feel that way{n} 🤍 I'm here to listen. Want to tell me what happened?"),
+    "tired": (r"تعبان|تعبانة|مرهق|مرهقة|منهك|tired|exhausted|worn out",
+              "الله يعطيك العافية{n} 😌 لا تنسى ترتاح وتشرب موية. يومك كان طويل؟",
+              "You deserve a rest{n} 😌 Long day?"),
+    "stressed": (r"قلقان|قلقانة|متوتر|متوترة|خايف|خايفة|ضغط|stressed|anxious|worried|nervous",
+                 "خذ نفس عميق{n}… أنت قدها 💪 وش اللي مسبب لك التوتر؟ يمكن نلقى له حل سوا.",
+                 "Take a deep breath{n}, you've got this 💪 What's stressing you? Maybe we can sort it out together."),
+    "angry": (r"معصب|معصبة|زعلان مرة|منرفز|angry|furious|annoyed",
+              "أفهمك{n}، الموقف واضح إنه مزعج 😤 تبي تفضفض؟", "I get it{n}, that sounds frustrating 😤 Want to vent?"),
+    "happy": (r"مبسوط|مبسوطة|فرحان|فرحانة|سعيد|سعيدة|متحمس|happy|excited|great day",
+              "الله يديم فرحتك{n}! 😄 وش الشي الحلو اللي صار؟", "Love that{n}! 😄 What made your day?"),
+}

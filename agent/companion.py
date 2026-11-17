@@ -10,7 +10,7 @@ from collections import OrderedDict, deque
 
 from agent import dialogue, personal_gate
 from agent.critic_rules import keyword_intent
-from agent.talk_bank import TALK
+from agent.talk_bank import MOODS, TALK
 
 MAX_SESSIONS, TTL = 2000, 3 * 3600
 _NAME = re.compile(r"^(?:انا\s+|أنا\s+)?(?:اسمي|إسمي)\s+([\w؀-ۿ]{2,20})(?:\s+[\w؀-ۿ]{2,20})?\s*$|"
@@ -27,21 +27,6 @@ _LIKE = re.compile(r"^(?:انا\s+|أنا\s+)?(?:(?:احب|أحب|اعشق|أع�
 def _word(pattern: str) -> re.Pattern:
     """Whole-word match: «ارق» must not fire inside «طارق», nor «ملل» inside «مللي»."""
     return re.compile(rf"(?<!\w)(?:{pattern})(?!\w)", re.I)
-MOODS = {  # mood -> (pattern, Arabic reply, English reply)
-    "sad": (r"زعلان|زعلانه|حزين|حزينة|متضايق|متضايقة|مقهور|مكتئب|ضايق|خاطري مكسور|sad|depressed|upset|down",
-            "سلامة قلبك{n} 🤍 أنا هنا أسمعك. تحب تقول لي وش اللي ضايقك؟",
-            "I'm sorry you feel that way{n} 🤍 I'm here to listen. Want to tell me what happened?"),
-    "tired": (r"تعبان|تعبانة|مرهق|مرهقة|منهك|tired|exhausted|worn out",
-              "الله يعطيك العافية{n} 😌 لا تنسى ترتاح وتشرب موية. يومك كان طويل؟",
-              "You deserve a rest{n} 😌 Long day?"),
-    "stressed": (r"قلقان|قلقانة|متوتر|متوترة|خايف|خايفة|ضغط|stressed|anxious|worried|nervous",
-                 "خذ نفس عميق{n}… أنت قدها 💪 وش اللي مسبب لك التوتر؟ يمكن نلقى له حل سوا.",
-                 "Take a deep breath{n}, you've got this 💪 What's stressing you? Maybe we can sort it out together."),
-    "angry": (r"معصب|معصبة|زعلان مرة|منرفز|angry|furious|annoyed",
-              "أفهمك{n}، الموقف واضح إنه مزعج 😤 تبي تفضفض؟", "I get it{n}, that sounds frustrating 😤 Want to vent?"),
-    "happy": (r"مبسوط|مبسوطة|فرحان|فرحانة|سعيد|سعيدة|متحمس|happy|excited|great day",
-              "الله يديم فرحتك{n}! 😄 وش الشي الحلو اللي صار؟", "Love that{n}! 😄 What made your day?"),
-}
 _PERSONAL = re.compile(r"^(?:انا|أنا|حاس|حاسس|احس|أحس|i'?m|i am|i feel|feeling)\b", re.I)
 
 
@@ -52,7 +37,8 @@ class Companion:
     def _state(self, session: str) -> dict:
         st = self._s.get(session)
         if not st or time.time() - st["t"] > TTL:
-            st = {"name": "", "city": "", "job": "", "likes": [], "mood": "", "awaiting": False, "last": {}, "turns": deque(maxlen=5)}
+            st = {"name": "", "city": "", "job": "", "likes": [], "age": "", "birth_year": "", "awaiting_age": False,
+                  "mood": "", "awaiting": False, "last": {}, "turns": deque(maxlen=5)}
         st["t"] = time.time()
         if not session:  # no session id: a throw-away memory, never shared between visitors
             return st
@@ -70,16 +56,20 @@ class Companion:
         """The small context the browser keeps (localStorage) so a cold serverless container still knows the visitor."""
         st = self._s.get(session) or {}
         return {"user_name": st.get("name", ""), "user_city": st.get("city", ""), "awaiting_name": bool(st.get("awaiting")),
-                "last_code": st.get("code", "")}
+                "last_code": st.get("code", ""), "user_job": st.get("job", ""), "user_likes": list(st.get("likes", [])),
+                "user_age": st.get("age", ""), "birth_year": st.get("birth_year", ""), "awaiting_age": bool(st.get("awaiting_age"))}
 
     def load(self, session: str, ctx: dict) -> None:
         if not session or not isinstance(ctx, dict):
             return
         st = self._state(session)
-        for key, field in (("user_name", "name"), ("user_city", "city")):
+        for key, field in (("user_name", "name"), ("user_city", "city"), ("user_job", "job"), ("user_age", "age"),
+                           ("birth_year", "birth_year")):
             if isinstance(ctx.get(key), str) and ctx[key].strip():
                 st[field] = ctx[key].strip()[:25]
-        st["awaiting"] = bool(ctx.get("awaiting_name"))
+        st["awaiting"], st["awaiting_age"] = bool(ctx.get("awaiting_name")), bool(ctx.get("awaiting_age"))
+        if isinstance(ctx.get("user_likes"), list):
+            st["likes"] = [str(x)[:30] for x in ctx["user_likes"][:10]]
         st["code"] = ctx["last_code"][:120] if isinstance(ctx.get("last_code"), str) else st.get("code", "")
 
     state = lambda self, session: self._state(session)   # noqa: E731  (the understanding stage reads/writes it)
@@ -95,11 +85,13 @@ class Companion:
         st["last"][key] = random.choice(choices)
         return st["last"][key]
 
-    def respond(self, session: str, message: str, lang: str) -> str | None:
+    def respond(self, session: str, message: str, lang: str, neural: str = "", conf: float = 0.0) -> str | None:
         """A person-to-person reply, or None when this is a real question for the tools."""
         st = self._state(session)
         text = re.sub(r"[.!؟?،,]+\s*$", "", message.strip())
         ar = lang == "ar"
+        if reply := personal_gate.capture_age(st, text, ar):   # «عمري 21» / «مواليد 2005» — remembered, never a date query
+            return reply
         if m := _NAME.match(text):
             st["name"] = next(g for g in m.groups() if g).strip().title()
             return f"تشرفنا يا {st['name']}! 🌟 أنا سَداة. كيف أقدر أساعدك اليوم؟" if ar else \
@@ -139,11 +131,15 @@ class Companion:
         for key, pat, rep_ar, rep_en in TALK:
             if _word(pat).search(text):
                 return self._pick(st, key, rep_ar if ar else rep_en).format(n=self._n(st, lang))
+        if neural in ("web", "code", "python") and conf >= 0.7:   # the brain says knowledge / code question: not small talk
+            return None
         return dialogue.chatty_reply(st, text, ar)
 
     def _profile(self, st: dict, ar: bool) -> str:
         facts = [(st["name"], "اسمك", "your name is"), (st["city"], "من", "you're from"),
-                 (st["job"], "تشتغل", "you work as"), ("، ".join(st["likes"]), "تحب", "you like")]
+                 (st["job"], "تشتغل", "you work as"), ("، ".join(st["likes"]), "تحب", "you like"),
+                 ((f"{st['age']} سنة (مواليد {st['birth_year']})" if ar else f"{st['age']} (born {st['birth_year']})")
+                  if st["age"] and st["birth_year"] else st["age"], "عمرك", "you are")]
         known = [f"{a} {v}" if ar else f"{e} {v}" for v, a, e in facts if v]
         if not known:
             return "للحين ما أعرف عنك شي 😊 عرّفني بنفسك!" if ar else "I don't know much yet 😊 Tell me about yourself!"

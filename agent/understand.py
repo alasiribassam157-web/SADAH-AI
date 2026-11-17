@@ -12,14 +12,17 @@ import re
 from agent import arabic, dialogue, lexicon, personal_gate
 from agent.code_kb import detect_language
 LANG_WORDS = ["جافاسكريبت", "جافا سكريبت", "جافاسكربت", "بايثون", "جافا", "سي بلس بلس", "سي شارب", "سي++", "جو"]
-_LEAD = re.compile(r"^(?:طيب|طيّب|اوكي|أوكي|اها|آها|قصدي|أقصد|اقصد|لو سمحت|من فضلك|بالنسبة|عفوا|عفواً|"
+_LEAD = re.compile(r"^(?:طيب لو|طيب|طيّب|اوكي|أوكي|اها|آها|قصدي|أقصد|اقصد|لو سمحت|من فضلك|بالنسبة|عفوا|عفواً|"
+                   r"اقولك|أقولك|اقول لك|أقول لك|يا سداة|يا سَداة|اسمعيني|اسمعني|شوفي|شوف|ترى|ترا|والله|"
                    r"يعني(?=\s+(?:كيف|وش|ليش|لماذا|متى|اين|أين|ما)))\s+")
+_ASKS = re.compile(r"^(?:كم|كيف|متى|أين|اين|وين|لماذا|ليش|ليه|وش|ايش|ما|ماذا|هل|احسب|ترجم|حول)(?!\w)")
+_OWN = re.compile(r"عمري|اسمي|مدينتي|مواليد")   # «تعرف كم عمري» asks about the visitor, not about a famous name
+_KEY_WORD = {"python": "بايثون", "javascript": "جافاسكريبت", "java": "جافا", "cpp": "C++", "csharp": "C#", "go": "جو"}
+_FILLER = {"طيب", "كيف", "وش", "في", "ب", "بـ", "بلغة", "لغة", "كود", "الكود", "اكتبها", "اكتبه", "اكتب", "كمان", "ايضا", "بس"}
 _KNOW = re.compile(r"^(?:هل تعرف|هل تعرفين|تعرفين|تعرف|وش تعرف عن|ايش تعرف عن|كلمني عن|حدثني عن|سمعت عن|"
                    r"وش رايك في|وش رأيك في)\s+")
 _TITLE = re.compile(r"(?<!\w)(?:الممثلة|الممثل|اللاعبة|اللاعب|العالمة|العالم|المخرجة|المخرج|الشاعرة|الشاعر|"
                     r"الرئيس|الملك|الأمير|الامير|المغني|المغنية|الكاتب|الكاتبة|مدينة|دولة|جزيرة)\s+")
-_LANG = "|".join(sorted(map(re.escape, LANG_WORDS), key=len, reverse=True))
-_ONLY_LANG = re.compile(rf"^(?:و\s*)?(?:بلغة\s+|ب|في\s+|ل)?({_LANG})$")
 _PRONOUN = re.compile(r"(?:فيها|بها|فيه|به|عنها|عنه|عنهم|لها|له|منها|منه)(?!\w)")
 _ATTACHED = re.compile(r"^(\S{3,})(?:ها|هم|ه)$")   # «فوائده», «سعرها»: a noun carrying a pronoun
 _SHORT_FOLLOW = re.compile(r"^(?:و\s*)?(?:وش|ايش|كيف|ليش|لماذا|متى|اين|أين|كم|ما|هل)\b")
@@ -46,12 +49,16 @@ def fix_spelling(text: str) -> str:
 
 
 def carry_code(text: str, last: str) -> str | None:
-    """«بجافا» / «فيها» after a coding question -> the same question in the new (or the same) language."""
+    """«طيب بجافا» / «وكيف في جافا» / «اكتبها بـ C++» / «كيف الطباعة فيها» -> the last coding question,
+    asked in the new language (or the same one)."""
     bare = re.sub(r"[؟?!.،\s]+$", "", text.strip())
-    if m := _ONLY_LANG.match(bare):
-        old = next((w for w in LANG_WORDS if re.search(rf"(?<!\w){w}(?!\w)", last)), None)
-        return last.replace(old, m.group(1), 1) if old else f"{last} بلغة {m.group(1)}"
-    return last if _PRONOUN.search(bare) and len(bare.split()) <= 5 else None
+    words = bare.split()
+    new = detect_language(bare)
+    leftover = [w for w in words if not detect_language(w) and (w.lstrip("و") or w) not in _FILLER]
+    if new and len(words) <= 6 and not leftover:   # the language is all that changed
+        old = next((w for w in last.split() if detect_language(w)), None)
+        return last.replace(old, _KEY_WORD[new], 1) if old else f"{last} بلغة {_KEY_WORD[new]}"
+    return last if _PRONOUN.search(bare) and len(words) <= 5 else None
 
 
 def carry_topic(text: str, subject: str) -> str | None:
@@ -65,7 +72,7 @@ def carry_topic(text: str, subject: str) -> str | None:
         if _PRONOUN.fullmatch(word):
             return " ".join(words[:i] + [subject])
         if (m := _ATTACHED.match(word)) and not dialogue.is_chatty(word):
-            return " ".join(words[:i] + [m.group(1), subject])
+            return " ".join(words[:i] + [m.group(1), subject] + words[i + 1:])
     return None
 
 
@@ -74,9 +81,17 @@ def rewrite(text: str, st: dict, subject: str = "") -> tuple[str, str]:
     new = fix_spelling(text)
     while (m := _LEAD.match(new)) and len(new) > m.end():
         new = new[m.end():]
-    if (m := _KNOW.match(new)) and not personal_gate.is_personal(new) and not dialogue.is_chatty(new[m.end():]):
-        entity = _TITLE.sub("", new[m.end():]).strip(" ؟?")
-        new = f"من هو {entity}" if entity else new
+    if m := _KNOW.match(new):
+        rest = new[m.end():]
+        if personal_gate.is_personal(new):
+            new = _TITLE.sub("", new)
+        elif _ASKS.match(rest) or _OWN.search(rest):   # «تعرف كيف اطبع» stays a question, not «من هو كيف اطبع»
+            new = rest.strip() or new
+        elif not dialogue.is_chatty(rest):
+            entity = _TITLE.sub("", rest).strip(" ؟?")
+            new = f"من هو {entity}" if entity else new   # only a bare proper name becomes «من هو»
+        else:
+            new = _TITLE.sub("", new)
     else:
         new = _TITLE.sub("", new)
     if st.get("code") and (carried := carry_code(new, st["code"])):

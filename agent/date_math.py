@@ -23,12 +23,25 @@ _NAMES = {"رمضان": "رمضان", "ramadan": "Ramadan", "عيد الفطر":
           "عيد الاضحى": "عيد الأضحى", "يوم عرفة": "يوم عرفة"}
 
 
+_AGE_WORDS = re.compile(r"عمري|مواليد|انولدت|ولدت|how old am i|born in")
+_ASKING = re.compile(r"(?<!\w)(?:كم|احسب|كيف|how|what|calculate)(?!\w)|\?|؟")
+
+
+def asks_age_from_date(q: str) -> bool:
+    """An age question date_math can compute: it has a full date or a birth year (1900…today) AND asks.
+    «عمري 21 سنه» is a statement, and «كم عمري» has nothing to compute from — both belong to the companion."""
+    q = q.translate(_DIGITS)
+    has_date = bool(_dates(q)) or any(1900 <= int(n) <= datetime.now().year for n in re.findall(r"(?<!\d)\d{4}(?!\d)", q))
+    return bool(_AGE_WORDS.search(q)) and has_date and bool(_ASKING.search(q))
+
+
 def handles(question: str) -> bool:
     q = question.lower()
-    return bool(re.search(r"كم باقي|كم بقي|كم يوم (?:باقي|بقي|بين|على|لين|حتى)|متى رمضان|متى العيد|عمري|كم عمري|مواليد|انولدت|"
-                          r"ولدت سنة|days until|how many days (?:until|till|left|between)|"
-                          r"how old am i|born in \d{4}|days between|بين .* و .*\d|بعد \d+ (?:يوم|أيام|ايام)|\d+ days from|from now|"
-                          r"(?:اي|أي|وش) يوم (?:يوافق|كان|بيكون)|what day (?:is|was|will)", q)) or any(e in q for e in EVENTS)
+    return asks_age_from_date(q) or bool(re.search(
+        r"كم باقي|كم بقي|كم يوم (?:باقي|بقي|بين|على|لين|حتى)|متى رمضان|متى العيد|"
+        r"days until|how many days (?:until|till|left|between)|"
+        r"بين .* و .*\d|بعد \d+ (?:يوم|أيام|ايام)|\d+ days from|from now|"
+        r"(?:اي|أي|وش) يوم (?:يوافق|كان|بيكون)|what day (?:is|was|will)", q)) or any(e in q for e in EVENTS)
 
 
 def mentions_event(question: str) -> bool:
@@ -78,6 +91,10 @@ def answer(question: str) -> ToolResult:
             return ToolResult(True, ("🎉 " if days == 0 else "📅 ") + text)
         dates, nums = _dates(question), [int(n) for n in re.findall(r"\b\d+\b", q)]
         if re.search(r"عمري|مواليد|انولدت|ولدت|how old am i|born in", q):
+            said = next((n for n in nums if 5 <= n <= 110), None)   # «عمري 21»: the age itself was given
+            if not dates and not any(1900 < n <= today.year for n in nums) and said:
+                return ToolResult(True, f"🎂 عمرك **{said} سنة**، يعني وُلدت حوالي سنة **{today.year - said}**" if ar else
+                                  f"🎂 You are **{said}**, so you were born around **{today.year - said}**")
             born = dates[0] if dates else date(next(n for n in nums if 1900 < n <= today.year), 7, 1)
             years = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
             exact = bool(dates)

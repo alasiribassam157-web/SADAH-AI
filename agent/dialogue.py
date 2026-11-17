@@ -15,6 +15,7 @@ _W = r"[؀-ۿa-zA-Z]"
 # a clear encyclopedic opening: only these may leave the companion when the brain says «chat»
 _ENCY = re.compile(r"^\s*(?:ما هو|ما هي|ماهو|ماهي|من هو|من هي|أين تقع|اين تقع|كم عدد|متى تأسس|متى تاسس|"
                    r"لماذا|ليش|ليه|كيف|اشرح|وضح|قارن|أين|اين|متى|كم|what is|what are|who is|who was|where is|how|why|explain|compare)\b", re.I)
+_REQUEST = re.compile(r"\d|(?<!\w)(?:ابغى|ابغي|ابي|اريد|أريد|اشرح|اكتب|سوي|عطني|اعطني|ورني|وضح|كود|برنامج|دالة)(?!\w)")
 _COMMAND = re.compile(r"^\s*(?:ترجم|ترجمة|احسب|حول|ابحث|translate|convert|calculate|search)\b", re.I)
 _CHATTY = re.compile(
     r"(?<!\w)(?:أنا|انا|إني|اني|اسمي|إسمي|فهمت|تفهم|تفهمني|اقصد|أقصد|اقصده|أقصده|اقول|أقول|لك|معي|يعمي|"
@@ -58,7 +59,7 @@ def _single_name(msg: str) -> bool:
 def is_chatty(msg: str) -> bool:
     """Everyday talk (pronouns, «فهمت؟», «لا يعمي»…) or a bare common first name: never a search.
     Only an unmistakable encyclopedic opening overrules it — «هل فهمت ما اقصده» is still talk."""
-    if _COMMAND.search(msg) or _ENCY.search(msg):
+    if _COMMAND.search(msg) or _ENCY.search(msg) or _REQUEST.search(msg):   # a request, a number or a task is no small talk
         return False
     return bool(_CHATTY.search(msg)) or _single_name(msg)
 

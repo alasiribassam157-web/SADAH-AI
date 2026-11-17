@@ -77,9 +77,10 @@ class SadahAgent:
         t0, steps = time.time(), []
         step = (lambda stage, title, detail="", status="ok": steps.append(
             {"stage": stage, "title": title, "detail": detail, "status": status}))
-        task = self.companion.resolve(Task(message, session=session, allow_exec=allow_exec))
+        task = Task(message, session=session, allow_exec=allow_exec)   # clean first, so «طيب وكم سكانها» still resolves
         task.text, said = understand.rewrite(task.text, self.companion.talk.state(session),
                                              self.companion.memory.subject(session))
+        task = self.companion.resolve(task)
         if said:
             step("plan", "سَداة نظّفت صياغة السؤال", said)
         if task.context.get("followup"):
@@ -96,7 +97,7 @@ class SadahAgent:
         if ask_back:   # a pronoun with no earlier subject: ask instead of searching at random
             step("result", "سؤال يعتمد على موضوع سابق", "لا يوجد كيان في الذاكرة", "warn")
             return done(ask_back, "chat", conf)
-        talk = self.companion.talk.respond(session, task.text, task.lang)
+        talk = self.companion.talk.respond(session, task.text, task.lang, neural, conf)
         if talk:
             step("result", "سَداة تردّ بشكل شخصي", "تتذكر الاسم والمزاج وآخر خمس رسائل")
             return done(speak_as_sadah(talk, task.lang), "chat", conf)
@@ -128,7 +129,8 @@ class SadahAgent:
     def _reply(self, task: Task, plan: dict, best: AgentResult, replies: dict, step) -> str:
         valid, verdict = self.critic.verify(best)
         step("critic", "تحقق الناقد بعد التنفيذ", verdict, "ok" if valid else "warn")
-        self.companion.memory.remember(task.session, best.entity)
+        if task.intent != "code":   # a code answer's «entity» is the language («python»), not the topic
+            self.companion.memory.remember(task.session, best.entity)
         if task.intent == "code" and best.ok:   # «طيب بجافا ؟» next time re-asks this task
             self.companion.talk.state(task.session)["code"] = task.text[:120]
         if not best.ok:
