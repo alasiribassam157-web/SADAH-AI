@@ -56,7 +56,7 @@ def _strip_al(topic: str) -> str:
 def title_ok(page: dict, query: str) -> bool:
     """Root gate: a hit is kept when the article really talks about what was asked — in its title or in
     its body.  «هل فهمت ما اقصده» still yields nothing, but «كيف ابني بيت» now reaches «بيت»."""
-    return topics.score_page(query, page) >= 0.34
+    return topics.score_page(query, page) >= 0.20
 
 
 def _query(http: httpx.Client, lang: str, params: dict, sentences: int = 3) -> dict | None:
