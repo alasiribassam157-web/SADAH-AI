@@ -12,7 +12,7 @@ from agent.chat_replies import is_small_talk
 _W = r"[؀-ۿa-zA-Z]"
 # a clear encyclopedic opening: only these may leave the companion when the brain says «chat»
 _ENCY = re.compile(r"^\s*(?:ما هو|ما هي|ماهو|ماهي|من هو|من هي|أين تقع|اين تقع|كم عدد|متى تأسس|متى تاسس|"
-                   r"لماذا يحدث|كيف يعمل|what is|what are|who is|who was|where is|how does|why does)\b", re.I)
+                   r"لماذا|ليش|ليه|كيف|اشرح|وضح|قارن|أين|اين|متى|كم|what is|what are|who is|who was|where is|how|why|explain|compare)\b", re.I)
 _COMMAND = re.compile(r"^\s*(?:ترجم|ترجمة|احسب|حول|ابحث|translate|convert|calculate|search)\b", re.I)
 _CHATTY = re.compile(
     r"(?<!\w)(?:أنا|انا|إني|اني|اسمي|إسمي|فهمت|تفهم|تفهمني|اقصد|أقصد|اقصده|أقصده|اقول|أقول|لك|معي|يعمي|"
