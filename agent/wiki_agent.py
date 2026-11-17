@@ -9,6 +9,7 @@ import re
 import httpx
 
 from agent.base_agent import AgentResult, BaseAgent, Task
+from agent.dialogue import _single_name
 from agent.facts import match_relation
 from agent.research import HEADERS, _english_fallback, _query, _strip_al, answer_length, intro, to_topic
 
@@ -43,6 +44,8 @@ class WikiAgent(BaseAgent):
 
     def search(self, question: str, lang: str, sentences: int) -> tuple[str, str, str] | None:
         """(title, text, url) straight from Wikipedia: exact title, title without «ال», then search."""
+        if _single_name(question):
+            return None
         topic = to_topic(question)
         attempts = [{"titles": topic}]
         if lang == "ar":

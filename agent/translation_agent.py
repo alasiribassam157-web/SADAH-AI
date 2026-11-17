@@ -30,6 +30,8 @@ class TranslationAgent(BaseAgent):
     timeout = 8.0
 
     def handle(self, task: Task) -> AgentResult:
+        if not re.search(self.keywords, task.text, re.I):   # only an explicit translation request runs this agent
+            return self.fail("ليس طلب ترجمة صريحًا")
         self.step("سَداة تبحث عن الترجمة", "القاموس المدمج أولًا، ثم تسميات Wikidata")
         res = translate(task.text)
         if not res.ok:
