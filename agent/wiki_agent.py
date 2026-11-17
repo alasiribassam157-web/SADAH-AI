@@ -11,7 +11,7 @@ import httpx
 from agent.base_agent import AgentResult, BaseAgent, Task
 from agent.dialogue import _single_name
 from agent.facts import match_relation
-from agent.research import HEADERS, _english_fallback, _query, _strip_al, answer_length, intro, to_topic
+from agent.research import HEADERS, _english_fallback, _query, _strip_al, answer_length, intro, searches, to_topic
 
 _CLUTTER = re.compile(r"\s*\([^()]*\)")
 _DIACRITICS = re.compile(r"[ً-ْٰـ]")
@@ -50,9 +50,7 @@ class WikiAgent(BaseAgent):
         attempts = [{"titles": topic}]
         if lang == "ar":
             attempts.append({"titles": _strip_al(topic)})
-        attempts.append({"generator": "search", "gsrsearch": topic, "gsrlimit": 1})
-        if topic != question:
-            attempts.append({"generator": "search", "gsrsearch": question, "gsrlimit": 1})
+        attempts += [{"generator": "search", "gsrsearch": q, "gsrlimit": 5} for q in searches(question)]
         with httpx.Client(timeout=6, headers=HEADERS, follow_redirects=True) as http:
             page = next((p for params in attempts if (p := _query(http, lang, params, sentences))), None)
             if not page and lang == "ar":

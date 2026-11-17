@@ -38,6 +38,18 @@ _DEFINE = re.compile(r"^(?:ما هو|ما هي|ماهو|ماهي|وش هو|وش 
 _TIME_WORDS = re.compile(r"الوقت|الساعة|الساعه|تاريخ|اليوم|بكرة|امس|أمس|هجري|ميلادي|\btime\b|\bdate\b|today|"
                          r"tomorrow|yesterday|طقس|الجو|حرارة|weather|صلاة|الصلاة|اذان|أذان|prayer|"
                          r"بالانجليزي|بالإنجليزي|بالعربي|in english|in arabic|translat|ترجم", re.IGNORECASE)
+# Any question that asks about the world rather than for live data: an opening word, or a word that
+# only ever introduces a subject («فوائد», «أسباب», «خطوات»).  Structure, not a list of questions.
+_OPEN_ASK = re.compile(r"^(?:كيف|كيفية|كيفيه|ازاي|شلون|لماذا|ليش|ليه|وش|ايش|إيش|شو|ما|ماذا|هل|من|متى|اين|أين|وين|"
+                       r"طريقة|طريقه|طرق|خطوات|افضل|أفضل|اسهل|أسهل|how|why|what|who|which|where|when|best way|steps)\b"
+                       r"|(?<!\w)(?:فوائد|منافع|أضرار|اضرار|مميزات|عيوب|أسباب|اسباب|خطوات|مكونات|أنواع|انواع|تعريف|"
+                       r"benefits|causes|steps|types|advantages)(?!\w)", re.IGNORECASE)
+
+
+def open_question(msg: str) -> bool:
+    return bool(_OPEN_ASK.search(msg.strip()))
+
+
 _CODE_TASK = re.compile(r"\b(?:for|while) loop\b|\btry catch\b|\bhello world\b|حلقة (?:for|while)|لوب", re.IGNORECASE)
 # Unmistakable arithmetic: "15*7", "3 ^ 4", "25% of 80".
 _STRONG_MATH = re.compile(r"\d\s*([+*/^×÷]|\*\*)\s*\d|\d\s*[%٪]\s*(of|من)\s*\d", re.IGNORECASE)

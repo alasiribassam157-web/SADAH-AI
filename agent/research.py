@@ -3,7 +3,7 @@ import re
 
 import httpx
 
-from agent import kb
+from agent import kb, topic as topics
 from agent.dialogue import _single_name
 
 HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
@@ -43,32 +43,35 @@ def to_topic(question: str) -> str:
     return text or question.strip()
 
 
+def searches(question: str) -> list[str]:
+    """The queries that cover a question, widest first: «كيف ابني بيت» -> «بناء بيت», «بيت», «بناء»."""
+    found = topics.queries(question) + [to_topic(question), question.strip(" ؟?")]
+    return [q for i, q in enumerate(found) if q and q not in found[:i]][:4]
+
+
 def _strip_al(topic: str) -> str:
     return " ".join(w[2:] if w.startswith("ال") and len(w) > 4 else w for w in topic.split())
 
 
 def title_ok(page: dict, query: str) -> bool:
-    """Strict title gate: a search hit is shown only if its title shares a real keyword with the question
-    (or its introduction covers the question's keywords): «هل فهمت ما اقصده» never yields «عبد السلام ياسين»."""
-    need = set(kb.terms(query))
-    if not need or need & set(kb.terms(page["title"])):
-        return bool(need)
-    got = len(need & set(kb.terms(page.get("extract", ""))))
-    return got >= 2 and got >= len(need) * 2 / 3
+    """Root gate: a hit is kept when the article really talks about what was asked — in its title or in
+    its body.  «هل فهمت ما اقصده» still yields nothing, but «كيف ابني بيت» now reaches «بيت»."""
+    return topics.score_page(query, page) >= 0.34
 
 
 def _query(http: httpx.Client, lang: str, params: dict, sentences: int = 3) -> dict | None:
+    """One Wikipedia call.  A search returns several hits and the best one is chosen by topic, so a
+    question is never answered by whatever article happened to rank first."""
     base = {"action": "query", "format": "json", "redirects": 1, "prop": "extracts|info|pageprops",
             "exintro": 1, "explaintext": 1, "exsentences": sentences, "inprop": "url"}
     if not sentences:  # 0 = the whole introduction (used to cross-check a fact)
         base.pop("exsentences")
     pages = http.get(f"https://{lang}.wikipedia.org/w/api.php", params={**base, **params}).json()
-    for page in (pages.get("query", {}).get("pages") or {}).values():
-        if "missing" in page or "disambiguation" in page.get("pageprops", {}):
-            continue
-        if page.get("extract", "").strip() and (not params.get("gsrsearch") or title_ok(page, params["gsrsearch"])):
-            return page
-    return None
+    found = [p for p in (pages.get("query", {}).get("pages") or {}).values()
+             if "missing" not in p and "disambiguation" not in p.get("pageprops", {}) and p.get("extract", "").strip()]
+    if not params.get("gsrsearch"):
+        return found[0] if found else None
+    return topics.best_page(params["gsrsearch"], found)
 
 
 def lookup(question: str, lang: str) -> tuple[str, str, str] | None:
@@ -79,9 +82,7 @@ def lookup(question: str, lang: str) -> tuple[str, str, str] | None:
     attempts = [{"titles": topic}]
     if lang == "ar":
         attempts.append({"titles": _strip_al(topic)})
-    attempts.append({"generator": "search", "gsrsearch": topic, "gsrlimit": 1})
-    if topic != question:
-        attempts.append({"generator": "search", "gsrsearch": question, "gsrlimit": 1})
+    attempts += [{"generator": "search", "gsrsearch": q, "gsrlimit": 5} for q in searches(question)]
     sentences = answer_length(question)
     hit = kb.lookup(question, topic, lang, sentences)   # local knowledge library first
     if hit:
@@ -121,5 +122,5 @@ def intro(topic: str, lang: str, timeout: float = 6) -> tuple[str, str, str] | N
     """(title, whole introduction, url) of the article about `topic`: the second witness for a fact."""
     with httpx.Client(timeout=timeout, headers=HEADERS, follow_redirects=True) as http:
         page = _query(http, lang, {"titles": topic}, 0) or _query(
-            http, lang, {"generator": "search", "gsrsearch": topic, "gsrlimit": 1}, 0)
+            http, lang, {"generator": "search", "gsrsearch": topic, "gsrlimit": 5}, 0)
     return (page["title"], page["extract"], page.get("fullurl", "")) if page else None

@@ -7,7 +7,7 @@ from agent.critic import review_intent
 from agent.chat_replies import chat_reply
 from agent.companion import Companion
 from agent.supervisor_agent import SupervisorAgent
-from agent.synthesis_agent import _enough
+from agent.synthesis_agent import on_axis
 from agent.works import fetch, is_works, parse, works
 
 failures = []
@@ -38,7 +38,8 @@ check("city remembered", "جدة" in talk.respond("s1", "وين أسكن", "ar")
 check("sessions are private", "ما هو اسمك" in talk.respond("other", "مين أنا", "ar"))
 
 # --- 2. strict relevance for open questions
-check("one word is not enough for «ابني بيت»", _enough({"ابني", "بيت"}) == 2 and _enough({"الخلية"}) == 1 and _enough(set("abcdef")) == 4)
+check("a sentence must share a root with its axis",
+      on_axis("بناء بيت", "تختلف البيوت في إنشائها حسب البيئة") and not on_axis("بناء بيت", "أصالة نصري مغنية سورية"))
 sup = SupervisorAgent.__new__(SupervisorAgent)
 plan = SupervisorAgent.route(sup, "كيف ابني بيت", "web")
 check("«كيف ابني بيت» has no random fallback", plan["primary"] == "Synthesis" and plan["fallback"] == [], plan)

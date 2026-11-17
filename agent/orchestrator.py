@@ -6,7 +6,7 @@ Companion writes the reply in SADAH's voice.  The response keeps the same shape 
 """
 import time
 
-from agent import composer, understand
+from agent import composer, lexicon, understand
 from agent.base_agent import AgentResult, Task
 from agent.chat_replies import chat_reply
 from agent.chrono_agent import ChronoAgent
@@ -46,6 +46,9 @@ class SadahAgent:
                   CodeArchitectAgent(coder), CodeSynthesizerAgent(coder), SandboxAgent()]
         self.registry = {a.name: a for a in agents}
         self.brain, self.coder = self.supervisor.brain, coder
+        for brain in (self.brain, coder.brain):   # the spelling corrector works on the brains' own vocabulary
+            if brain.tok:
+                lexicon.learn(brain.tok.vocab)
 
     @property
     def brains(self) -> dict:
@@ -75,7 +78,8 @@ class SadahAgent:
         step = (lambda stage, title, detail="", status="ok": steps.append(
             {"stage": stage, "title": title, "detail": detail, "status": status}))
         task = self.companion.resolve(Task(message, session=session, allow_exec=allow_exec))
-        task.text, said = understand.rewrite(task.text, self.companion.talk.state(session))
+        task.text, said = understand.rewrite(task.text, self.companion.talk.state(session),
+                                             self.companion.memory.subject(session))
         if said:
             step("plan", "سَداة نظّفت صياغة السؤال", said)
         if task.context.get("followup"):

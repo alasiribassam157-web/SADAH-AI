@@ -1,10 +1,8 @@
 """[08] Synthesis agent: open questions («كيف»، «لماذا»، «قارن»، «حلّل») answered from real sources.
 
-1. split the question into axes (each side of a comparison, causes, how it works …)
-2. gather paragraphs for every axis: the offline library (BM25) and Wikipedia, in parallel
-3. rank the sentences with TextRank (NumPy power iteration) mixed with BM25-style relevance
-4. hand the best sentences to the stylist, which links them without adding anything
-Numeric comparisons («قارن بين سكان مصر والسعودية») go to Wikidata through composer.compare.
+Axes come from the question's nominal core (agent/topic.py), so «كيف ابني بيت» is searched as «بناء
+بيت», «بيت» and «بناء»; paragraphs come from the offline library and Wikipedia in parallel, ranked by
+TextRank and woven by the stylist, which adds nothing.  Numeric comparisons go to Wikidata.
 """
 import math
 import re
@@ -12,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 
-from agent import causal, composer, kb
+from agent import arabic, causal, composer, kb, topic as topics
 from agent.base_agent import AgentResult, BaseAgent, Task
 from agent.local_kb_agent import LocalKBAgent
 from agent.research import to_topic
@@ -25,13 +23,12 @@ _LEAD = re.compile(r"^(?:حلل|حلّل|اشرح|وضح|وضّح|قارن بي�
 _TRAIL = re.compile(r"\s+(?:مهم|مهمة|مفيد|مفيدة|خطير|خطيرة|important|useful|dangerous)$", re.I)
 _KIND = [("compare", r"قارن|مقارنة|الفرق بين|ايهما|أيهما|compare|difference between|versus|\bvs\b"),
          ("why", r"لماذا|ليش|ليه|أسباب|اسباب|why|causes?"), ("how", r"كيف|ازاي|how"),
-         ("analyze", r"حلل|حلّل|تحليل|أهمية|اهمية|تأثير|analy[sz]e|impact|importance")]
+         ("analyze", r"حلل|حلّل|تحليل|أهمية|اهمية|تأثير|analy[sz]e|impact")]
 PER_AXIS, MAX_POINTS = 3, 7      # sentences kept per axis / in total
 
 
-def _enough(need: set) -> int:   # all terms for short topics: «ابني بيت» is not «بيت»
-    return len(need) if len(need) <= 2 else math.ceil(len(need) * 2 / 3)
-
+def on_axis(query: str, sentence: str) -> bool:   # «البيوت» answers «بناء بيت»: a shared root is enough
+    return bool(arabic.roots(query) & arabic.roots(sentence))
 
 def kind_of(question: str) -> str:
     return next((k for k, pat in _KIND if re.search(pat, question, re.I)), "define")
@@ -48,12 +45,15 @@ def axes(question: str, kind: str) -> tuple[str, list[tuple[str, str]]]:
     topic, previous = to_topic(question), ""
     while topic != previous:  # «حلل أهمية الذكاء الاصطناعي» -> «الذكاء الاصطناعي»
         previous, topic = topic, _TRAIL.sub("", _VERBS.sub("", _LEAD.sub("", topic))).strip()
+    wide = topics.queries(question)          # «كيف ابني بيت» -> «بناء بيت», «بيت», «بناء»
     topic = topic or question
-    if kind == "why":   # one causal axis: the search is widened by causal.expand when the sources are read
+    if kind in ("how", "define") and wide:   # a request verb becomes the noun it asks about
+        topic = wide[0]
+    if kind == "why":   # one causal axis: the search ladder inside the agents widens it on its own
         return topic, [("الأسباب", topic)]
     if kind == "analyze":
         return topic, [("", topic), ("التأثير والأهمية", f"تأثير {topic}")]
-    return topic, [("", topic)]
+    return topic, [("", q) for q in wide[:3]]
 
 
 def sentences(text: str) -> list[str]:
@@ -94,19 +94,18 @@ class SynthesisAgent(BaseAgent):
         super().__init__()
         self.local, self.wiki = local or LocalKBAgent(), wiki or WikiAgent()
 
-    def gather(self, query: str, lang: str, why: bool = False) -> list[tuple[str, str]]:
-        """[(sentence, source url)] for one axis: library paragraphs plus the Wikipedia article.
-        A «why» axis is also searched with the reason words added (causal.expand)."""
+    def gather(self, query: str, lang: str, why: bool = False, question: str = "") -> list[tuple[str, str]]:
+        """[(sentence, source url)] for one axis: library paragraphs plus the Wikipedia article.  A
+        library paragraph can be about anything, so only sentences covering the question are taken."""
         found = []
         for q in ([query, causal.expand(query, lang)] if why else [query]):
             found += [(s, p["url"]) for p in self.local.passages(q, lang, 4) if p["coverage"] >= 0.6
-                      for s in sentences(p["text"])]
+                      for s in sentences(p["text"]) if topics.covers(question or query, s)]
         try:
             page = self.wiki.search(query, lang, 10)
         except Exception:  # Wikipedia down: the library alone still answers
             page = None
-        if page:
-            found += [(s, page[2]) for s in sentences(page[1])]
+        found += [(s, page[2]) for s in sentences(page[1])] if page else []
         return list(dict.fromkeys(found))
 
     def handle(self, task: Task) -> AgentResult:
@@ -122,13 +121,15 @@ class SynthesisAgent(BaseAgent):
         count = {1: "محور واحد", 2: "محورين"}.get(len(plan), f"{len(plan)} محاور")
         self.step(f"سَداة قسّمت السؤال إلى {count}", " | ".join(q for _, q in plan))
         with ThreadPoolExecutor(max_workers=len(plan)) as pool:
-            pools = list(pool.map(lambda ax: self.gather(ax[1], task.lang, kind == "why"), plan))
+            pools = list(pool.map(lambda ax: self.gather(ax[1], task.lang, kind == "why", task.text), plan))
         sections, sources, used = [], [], set()
         for (heading, query), found in zip(plan, pools):
-            need = set(kb.terms(query))
             why = kind == "why"
-            found = [(s, u) for s, u in found if s not in used
-                     and len(need & set(kb.terms(s))) >= _enough(need)]   # stay on the axis
+            fresh = [(s, u) for s, u in found if s not in used]
+            # the best sentences answer the whole question; then those on this axis; and if the sources
+            # had nothing so precise, their opening sentences — but never an apology.
+            found = ([p for p in fresh if topics.covers(task.text, p[0])]
+                     or [p for p in fresh if on_axis(query, p[0])] or fresh[:PER_AXIS])
             if not found:
                 continue
             texts = [s for s, _ in found]

@@ -7,7 +7,9 @@ import random
 import re
 
 from agent import personal_gate
+from agent import topic
 from agent.chat_replies import is_small_talk
+from agent.critic_rules import open_question
 
 _W = r"[؀-ۿa-zA-Z]"
 # a clear encyclopedic opening: only these may leave the companion when the brain says «chat»
@@ -43,7 +45,10 @@ REPLIES = {
 
 
 def encyclopedic(msg: str) -> bool:
-    return bool(_ENCY.search(msg))
+    """A question about the world: a clear opening («ما هو», «كيف»…) or any asking shape that is not
+    small talk — «وش فوائد العسل» asks about honey, «وش أخبارك» does not."""
+    return bool(_ENCY.search(msg)) or bool(
+        open_question(msg) and not is_small_talk(msg) and topic.asked_roots(msg))
 
 
 def _single_name(msg: str) -> bool:
@@ -51,8 +56,9 @@ def _single_name(msg: str) -> bool:
 
 
 def is_chatty(msg: str) -> bool:
-    """Everyday talk (pronouns, «فهمت؟», «لا يعمي»…) or a bare common first name: never a search."""
-    if _COMMAND.search(msg) or encyclopedic(msg):
+    """Everyday talk (pronouns, «فهمت؟», «لا يعمي»…) or a bare common first name: never a search.
+    Only an unmistakable encyclopedic opening overrules it — «هل فهمت ما اقصده» is still talk."""
+    if _COMMAND.search(msg) or _ENCY.search(msg):
         return False
     return bool(_CHATTY.search(msg)) or _single_name(msg)
 

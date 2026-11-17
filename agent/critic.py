@@ -5,9 +5,11 @@ from agent import composer, date_math, dialogue, markets, math_engine, personal_
 from agent.chat_replies import is_small_talk
 from agent.code_kb import detect_language
 from agent.critic_rules import (CONFIDENCE_FLOOR, _CODE_TASK, _DEFINE, _MATH, _STRONG_MATH, _TIME_WORDS,
-                                 keyword_intent)
+                                 keyword_intent, open_question)
 from agent.live_skills import find_currencies
 from agent.tools import WORKSPACE, ToolResult, _BLOCKED
+
+SURE = 0.90   # above this the brain's live-data answer stands even for an open question
 
 
 def review_intent(msg: str, intent: str, confidence: float) -> tuple[str, str]:
@@ -26,6 +28,12 @@ def review_intent(msg: str, intent: str, confidence: float) -> tuple[str, str]:
     if date_math.handles(msg) and (final in ("web", "python", "chat", "units", "datetime")
                                    or (final == "prayer" and date_math.mentions_event(msg))):
         return "datetime", note + " Date reasoning (days until / age / gap between dates)."
+    # General shape rule: an open question about the world never belongs to a live-data agent.
+    if final in ("datetime", "weather", "prayer", "translate", "units", "currency") and open_question(msg) \
+            and confidence < SURE and keyword_intent(msg) not in (final, "code") and not _TIME_WORDS.search(msg) \
+            and not is_small_talk(msg) and not detect_language(msg) and not _MATH.search(text) \
+            and not units.is_conversion(msg) and not find_currencies(msg):
+        return "web", note + " An open question about the world — answered from knowledge, not live data."
     if final in ("datetime", "weather", "prayer", "translate") and _DEFINE.match(msg.strip()) \
             and keyword_intent(msg) != final and not _TIME_WORDS.search(msg):
         return "web", note + " A «what is …» question with no live-data words — looking it up."
