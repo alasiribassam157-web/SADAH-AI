@@ -63,6 +63,9 @@ const scrollDown = () => ($("main").scrollTop = $("main").scrollHeight);
 function autosize() { const el = $("input"); el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 200) + "px"; }
 function refreshSend() { $("send").disabled = busy || !$("input").value.trim(); }
 
+// the visitor's name / city / topic live in localStorage and travel with every request (Vercel containers are stateless)
+function loadCtx() { try { return JSON.parse(store.get("sadah_ctx", "{}")) || {}; } catch { return {}; } }
+
 async function send(text) {
   text = (text || "").trim();
   if (!text || busy) return;
@@ -79,9 +82,10 @@ async function send(text) {
   $("thread").appendChild(pending); scrollDown();
   try {
     const res = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" },
-                                           body: JSON.stringify({ message: text, session: chatId }) });
+                                           body: JSON.stringify({ message: text, session: chatId, context: loadCtx() }) });
     if (!res.ok) throw new Error(res.statusText);
     const data = await res.json();
+    if (data.context) store.set("sadah_ctx", JSON.stringify(data.context));
     const trace = buildTrace(data);
     pending.outerHTML = botBubble(data.answer, data.intent, trace);
     History.add(chatId, { role: "bot", text: data.answer, intent: data.intent, trace });
