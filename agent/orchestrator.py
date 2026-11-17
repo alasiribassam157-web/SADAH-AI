@@ -6,7 +6,7 @@ Companion writes the reply in SADAH's voice.  The response keeps the same shape 
 """
 import time
 
-from agent import composer
+from agent import composer, understand
 from agent.base_agent import AgentResult, Task
 from agent.chat_replies import chat_reply
 from agent.chrono_agent import ChronoAgent
@@ -75,6 +75,9 @@ class SadahAgent:
         step = (lambda stage, title, detail="", status="ok": steps.append(
             {"stage": stage, "title": title, "detail": detail, "status": status}))
         task = self.companion.resolve(Task(message, session=session, allow_exec=allow_exec))
+        task.text, said = understand.rewrite(task.text, self.companion.talk.state(session))
+        if said:
+            step("plan", "سَداة نظّفت صياغة السؤال", said)
         if task.context.get("followup"):
             step("plan", "سَداة فهمت السؤال من سياق المحادثة", task.context["followup"])
 
@@ -122,6 +125,8 @@ class SadahAgent:
         valid, verdict = self.critic.verify(best)
         step("critic", "تحقق الناقد بعد التنفيذ", verdict, "ok" if valid else "warn")
         self.companion.memory.remember(task.session, best.entity)
+        if task.intent == "code" and best.ok:   # «طيب بجافا ؟» next time re-asks this task
+            self.companion.talk.state(task.session)["code"] = task.text[:120]
         if not best.ok:
             step("result", "لا توجد إجابة موثوقة", best.answer[:200], "warn")
             return NO_ANSWER[task.lang] if task.intent == "web" else best.answer
