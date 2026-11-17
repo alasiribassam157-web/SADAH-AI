@@ -1,7 +1,7 @@
 """Internal critic: validates plans before execution and results after, with self-repair."""
 import re
 
-from agent import composer, date_math, markets, math_engine, personal_gate, units
+from agent import composer, date_math, dialogue, markets, math_engine, personal_gate, units
 from agent.chat_replies import is_small_talk
 from agent.code_kb import detect_language
 from agent.critic_rules import (CONFIDENCE_FLOOR, _CODE_TASK, _DEFINE, _MATH, _STRONG_MATH, _TIME_WORDS,
@@ -14,7 +14,10 @@ def review_intent(msg: str, intent: str, confidence: float) -> tuple[str, str]:
     """Return (final_intent, note). Overrides the network only when it is unsure or implausible."""
     if personal_gate.is_personal(msg):   # iron rule: identity questions are never searched for
         return "chat", "Personal / identity question — kept with the companion, never turned into a search."
-    final, note = _review_confidence(msg, intent, confidence)
+    if intent in ("chat", "web", "translate") and keyword_intent(msg) in (None, "chat") and dialogue.is_chatty(msg):
+        return "chat", "Everyday talk (pronouns / «فهمت؟» / a bare name) — kept with the companion, never searched."
+    hold = intent == "chat" and confidence >= 0.5 and not dialogue.encyclopedic(msg)   # the brain's chat stands
+    final, note = _review_confidence(msg, intent, confidence, hold)
     text = msg.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789"))
     # SADAH v5 reasoning skills take precedence when the question clearly needs them.
     op = math_engine.detect(msg)
@@ -51,13 +54,13 @@ def review_intent(msg: str, intent: str, confidence: float) -> tuple[str, str]:
     named = set(find_currencies(msg))
     if final in ("units", "web", "chat", "translate") and (len(named) >= 2 or (named and markets.PRICE.search(msg))):
         return "currency", note + " A currency is named with a price question — converting money."
-    if final == "chat" and not is_small_talk(msg):
+    if final == "chat" and not is_small_talk(msg) and not hold:
         return "web", note + " Not small talk — answering via web search instead."
     return final, note
 
 
-def _review_confidence(msg: str, intent: str, confidence: float) -> tuple[str, str]:
-    if confidence >= CONFIDENCE_FLOOR:
+def _review_confidence(msg: str, intent: str, confidence: float, hold: bool = False) -> tuple[str, str]:
+    if confidence >= CONFIDENCE_FLOOR or (hold and keyword_intent(msg) in (None, "chat")):
         return intent, f"Neural confidence {confidence:.0%} ≥ {CONFIDENCE_FLOOR:.0%} — accepted."
     alt = keyword_intent(msg)
     if alt and alt != intent:

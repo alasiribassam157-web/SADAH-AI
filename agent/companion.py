@@ -8,7 +8,7 @@ import re
 import time
 from collections import OrderedDict, deque
 
-from agent import personal_gate
+from agent import dialogue, personal_gate
 from agent.critic_rules import keyword_intent
 from agent.talk_bank import TALK
 
@@ -52,7 +52,7 @@ class Companion:
     def _state(self, session: str) -> dict:
         st = self._s.get(session)
         if not st or time.time() - st["t"] > TTL:
-            st = {"name": "", "city": "", "job": "", "likes": [], "mood": "", "last": {}, "turns": deque(maxlen=5)}
+            st = {"name": "", "city": "", "job": "", "likes": [], "mood": "", "awaiting": False, "last": {}, "turns": deque(maxlen=5)}
         st["t"] = time.time()
         if not session:  # no session id: a throw-away memory, never shared between visitors
             return st
@@ -65,6 +65,20 @@ class Companion:
     def note(self, session: str, message: str, answer: str) -> None:
         if session:
             self._state(session)["turns"].append((message, answer[:200]))
+
+    def export(self, session: str) -> dict:
+        """The small context the browser keeps (localStorage) so a cold serverless container still knows the visitor."""
+        st = self._s.get(session) or {}
+        return {"user_name": st.get("name", ""), "user_city": st.get("city", ""), "awaiting_name": bool(st.get("awaiting"))}
+
+    def load(self, session: str, ctx: dict) -> None:
+        if not session or not isinstance(ctx, dict):
+            return
+        st = self._state(session)
+        for key, field in (("user_name", "name"), ("user_city", "city")):
+            if isinstance(ctx.get(key), str) and ctx[key].strip():
+                st[field] = ctx[key].strip()[:25]
+        st["awaiting"] = bool(ctx.get("awaiting_name"))
 
     def name(self, session: str) -> str:
         return self._s.get(session, {}).get("name", "") if session else ""
@@ -114,12 +128,14 @@ class Companion:
                 if _word(pat).search(text):
                     st["mood"] = mood
                     return (rep_ar if ar else rep_en).format(n=self._n(st, lang))
+        if reply := dialogue.capture(st, text, ar):
+            return reply
         if keyword_intent(text) not in (None, "chat"):  # «الجو عامل ايه في القاهرة» is weather, not small talk
             return None
         for key, pat, rep_ar, rep_en in TALK:
             if _word(pat).search(text):
                 return self._pick(st, key, rep_ar if ar else rep_en).format(n=self._n(st, lang))
-        return None
+        return dialogue.chatty_reply(st, text, ar)
 
     def _profile(self, st: dict, ar: bool) -> str:
         facts = [(st["name"], "اسمك", "your name is"), (st["city"], "من", "you're from"),
