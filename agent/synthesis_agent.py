@@ -96,11 +96,11 @@ class SynthesisAgent(BaseAgent):
 
     def gather(self, query: str, lang: str, why: bool = False, question: str = "") -> list[tuple[str, str]]:
         """[(sentence, source url)] for one axis: library paragraphs plus the Wikipedia article.  A
-        library paragraph can be about anything, so only sentences covering the question are taken."""
+        library paragraph can be about anything, so only sentences sharing a root with the axis are taken."""
         found = []
         for q in ([query, causal.expand(query, lang)] if why else [query]):
             found += [(s, p["url"]) for p in self.local.passages(q, lang, 4) if p["coverage"] >= 0.6
-                      for s in sentences(p["text"]) if topics.covers(question or query, s)]
+                      for s in sentences(p["text"]) if on_axis(query, s)]   # a shared root of the topic is enough
         try:
             page = self.wiki.search(query, lang, 10)
         except Exception:  # Wikipedia down: the library alone still answers
