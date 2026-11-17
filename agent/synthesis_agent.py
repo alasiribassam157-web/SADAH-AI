@@ -26,8 +26,11 @@ _TRAIL = re.compile(r"\s+(?:مهم|مهمة|مفيد|مفيدة|خطير|خطي�
 _KIND = [("compare", r"قارن|مقارنة|الفرق بين|ايهما|أيهما|compare|difference between|versus|\bvs\b"),
          ("why", r"لماذا|ليش|ليه|أسباب|اسباب|why|causes?"), ("how", r"كيف|ازاي|how"),
          ("analyze", r"حلل|حلّل|تحليل|أهمية|اهمية|تأثير|analy[sz]e|impact|importance")]
-PER_AXIS = 3      # sentences kept per axis
-MAX_POINTS = 7
+PER_AXIS, MAX_POINTS = 3, 7      # sentences kept per axis / in total
+
+
+def _enough(need: set) -> int:   # all terms for short topics: «ابني بيت» is not «بيت»
+    return len(need) if len(need) <= 2 else math.ceil(len(need) * 2 / 3)
 
 
 def kind_of(question: str) -> str:
@@ -96,7 +99,7 @@ class SynthesisAgent(BaseAgent):
         A «why» axis is also searched with the reason words added (causal.expand)."""
         found = []
         for q in ([query, causal.expand(query, lang)] if why else [query]):
-            found += [(s, p["url"]) for p in self.local.passages(q, lang, 4) if p["coverage"] >= 0.5
+            found += [(s, p["url"]) for p in self.local.passages(q, lang, 4) if p["coverage"] >= 0.6
                       for s in sentences(p["text"])]
         try:
             page = self.wiki.search(query, lang, 10)
@@ -125,7 +128,7 @@ class SynthesisAgent(BaseAgent):
             need = set(kb.terms(query))
             why = kind == "why"
             found = [(s, u) for s, u in found if s not in used
-                     and len(need & set(kb.terms(s))) >= max(1, math.ceil(len(need) / 2))]   # stay on the axis
+                     and len(need & set(kb.terms(s))) >= _enough(need)]   # stay on the axis
             if not found:
                 continue
             texts = [s for s, _ in found]

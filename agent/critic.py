@@ -1,7 +1,7 @@
 """Internal critic: validates plans before execution and results after, with self-repair."""
 import re
 
-from agent import composer, date_math, markets, math_engine, units
+from agent import composer, date_math, markets, math_engine, personal_gate, units
 from agent.chat_replies import is_small_talk
 from agent.code_kb import detect_language
 from agent.critic_rules import (CONFIDENCE_FLOOR, _CODE_TASK, _DEFINE, _MATH, _STRONG_MATH, _TIME_WORDS,
@@ -12,6 +12,8 @@ from agent.tools import WORKSPACE, ToolResult, _BLOCKED
 
 def review_intent(msg: str, intent: str, confidence: float) -> tuple[str, str]:
     """Return (final_intent, note). Overrides the network only when it is unsure or implausible."""
+    if personal_gate.is_personal(msg):   # iron rule: identity questions are never searched for
+        return "chat", "Personal / identity question — kept with the companion, never turned into a search."
     final, note = _review_confidence(msg, intent, confidence)
     text = msg.translate(str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789"))
     # SADAH v5 reasoning skills take precedence when the question clearly needs them.

@@ -8,6 +8,7 @@ import re
 import time
 from collections import OrderedDict, deque
 
+from agent import personal_gate
 from agent.critic_rules import keyword_intent
 from agent.talk_bank import TALK
 
@@ -97,6 +98,8 @@ class Companion:
             st["likes"].append(next(g for g in m.groups() if g).strip())
             return f"حلو! {st['likes'][-1]} اختيار رهيب 😄 وش اللي شدّك له؟" if ar else \
                 f"Nice! {st['likes'][-1]} is a great choice 😄 What got you into it?"
+        if reply := personal_gate.answer(st, text, ar):
+            return reply
         if re.search(r"(?:وش|ما|ايش) اسمي|تعرف اسمي|what(?:'s| is) my name", text, re.I):
             return (f"اسمك {st['name']} 😊" if st["name"] else "ما قلت لي اسمك للحين! وش اسمك؟") if ar else \
                 (f"You're {st['name']} 😊" if st["name"] else "You haven't told me yet! What's your name?")

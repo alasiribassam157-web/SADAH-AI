@@ -13,12 +13,14 @@ from agent.base_agent import AgentResult, BaseAgent, Task
 from agent.critic_rules import keyword_intent
 from agent.facts import match_relation
 from agent.message_bus import MessageBus
+from agent.works import is_works
 from core.inference import BrainInference
 
 _OPEN = re.compile(r"^(?:كيف|لماذا|ليش|ليه|اشرح|وضح|وضّح|حلل|حلّل|ما (?:أسباب|اسباب|أهمية|اهمية|فوائد|أضرار|اضرار|الفرق)|"
                    r"why|how (?:does|do|did|can)|explain|analy[sz]e|what (?:causes|are the (?:causes|benefits|effects)))",
                    re.IGNORECASE)
 _NEWS = re.compile(r"أخبار|اخبار|آخر (?:الأخبار|المستجدات)|مستجدات|حدث اليوم|عاجل|news|latest|breaking|today'?s", re.I)
+_HOWTO = re.compile(r"^(?:كيف|ازاي|شلون)\s+(?:ا|أ|ن)(?:بني|سوي|صنع|عمل|طبخ|رب[يى]|زرع|اصلح|أصلح|ركب|فتح|اكتب|أكتب)\b", re.I)
 _SYMBOLIC = set(math_engine.STRONG_OPS)
 # intent -> (primary, witnesses, fallback)
 ROUTES = {
@@ -63,6 +65,10 @@ class SupervisorAgent(BaseAgent):
             primary, witnesses, fallback = ("Markets", [], ["Forex"]) if gold else ("Forex", [], ["Markets"])
         elif _NEWS.search(text):
             primary, witnesses, fallback = "OpenWeb", [], ["Wiki"]
+        elif is_works(text):   # a list of works: Wikidata or an honest «no answer», never the article's first sentences
+            primary, witnesses, fallback = "Wikidata", [], []
+        elif _HOWTO.search(text.strip()):   # «كيف ابني بيت»: practical steps are not in an encyclopedia
+            primary, witnesses, fallback = "Synthesis", [], []
         elif composer.is_comparison(text) or _OPEN.search(text.strip()):
             primary, witnesses, fallback = "Synthesis", [], ["LocalKB", "Wiki"]
         elif match_relation(text):

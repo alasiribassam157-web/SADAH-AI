@@ -7,6 +7,7 @@ import httpx
 from agent.base_agent import AgentResult, BaseAgent, Task
 from agent.fact_resolver import resolve
 from agent.facts import match_relation, numeric_fact
+from agent.works import is_works, works
 
 LABELS = {"P36": "العاصمة", "P1082": "عدد السكان", "P571": "تاريخ التأسيس", "P38": "العملة", "P37": "اللغة الرسمية",
           "P569": "تاريخ الميلاد", "P19": "مكان الميلاد", "P2046": "المساحة", "P112": "المؤسس", "P286": "المدرب",
@@ -21,7 +22,7 @@ class WikidataAgent(BaseAgent):
     timeout = 9.0
 
     def can_handle(self, task: Task) -> float:
-        return 0.95 if match_relation(task.text) else 0.0
+        return 0.95 if match_relation(task.text) or is_works(task.text) else 0.0
 
     def number(self, entity: str, prop: str, lang: str) -> tuple[str, float, str, str] | None:
         """(name, value, unit, url) for a quantity, used by comparisons."""
@@ -30,7 +31,21 @@ class WikidataAgent(BaseAgent):
         except (httpx.HTTPError, KeyError, ValueError):
             return None
 
+    def _works(self, task: Task) -> AgentResult:
+        """A list of films / songs / books of a person: every item, not the first sentences of an article."""
+        self.step("سَداة تبحث عن قائمة الأعمال في Wikidata", task.text)
+        try:
+            found = works(task.text, task.lang)
+        except (httpx.HTTPError, KeyError, ValueError) as exc:
+            return self.fail(f"تعذّر جلب قائمة الأعمال: {exc}")
+        if not found or not found["count"]:
+            return self.fail("لم أجد قائمة أعمال موثوقة لهذا الاسم في Wikidata")
+        self.step(f"وجدتُ {found['count']} عملًا", found["name"], confidence=0.9)
+        return self.ok(found["answer"], 0.9, [found["url"]], {"kind": "works"}, entity=found["name"])
+
     def handle(self, task: Task) -> AgentResult:
+        if is_works(task.text):
+            return self._works(task)
         rel = match_relation(task.text)
         if not rel:
             return self.fail("السؤال ليس عن خاصية معروفة في Wikidata")
