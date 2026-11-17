@@ -33,6 +33,7 @@ def answer(st: dict, message: str, ar: bool) -> str | None:
     name, city, job, likes = st["name"], st["city"], st["job"], "، ".join(st["likes"])
     where = re.search(r"وين|أين|اين|مدينتي|بلدي|where", message, re.I)
     if not name and not city and not job and not likes:
+        st["awaiting"] = True   # the next short message is the name
         return ("أنت صديقي 🤍 لكنك لم تخبرني باسمك بعد، ما هو اسمك لأحفظه في ذاكرتي؟" if ar else
                 "You're my friend 🤍 but you haven't told me your name yet. What's your name so I can remember it?")
     if where and city:

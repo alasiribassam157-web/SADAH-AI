@@ -40,6 +40,7 @@ app.include_router(cv_api.build_router())
 class ChatIn(BaseModel):
     message: str
     session: str = ""  # per-tab id from the browser, used only for follow-up questions
+    context: dict = {}  # user_name / user_city / awaiting_name / last_topic, kept in the browser's localStorage
 
 
 @app.on_event("startup")
@@ -81,7 +82,7 @@ def chat(body: ChatIn, request: Request):
         raise HTTPException(400, "Empty message")
     # Real code/system execution only for the developer sitting at this machine.
     allow_exec = not SAFE_MODE and dev_api is not None and dev_api.is_local(request)
-    result = agent.handle(message, allow_exec=allow_exec, session=body.session[:64])
+    result = agent.handle(message, allow_exec=allow_exec, session=body.session[:64], context=body.context)
     stats.record(message, result)
     return result
 

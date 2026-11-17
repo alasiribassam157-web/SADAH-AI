@@ -51,8 +51,12 @@ class SadahAgent:
     def brains(self) -> dict:
         return {"router": self.brain, "coder": self.coder.brain}
 
-    def handle(self, message: str, allow_exec: bool = False, session: str = "") -> dict:
+    def handle(self, message: str, allow_exec: bool = False, session: str = "", context: dict | None = None) -> dict:
         """Compound questions («…وكم عدد سكانها») are answered part by part, sharing the conversation memory."""
+        if context:   # the browser's copy of the visitor's memory (a cold serverless container starts empty)
+            self.companion.talk.load(session, context)
+            if isinstance(context.get("last_topic"), str):
+                self.companion.memory.remember(session, context["last_topic"][:60])
         parts = composer.split_compound(message)
         if len(parts) > 1:
             session = session or f"compound-{id(parts)}"
@@ -63,6 +67,7 @@ class SadahAgent:
             merged["steps"] = [s for r in results for s in r["steps"]]
             merged["ms"] = sum(r["ms"] for r in results)
         self.companion.talk.note(session, message, merged["answer"])
+        merged["context"] = {**self.companion.talk.export(session), "last_topic": self.companion.memory.subject(session)}
         return merged
 
     def _one(self, message: str, allow_exec: bool, session: str) -> dict:

@@ -46,6 +46,16 @@ def _strip_al(topic: str) -> str:
     return " ".join(w[2:] if w.startswith("ال") and len(w) > 4 else w for w in topic.split())
 
 
+def title_ok(page: dict, query: str) -> bool:
+    """Strict title gate: a search hit is shown only if its title shares a real keyword with the question
+    (or its introduction covers the question's keywords): «هل فهمت ما اقصده» never yields «عبد السلام ياسين»."""
+    need = set(kb.terms(query))
+    if not need or need & set(kb.terms(page["title"])):
+        return bool(need)
+    got = len(need & set(kb.terms(page.get("extract", ""))))
+    return got >= 2 and got >= len(need) * 2 / 3
+
+
 def _query(http: httpx.Client, lang: str, params: dict, sentences: int = 3) -> dict | None:
     base = {"action": "query", "format": "json", "redirects": 1, "prop": "extracts|info|pageprops",
             "exintro": 1, "explaintext": 1, "exsentences": sentences, "inprop": "url"}
@@ -55,7 +65,7 @@ def _query(http: httpx.Client, lang: str, params: dict, sentences: int = 3) -> d
     for page in (pages.get("query", {}).get("pages") or {}).values():
         if "missing" in page or "disambiguation" in page.get("pageprops", {}):
             continue
-        if page.get("extract", "").strip():
+        if page.get("extract", "").strip() and (not params.get("gsrsearch") or title_ok(page, params["gsrsearch"])):
             return page
     return None
 
