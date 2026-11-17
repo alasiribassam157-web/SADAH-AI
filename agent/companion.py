@@ -69,7 +69,8 @@ class Companion:
     def export(self, session: str) -> dict:
         """The small context the browser keeps (localStorage) so a cold serverless container still knows the visitor."""
         st = self._s.get(session) or {}
-        return {"user_name": st.get("name", ""), "user_city": st.get("city", ""), "awaiting_name": bool(st.get("awaiting"))}
+        return {"user_name": st.get("name", ""), "user_city": st.get("city", ""), "awaiting_name": bool(st.get("awaiting")),
+                "last_code": st.get("code", "")}
 
     def load(self, session: str, ctx: dict) -> None:
         if not session or not isinstance(ctx, dict):
@@ -79,6 +80,9 @@ class Companion:
             if isinstance(ctx.get(key), str) and ctx[key].strip():
                 st[field] = ctx[key].strip()[:25]
         st["awaiting"] = bool(ctx.get("awaiting_name"))
+        st["code"] = ctx["last_code"][:120] if isinstance(ctx.get("last_code"), str) else st.get("code", "")
+
+    state = lambda self, session: self._state(session)   # noqa: E731  (the understanding stage reads/writes it)
 
     def name(self, session: str) -> str:
         return self._s.get(session, {}).get("name", "") if session else ""
