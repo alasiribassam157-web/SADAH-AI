@@ -4,6 +4,7 @@ import re
 import httpx
 
 from agent import kb
+from agent.dialogue import _single_name
 
 HEADERS = {"User-Agent": "SADAH-Agent/1.0 (https://github.com/alasiribassam157-web/SADAH-AI) python-httpx"}
 _DIACRITICS = re.compile(r"[ً-ْٰـ]")
@@ -72,6 +73,8 @@ def _query(http: httpx.Client, lang: str, params: dict, sentences: int = 3) -> d
 
 def lookup(question: str, lang: str) -> tuple[str, str, str] | None:
     """Return (title, short answer, url) or None."""
+    if _single_name(question):   # «بسام» alone is a greeting, not a search for a cartoon character
+        return None
     topic = to_topic(question)
     attempts = [{"titles": topic}]
     if lang == "ar":
