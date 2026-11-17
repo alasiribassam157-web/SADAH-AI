@@ -86,7 +86,7 @@ def relevance(question: str, text: str) -> float:
     return len(asked & arabic.roots(text)) / len(asked) if asked else 0.0
 
 
-def on_topic(question: str, text: str, need: float = 0.34) -> bool:
+def on_topic(question: str, text: str, need: float = 0.20) -> bool:
     """The general gate that replaced «the title must match»: a shared root, in the title or the body."""
     return relevance(question, text) >= need
 
@@ -111,14 +111,15 @@ def score_page(question: str, page: dict) -> float:
         return 0.0
     title, body = arabic.roots(page.get("title", "")), arabic.roots(page.get("extract", ""))
     extra = len(title - asked)   # «بيت الصفاة» answers about one particular house, not about houses
-    hit = 0.7 * (len(asked & title) / len(asked)) / (1 + 0.6 * extra) + 0.3 * len(asked & body) / len(asked)
+    lead = asked & (title | arabic.roots(page.get("extract", "")[:200]))   # a question root in the title / opening
+    hit = 0.7 * (len(asked & title) / len(asked)) / (1 + (0.2 if lead else 0.6) * extra) + 0.3 * len(asked & body) / len(asked)
     if _ASKS_WORK.search(question):   # the question really is about a film or a book
         return hit
     work = _QUALIFIER.search(page.get("title", "")) or _IS_WORK.match(page.get("extract", ""))
     return hit * (0.4 if work else 1.0)
 
 
-def best_page(question: str, pages, need: float = 0.34) -> dict | None:
+def best_page(question: str, pages, need: float = 0.20) -> dict | None:
     """Pick the hit that is really about the question, instead of trusting the first result blindly."""
     ranked = sorted(pages, key=lambda p: score_page(question, p), reverse=True)
     return ranked[0] if ranked and score_page(question, ranked[0]) >= need else None
