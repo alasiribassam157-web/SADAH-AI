@@ -1,8 +1,8 @@
-/* Conversation: your question as a night tag edged in gold, SADAH's answer set like a printed page. */
+/* Conversation: your question as a soft tag, the answer as plain reading text. */
 .thread { display: none; max-width: 760px; margin: 0 auto; flex-direction: column; gap: 34px; padding: 28px 0 12px; }
 body.chatting .thread { display: flex; }
-.msg-user { align-self: flex-end; max-width: 82%; padding: 11px 18px; background: var(--tag-bg); color: var(--tag-ink); font-weight: 400;
-  white-space: pre-wrap; border: 1px solid var(--rule); border-inline-end: 2px solid var(--gold); animation: rise .25s both; }
+.msg-user { align-self: flex-end; max-width: 82%; padding: 11px 18px; background: var(--sunk); color: var(--tag-ink); font-weight: 400;
+  white-space: pre-wrap; border: 1px solid var(--rule); border-radius: 18px 18px 18px 4px; animation: rise .25s both; }
 .msg-bot { display: flex; flex-direction: column; gap: 8px; animation: rise .3s both; }
 .bot-meta { display: flex; align-items: center; gap: 10px; font: 600 17px var(--f-display); color: var(--accent); }
 html[lang="en"] .bot-meta { letter-spacing: .2em; }
@@ -16,12 +16,12 @@ html[lang="en"] .bot-meta { letter-spacing: .2em; }
 .badge { --c: var(--ink-2); font: 600 11.5px var(--f-ui); letter-spacing: 0; color: var(--c); padding: 0 8px; line-height: 22px; border: 1px solid var(--c); }
 .badge[data-i="web"] { --c: #8cb6e0; } .badge[data-i="code"] { --c: #b9a2ea; } .badge[data-i="weather"] { --c: #7cc6df; }
 .badge[data-i="currency"], .badge[data-i="python"] { --c: var(--gold-text); } .badge[data-i="prayer"] { --c: var(--olive); }
-.badge[data-i="translate"] { --c: var(--accent); } .badge[data-i="datetime"], .badge[data-i="units"] { --c: #d9b98c; }
+.badge[data-i="translate"] { --c: var(--accent); } .badge[data-i="datetime"], .badge[data-i="units"] { --c: #FFD2A8; }
 
-.code { margin: 14px 0; border: 1px solid #3b3029; background: #15110f; color: #efe6d8; direction: ltr; overflow: hidden; }
+.code { margin: 14px 0; border: 1px solid #26252A; background: #0C0C0E; color: #F3EEE6; direction: ltr; overflow: hidden; }
 .code header { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px 4px 14px; font: 500 12px var(--f-mono);
-  color: #d4b26a; border-bottom: 1px solid #3b3029; }
-.code header .mini { color: #bfb09c; } .code header .mini:hover { background: #201915; color: #efe6d8; }
+  color: #FFB36B; border-bottom: 1px solid #26252A; }
+.code header .mini { color: #A8A39A; } .code header .mini:hover { background: #16161A; color: #F3EEE6; }
 .code pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 13.5px/1.7 var(--f-mono); text-align: left; }
 .src { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 3px 12px; font: 500 13px var(--f-ui);
   color: var(--ink); text-decoration: none; border: 1px solid var(--line); background: var(--surface); transition: border-color .2s; }

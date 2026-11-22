@@ -41,8 +41,8 @@ html[dir="ltr"] .example .go { transform: scaleX(-1); }
 .board { margin-top: 44px; }
 .board h2 { font: 600 24px/1.2 var(--f-display); color: var(--ink); margin-bottom: 12px; text-align: center; }
 .board-row { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--night); color: var(--night-ink); padding: 15px 6px 6px;
-  border: 1px solid #8c7240; outline: 1px solid rgba(201,164,92,.28); outline-offset: -7px; box-shadow: var(--shadow); }
-.board-row::before { content: ""; position: absolute; inset: 7px 7px auto; height: 7px; background: repeating-linear-gradient(90deg, #c9a45c 0 1px, transparent 1px 6px); opacity: .55; }
+  border: 1px solid #2E2C29; outline: 1px solid rgba(255,179,107,.28); outline-offset: -7px; box-shadow: var(--shadow); }
+.board-row::before { content: ""; position: absolute; inset: 7px 7px auto; height: 7px; background: repeating-linear-gradient(90deg, #FFB36B 0 1px, transparent 1px 6px); opacity: .55; }
 .cell { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 16px 18px 18px; text-align: center; min-width: 0; color: inherit; transition: background .2s; }
 .cell + .cell { border-inline-start: 1px solid var(--night-line); }
 .cell:hover { background: var(--night-2); }
@@ -53,7 +53,7 @@ html[dir="ltr"] .example .go { transform: scaleX(-1); }
 .cell .sub { font-size: 13px; color: var(--night-mute); }
 .cell .sub bdi { direction: ltr; unicode-bidi: isolate; }
 .cell .na { font-size: 13px; color: var(--night-mute); margin-top: 10px; }
-.shimmer { display: block; height: 30px; width: 70%; margin-top: 10px; background: linear-gradient(90deg, #201915, #3b3029, #201915); background-size: 200% 100%; animation: shine 1.4s infinite; }
+.shimmer { display: block; height: 30px; width: 70%; margin-top: 10px; background: linear-gradient(90deg, #16161A, #26252A, #16161A); background-size: 200% 100%; animation: shine 1.4s infinite; }
 .shimmer.short { height: 12px; width: 45%; }
 @keyframes shine { to { background-position: -200% 0; } }
 .own { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 36px; font-size: 13px; font-weight: 500; color: var(--ink-2); line-height: 1.7; text-align: center; }

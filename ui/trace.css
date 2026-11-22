@@ -1,21 +1,21 @@
 /* Trace panel: a dark card with a hairline gold frame, closed by default. Agent names and numbers in JetBrains Mono. */
-.trace { margin-top: 14px; background: #0d0b09; border: 1px solid #8A6D1B; font-size: 13px; }
+.trace { margin-top: 14px; background: #050506; border: 1px solid #8A6A3A; font-size: 13px; }
 .trace summary { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 7px 12px; cursor: pointer; list-style: none; color: var(--ink-2); }
 .trace summary::-webkit-details-marker { display: none; }
-.trace summary::before { content: ""; width: 7px; height: 7px; background: #D4AF37; transform: rotate(45deg); flex-shrink: 0; }
+.trace summary::before { content: ""; width: 7px; height: 7px; background: #FFB36B; transform: rotate(45deg); flex-shrink: 0; }
 .trace[open] summary { border-bottom: 1px solid var(--line); }
-.tr-lbl { font-weight: 600; color: #F3E5AB; }
+.tr-lbl { font-weight: 600; color: #FFD2A8; }
 .trace code { font: 500 12px var(--f-mono); color: var(--ink); direction: ltr; unicode-bidi: isolate; }
 .tr-badge { font-weight: 600; padding: 0 8px; line-height: 22px; border: 1px solid; }
-.tr-badge.ok { color: #F3E5AB; border-color: #D4AF37; background: rgba(212,175,55,.1); }
+.tr-badge.ok { color: #FFD2A8; border-color: #FFB36B; background: rgba(255,179,107,.1); }
 .tr-badge.mid { color: var(--ink-2); border-color: var(--line); }
-.tr-badge.bad { color: #F0A0A8; border-color: #8a2d3a; background: #4A0E17; }
+.tr-badge.bad { color: #FF9A8A; border-color: #FF6A3D; background: #FF6A3D; }
 .tr-num { margin-inline-start: auto; font: 500 12px var(--f-mono); color: var(--ink-2); direction: ltr; }
 .tr-body { padding: 10px 12px 12px; }
 .tr-body dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; align-items: center; }
 .tr-body dt { color: var(--ink-2); } .tr-body dd { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; }
-.tr-bar { width: 140px; height: 4px; background: var(--line); } .tr-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8A6D1B, #F3E5AB); }
+.tr-bar { width: 140px; height: 4px; background: var(--line); } .tr-bar i { display: block; height: 100%; background: linear-gradient(90deg, #8A6A3A, #FFD2A8); }
 .tr-steps { list-style: none; margin: 12px 0 0; padding: 10px 0 0; border-top: 1px solid var(--line); display: grid; gap: 3px; max-height: 220px; overflow-y: auto; }
 .tr-steps li { display: flex; gap: 10px; align-items: baseline; color: var(--ink-2); line-height: 1.6; }
-.tr-steps code { flex: 0 0 104px; color: #D9BC7A; } .tr-steps li.warn span { color: #F0A0A8; }
+.tr-steps code { flex: 0 0 104px; color: #FFB36B; } .tr-steps li.warn span { color: #FF9A8A; }
 @media (max-width: 640px) { .tr-num { margin-inline-start: 0; } .tr-steps code { flex-basis: 84px; } }
