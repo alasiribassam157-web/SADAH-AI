@@ -63,9 +63,25 @@ pinned: false
 | `core/` | العقول والمحلّل ومسار التدريب |
 | `ui/` | الواجهة والمقدمة ولوحة المسار |
 | `cv/` | السيرة الذاتية: قراءة الملفات وتوليد السيرة |
-| `tests/` | اختبارات بلا شبكة (`shield_test`, `agents_test`, `sadah2_test*`, `sadah3_test`) والاختبار الرسمي `benchmark` |
+| `tests/` | اختبارات بلا شبكة (`shield_test`, `agents_test`, `sadah2_test*`, `sadah3_test`, `regression_*_test`) والاختبار الرسمي `benchmark` |
+| `models/` | العقلان المخدومان `router.pt` و`coder.pt`، وسجل الإصدارات `registry/` وحدود البوابة `gate.json` |
 
-كل ملف بايثون أقل من 150 سطراً.
+كل ملف بايثون لا يزيد على 150 سطراً (يتحقق منه `tests.regression_gate_test`).
+
+## التدريب الآمن: لا اعتماد بلا بوابة
+
+التدريب لا يكتب فوق العقل المخدوم. ينتج مرشحًا في `models/registry/`، ثم **بوابة انحدار** تقارنه مع النسخة المستقرة مهارة بمهارة على أسئلة لا يُدرَّب عليها، وترفضه إذا تراجعت أي مهارة أكثر من الحد (`models/gate.json`). كل نسخة لها sha256 وسجل تدقيق ويمكن الرجوع إلى أي نسخة مستقرة.
+
+```bash
+python -m core.lifecycle init                         # مرة واحدة: تسجيل الأوزان الحالية كنسخة مستقرة
+python -m core.lifecycle new-experiment my-exp --brain router --size pretrained --epochs 12
+python -m core.trainer --experiment my-exp            # تدريب مرشح + حكم البوابة (exit 1 إن رُفض)
+python -m core.lifecycle promote router 3             # اعتماد مرشح ناجح
+python -m core.lifecycle rollback router              # رجوع للنسخة السابقة
+python -m unittest tests.regression_gate_test tests.regression_registry_test   # اختبارات الانحدار
+```
+
+التفاصيل الكاملة (الأوامر، هيكل الحفظ، إضافة مهارة جديدة): [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 
 ## شغّلها على جهازك
 
@@ -78,7 +94,7 @@ pip install -r requirements.txt
 python app.py          # http://localhost:8000
 ```
 
-الاختبارات: `python -m tests.shield_test` و`python -m tests.agents_test` و`python -m tests.sadah3_test`، والاختبار الرسمي `python -m tests.benchmark`.
+الاختبارات: `python -m unittest tests.regression_gate_test tests.regression_registry_test` و`python -m tests.shield_test` و`python -m tests.agents_test` و`python -m tests.sadah3_test`، والاختبار الرسمي `python -m tests.benchmark`.
 
 ## الخصوصية والأمان
 

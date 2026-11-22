@@ -2,7 +2,7 @@
 import threading
 from typing import Callable
 
-from core import trainer
+from core import lifecycle, trainer
 from core.dataset_builder import BRAINS
 
 
@@ -27,8 +27,11 @@ class TrainingJob:
                 self.state.update(brain=name, history=[])
                 result = trainer.train(brain=name, size=size, epochs=epochs,
                                        on_epoch=lambda m: self.state["history"].append(m))
-                self.on_done(name)
+                verdict = lifecycle.review_and_promote(name, result["registry_version"])   # the gate decides
+                if verdict["passed"]:
+                    self.on_done(name)   # reload the live brain only when the candidate was promoted
                 summary = {k: v for k, v in result.items() if k != "history"}
+                summary["gate"] = {"passed": verdict["passed"], "reasons": verdict["reasons"]}
                 self.state["results"].append(summary)
                 self.state["result"] = summary
         except Exception as exc:  # surfaced to the UI instead of killing the thread silently

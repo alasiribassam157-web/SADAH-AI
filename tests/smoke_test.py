@@ -1,11 +1,11 @@
 """Fast end-to-end checks run before every push.  Run:  py -m tests.smoke_test"""
 import sys
 
-from core import trainer
+from core import lifecycle, trainer
 
 for _brain in ("router", "coder"):
     if not trainer.checkpoint(_brain).exists():
-        trainer.train(brain=_brain)
+        lifecycle.review_and_promote(_brain, trainer.train(brain=_brain)["registry_version"])
 
 from agent.orchestrator import SadahAgent  # noqa: E402  (needs the checkpoint)
 from agent.tools import SAFE_MODE, WORKSPACE  # noqa: E402

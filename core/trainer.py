@@ -1,7 +1,8 @@
 """CPU-friendly training loop for SADAH brains (time cap, limited threads).
 
-Run directly:  py -m core.trainer [router|coder|all] [small|medium|large|xlarge] [epochs]
-Trained weights live in models/ and are committed, so the cloud serves the exact brain you tested.
+Run directly:  py -m core.trainer [router|coder|all] [small|medium|large|xlarge|pretrained] [epochs] [--experiment NAME]
+Training NEVER overwrites the brain the server uses: it stores a candidate in the registry (core/registry.py).
+Only a candidate that passes the regression gate (core/gate.py) becomes models/<brain>.pt (core/lifecycle.py).
 """
 import json
 import os
@@ -13,9 +14,10 @@ from typing import Callable
 import torch
 import torch.nn as nn
 
-from core import finetune
+from core import finetune, provenance
 from core.dataset_builder import BRAINS, build_dataset, train_val_split
 from core.neural_net import SadahBrain
+from core.registry import Registry
 from core.tokenizer import SadahTokenizer
 
 MODELS = Path(__file__).resolve().parent.parent / "models"
@@ -57,8 +59,8 @@ def _evaluate(model, x, y, loss_fn):
 
 
 def train(brain: str = "router", size: str = "medium", epochs: int = 12, batch_size: int = 64, lr: float = 2e-3,
-          on_epoch: Callable[[dict], None] | None = None) -> dict:
-    """Train one brain and save it. `on_epoch` receives live metrics for the dashboard."""
+          on_epoch: Callable[[dict], None] | None = None, experiment: str = "") -> dict:
+    """Train one brain and store it as a registry CANDIDATE. `on_epoch` receives live metrics for the dashboard."""
     torch.set_num_threads(CPU_THREADS)
     torch.manual_seed(0)
     start = time.time()
@@ -114,28 +116,29 @@ def train(brain: str = "router", size: str = "medium", epochs: int = 12, batch_s
     versions = load_versions()
     info = {"version": len(versions) + 1, "brain": brain, "size": size,
             "params": sum(p.numel() for p in model.parameters()), "steps": steps,
-            "total_steps": steps + sum(v["steps"] for v in versions), "examples": len(train_pairs),
-            "custom_examples": n_custom, "vocab": len(tok.vocab), "labels": len(labels),
-            "val_acc": history[-1]["val_acc"], "seconds": round(time.time() - start, 2),
-            "date": time.strftime("%Y-%m-%d %H:%M"), "tokenizer": getattr(tok, "kind", "word"), **extra}
-    MODELS.mkdir(parents=True, exist_ok=True)
+            "total_steps": steps + sum(v["steps"] for v in versions if v["brain"] == brain),
+            "examples": len(train_pairs), "val_examples": len(val_pairs), "custom_examples": n_custom,
+            "vocab": len(tok.vocab), "labels": len(labels), "val_acc": history[-1]["val_acc"],
+            "seconds": round(time.time() - start, 2), "date": time.strftime("%Y-%m-%d %H:%M"),
+            "tokenizer": getattr(tok, "kind", "word"), "experiment": experiment, "seed": 0, "data_seed": 7,
+            "epochs_requested": epochs, "epochs_run": len(history), "truncated": len(history) < epochs,  # time cap hit
+            "data_sha256": provenance.data_fingerprint(train_pairs), "git_commit": provenance.git_commit(),
+            "torch": str(torch.__version__), **extra}
+    registry = Registry(MODELS)
+    registry.root.joinpath(brain).mkdir(parents=True, exist_ok=True)
+    tmp = registry.root / brain / "incoming.pt"
     # fp16 halves the file size on GitHub; inference converts back to fp32.
     weights = {k: v.half() if v.is_floating_point() else v for k, v in model.state_dict().items()}
     torch.save({"state_dict": weights, "config": model.config, "tokenizer": tok.to_json(),
-                "intents": labels, "history": history, "info": info}, checkpoint(brain))
-    VERSIONS.write_text(json.dumps(versions + [info], indent=1), encoding="utf-8")
-    return {"history": history, "checkpoint": str(checkpoint(brain)), **info}
+                "intents": labels, "history": history, "info": info}, tmp)
+    number = registry.add(brain, tmp, info, move=True)
+    VERSIONS.write_text(json.dumps(versions + [{**info, "registry_version": number, "status": "candidate"}], indent=1),
+                        encoding="utf-8")
+    return {"history": history, "checkpoint": str(registry.weights(brain, number)), "registry_version": number, **info}
 
 
 if __name__ == "__main__":
-    def _print(m):
-        print(f"[{m['brain']}] epoch {m['epoch']:>2}/{m['epochs']}  loss {m['loss']:.4f}  acc {m['acc']:.3f}"
-              f"  val_acc {m['val_acc']:.3f}  ({m['elapsed']}s)", flush=True)
+    import sys
 
-    which = sys.argv[1] if len(sys.argv) > 1 else "all"
-    size = sys.argv[2] if len(sys.argv) > 2 else "medium"
-    epochs = int(sys.argv[3]) if len(sys.argv) > 3 else 12
-    for name in (BRAINS if which == "all" else [which]):
-        result = train(brain=name, size=size, epochs=epochs, on_epoch=_print)
-        print(f"{name} v{result['version']} saved  params={result['params']:,}  steps={result['steps']}"
-              f"  val_acc={result['val_acc']}  time={result['seconds']}s")
+    from core.train_cli import main
+    sys.exit(main())

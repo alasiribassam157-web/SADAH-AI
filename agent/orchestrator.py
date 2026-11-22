@@ -5,6 +5,7 @@ primary + witnesses + fallback → agents answer in parallel → Critic verifies
 Companion writes the reply in SADAH's voice.  The response keeps the same shape as before.
 """
 import time
+import uuid
 
 from agent import composer, lexicon, understand
 from agent.base_agent import AgentResult, Task
@@ -62,7 +63,7 @@ class SadahAgent:
                 self.companion.memory.remember(session, context["last_topic"][:60])
         parts = composer.split_compound(message)
         if len(parts) > 1:
-            session = session or f"compound-{id(parts)}"
+            session = session or f"compound-{uuid.uuid4().hex}"
         results = [self._one(part, allow_exec, session) for part in parts]
         merged = dict(results[0])
         if len(results) > 1:

@@ -4,12 +4,19 @@ venv/
 __pycache__/
 *.pyc
 
-# Model weights / runtime data
+# Model weights: only the SERVED stable brains (models/router.pt, models/coder.pt) are committed.
+# Every other trained version lives in models/registry/<brain>/vN/model.pt on the machine that trained it;
+# its meta.json, stable.json and history.jsonl ARE committed (they are the audit trail, see docs/OPERATIONS.md).
 checkpoints/
 *.pt
-!models/*.pt
+!models/router.pt
+!models/coder.pt
+models/registry/**/*.pt
+models/.*.tmp
+models/registry/**/*.tmp
 workspace/
 logs/
+.pytest_cache/
 
 # Developer-only (stays on the laptop)
 devtools/

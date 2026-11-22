@@ -32,9 +32,9 @@ def checkpoint(brain: str) -> Path:
 
 
 class BrainInference:
-    def __init__(self, brain: str = "router"):
+    def __init__(self, brain: str = "router", path: Path | None = None):
         self.brain = brain
-        self.path: Path = checkpoint(brain)
+        self.path: Path = Path(path) if path else checkpoint(brain)   # `path`: evaluate a candidate, not the served file
         self.model = None
         self.tok = None
         self.intents: list[str] = []
