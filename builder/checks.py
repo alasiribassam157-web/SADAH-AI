@@ -4,6 +4,11 @@ from html.parser import HTMLParser
 
 VOID = {"meta", "link", "img", "br", "hr", "input", "source"}
 _EXTERNAL = re.compile(r"""(?:src|href)\s*=\s*["']?(?:https?:)?//""", re.I)
+_SCRIPT = re.compile(r"<script\b([^>]*)>(.*?)</script>", re.I | re.S)
+_BANNED_JS = ("eval(", "new Function", "Function(", "document.write", "innerHTML", "outerHTML", "insertAdjacentHTML",
+              "fetch(", "XMLHttpRequest", "WebSocket", "sendBeacon", "import(", "importScripts", "http://", "https://",
+              "document.cookie", "window.open", "location.href", "location.assign")
+ALLOWED_FILES = {"index.html", "style.css", "app.js"}
 
 
 class _Scan(HTMLParser):
@@ -11,6 +16,7 @@ class _Scan(HTMLParser):
         super().__init__()
         self.stack, self.ids, self.hrefs, self.errors = [], set(), [], []
         self.tags, self.attrs = [], {}
+        self.label_for, self.inputs = set(), []
         self.title = ""
         self._in_title = False
 
@@ -20,6 +26,10 @@ class _Scan(HTMLParser):
         self.attrs.setdefault(tag, []).append(d)
         if d.get("id"):
             self.ids.add(d["id"])
+        if tag == "label" and d.get("for"):
+            self.label_for.add(d["for"])
+        if tag in ("input", "textarea", "select") and d.get("type") not in ("submit", "hidden"):
+            self.inputs.append(d)
         if tag == "a" and (d.get("href") or "").startswith("#"):
             self.hrefs.append(d["href"][1:])
         if tag == "img" and not d.get("alt"):
@@ -60,8 +70,26 @@ def check_html(html: str) -> list[str]:
     if s.tags.count("h1") != 1:
         out.append("يجب وجود عنوان h1 واحد بالضبط")
     out += [f"رابط داخلي إلى قسم غير موجود: #{h}" for h in s.hrefs if h not in s.ids]
-    if "<script" in html.lower() or _EXTERNAL.search(html):
-        out.append("سكربت أو مورد خارجي غير مسموح في هذا القالب")
+    out += [f"حقل إدخال بلا تسمية: {d.get('id') or d.get('type')}" for d in s.inputs
+            if d.get("id") not in s.label_for and not d.get("aria-label")]
+    for attrs, body in _SCRIPT.findall(html):
+        if attrs.strip() != 'src="app.js"' or body.strip():
+            out.append("يُسمح فقط بسكربت app.js الخارجي عن الصفحة بلا كود مضمّن")
+    if len(_SCRIPT.findall(html)) != html.lower().count("<script"):
+        out.append("وسم script غير سليم")
+    if _EXTERNAL.search(html):
+        out.append("مورد خارجي غير مسموح في هذا القالب")
+    return out
+
+
+def check_js(js: str) -> list[str]:
+    """The template's app.js: no dynamic code, no HTML injection, no network, balanced brackets."""
+    out = [f"كود محظور في JavaScript: {b}" for b in _BANNED_JS if b in js]
+    for a, b in ("()", "{}", "[]"):
+        if js.count(a) != js.count(b):
+            out.append(f"أقواس JavaScript غير متوازنة: {a}{b}")
+    if len(js) > 20000:
+        out.append("ملف JavaScript كبير جدًا")
     return out
 
 
@@ -78,7 +106,13 @@ def check_site(files: dict[str, str]) -> list[str]:
     """All problems of a {path: text} site (empty list = passes)."""
     if "index.html" not in files or "style.css" not in files:
         return ["index.html أو style.css مفقود"]
-    out = check_html(files["index.html"]) + check_css(files["style.css"])
+    out = [f"ملف غير مسموح: {p}" for p in files if p not in ALLOWED_FILES]
+    out += check_html(files["index.html"]) + check_css(files["style.css"])
+    uses_js = 'src="app.js"' in files["index.html"]
+    if uses_js != ("app.js" in files):
+        out.append("app.js والصفحة غير متطابقين")
+    if "app.js" in files:
+        out += check_js(files["app.js"])
     if 'href="style.css"' not in files["index.html"]:
         out.append("index.html لا يربط style.css")
     return out

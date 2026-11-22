@@ -15,6 +15,7 @@ from agent import home_feed, session_id
 from agent.orchestrator import SadahAgent
 from agent.stats import UsageStats
 from agent.tools import SAFE_MODE
+from builder import api as builder_api
 from cv import api as cv_api
 
 try:  # training + developer tools: only where PyTorch is installed (the laptop, Docker)
@@ -35,6 +36,7 @@ job = TrainingJob(on_done=lambda name: agent.brains[name].reload()) if TrainingJ
 if dev_api:
     app.include_router(dev_api.build_router(agent, stats, job))
 app.include_router(cv_api.build_router())
+app.include_router(builder_api.build_router())
 
 
 class ChatIn(BaseModel):
@@ -53,6 +55,11 @@ def _bootstrap():
 def index():
     # no-cache: browsers check for a new page after every deploy instead of mixing old HTML with new CSS
     return FileResponse(ROOT / "ui" / "index.html", headers={"Cache-Control": "no-cache"})
+
+
+@app.get("/builder")
+def builder_page():
+    return FileResponse(ROOT / "ui" / "builder.html", headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/dev")

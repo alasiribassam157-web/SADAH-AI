@@ -3,8 +3,10 @@ import io
 import zipfile
 from dataclasses import dataclass, field
 
-from builder import checks, landing, spec as spec_mod
+from builder import checks, dashboard, landing, shop, webapp, spec as spec_mod
 from builder.understand import understand
+
+RENDERERS = {"landing": landing.render, "dashboard": dashboard.render, "shop": shop.render, "webapp": webapp.render}
 
 
 @dataclass
@@ -26,7 +28,7 @@ def build(request: str) -> Result:
     bad = spec_mod.problems(u.spec)
     if bad:
         return Result(False, problems=bad, spec=u.spec)
-    files = landing.render(u.spec)
+    files = RENDERERS[u.spec.kind](u.spec)
     found = checks.check_site(files)
     if found:
         return Result(False, problems=found, spec=u.spec)

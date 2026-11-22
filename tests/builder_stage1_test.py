@@ -1,5 +1,5 @@
-"""Stage-1 tests for the builder: the exit criterion (10/10 simple requests give a site that passes every check),
-the checkers themselves, and honest refusals. Offline, no PyTorch.
+"""Builder tests, part 1: the landing page, the static checkers, honest questions/refusals, the zip.
+Offline, no PyTorch.
 
 Run:  python -m tests.builder_stage1_test
 """
@@ -11,44 +11,47 @@ from builder import checks, content
 from builder.build import build, to_zip
 from builder.landing import render
 from builder.spec import Spec
-from tests.builder_requests import NEEDS_NAME, SIMPLE, UNSUPPORTED
+from tests.builder_requests import SUITE
+
+CAR_SHOWROOM = "أبغى موقع لمعرض سيارات باسم النخبة وفيه صفحة اتصال"
 
 
-class ExitCriterion(unittest.TestCase):
-    def test_every_simple_request_builds_a_site_that_passes_all_checks(self):
-        failures = []
-        for request, name, business, sections, accent in SIMPLE:
-            r = build(request)
-            ok = (r.ok and r.spec.name == name and r.spec.business == business
-                  and all(s in r.spec.sections for s in sections)
-                  and (accent is None or r.spec.accent == accent) and not checks.check_site(r.files))
-            if not ok:
-                failures.append((request, r.spec, r.problems, r.question))
-        self.assertEqual(failures, [], f"{len(SIMPLE) - len(failures)}/{len(SIMPLE)} passed")
+def asked(skill):
+    return [c["q"] for c in SUITE if c["skill"] == skill]
+
+
+class Landing(unittest.TestCase):
+    def test_every_landing_request_in_the_suite_builds_and_passes_all_checks(self):
+        for c in (c for c in SUITE if c["skill"] == "landing"):
+            r = build(c["q"])
+            self.assertTrue(r.ok, c["q"])
+            self.assertEqual(checks.check_site(r.files), [], c["q"])
+            self.assertEqual(r.spec.name, c["expect"]["name"], c["q"])
 
     def test_a_car_showroom_is_not_mistaken_for_a_photo_gallery(self):
-        self.assertNotIn("gallery", build(SIMPLE[0][0]).spec.sections)
-        self.assertIn("gallery", build(SIMPLE[5][0]).spec.sections)
-
-    def test_missing_name_asks_one_short_question_and_builds_nothing(self):
-        for request in NEEDS_NAME:
-            r = build(request)
-            self.assertFalse(r.ok)
-            self.assertEqual(r.question, "ما اسم المشروع؟")
-            self.assertEqual(r.files, {})
-
-    def test_unsupported_kinds_are_refused_honestly(self):
-        for request in UNSUPPORTED:
-            r = build(request)
-            self.assertFalse(r.ok)
-            self.assertIn("غير مدعوم", r.message)
-            self.assertEqual(r.files, {})
+        self.assertNotIn("gallery", build(CAR_SHOWROOM).spec.sections)
 
     def test_zip_holds_the_files_and_is_valid(self):
-        r = build(SIMPLE[0][0])
+        r = build(CAR_SHOWROOM)
         z = zipfile.ZipFile(io.BytesIO(to_zip(r.files)))
         self.assertEqual(sorted(z.namelist()), ["index.html", "style.css"])
         self.assertIn("النخبة", z.read("index.html").decode("utf-8"))
+
+
+class QuestionsAndRefusals(unittest.TestCase):
+    def test_missing_name_asks_one_short_question_and_builds_nothing(self):
+        for request in asked("ask"):
+            r = build(request)
+            self.assertFalse(r.ok, request)
+            self.assertEqual(r.question, "ما اسم المشروع؟", request)
+            self.assertEqual(r.files, {})
+
+    def test_unsupported_requests_are_refused_honestly(self):
+        for request in asked("refuse"):
+            r = build(request)
+            self.assertFalse(r.ok, request)
+            self.assertIn("غير مدعوم", r.message, request)
+            self.assertEqual(r.files, {})
 
 
 class Checkers(unittest.TestCase):
@@ -68,8 +71,10 @@ class Checkers(unittest.TestCase):
             "unclosed": good.replace("</main>", ""),
             "handler": good.replace("<footer>", '<footer onclick="x()">'),
             "script": good.replace("</body>", "<script>1</script></body>"),
+            "foreign script": good.replace("</body>", '<script src="x.js"></script></body>'),
             "external": good.replace('href="style.css"', 'href="https://evil.example/x.css"'),
             "second h1": good.replace("<main>", "<main><h1>ثانٍ</h1>"),
+            "unlabelled input": good.replace("</main>", '<input id="q" type="text"></main>'),
         }
         for label, html in defects.items():
             self.assertTrue(checks.check_html(html), f"{label} was not caught")
