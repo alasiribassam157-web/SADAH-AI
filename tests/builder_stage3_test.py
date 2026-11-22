@@ -84,6 +84,15 @@ class Understanding(unittest.TestCase):
         for q in ("ابغى موقع للدفع", "ابغى موقع وفيه الدفع", "ابغى موقع مع الحجز"):
             self.assertIn("غير مدعوم", build(q).message, q)
 
+    def test_server_side_features_are_refused_in_every_kind_not_silently_dropped(self):
+        for q in ("ابغى متجر فيه سلة مشتريات", "ابغى مدونة فيها بث مباشر", "ابغى موقع باسم اخبار فيه اشعارات",
+                  "ابغى مدونة باسم رحلات فيها تعليقات", "ابغى متجر باسم عطور فيه كوبونات"):
+            self.assertIn("غير مدعوم", build(q).message, q)
+        self.assertTrue(build("ابغى متجر باسم السلة وفيه ورد 20").ok)  # a name that merely contains a word is fine
+
+    def test_a_place_after_the_name_ends_it(self):
+        self.assertEqual(understand("موقع تعريفي لشركة اسمها الرؤية في الرياض").spec.name, "الرؤية")
+
     def test_the_refusal_message_lists_the_new_kinds(self):
         msg = build("ابغى تطبيق اندرويد باسم رحلة").message
         for word in ("ملف أعمال", "مدونة", "دعوة"):
