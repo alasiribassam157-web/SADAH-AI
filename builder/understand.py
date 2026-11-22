@@ -10,7 +10,9 @@ from builder.spec import COLORS, DEFAULT_ACCENT, Spec
 SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر عرض، ملف أعمال، مدونة، دعوة فعالية، "
              "وتطبيق ويب صغير (قائمة مهام أو نموذج تسجيل).")
 OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانات", "تسجيل دخول", "حجز", "سيرفر", "ذكاء",
-                "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال")
+                "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال",
+                # features that need a server or live data: said plainly, never silently dropped
+                "سلة مشتريات", "سلة التسوق", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
                  "gallery": ("معرض صور", "صور", "ألبوم"), "pricing": ("أسعار", "باقات", "تسعير"),
                  "testimonials": ("آراء", "تقييمات", "شهادات"), "contact": ("اتصال", "تواصل", "واتساب")}
@@ -35,8 +37,9 @@ _PAGE_WORDS = {"portfolio": ("ملف شخصي", "معرض أعمال", "بورت
                "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف")}
 # whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
 _OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
-# a date or time after the name ends it («زفاف سلمى يوم الخميس»); kept apart from _STOP because weekdays are also dashboard labels
-_WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
+# a date, time or place after the name ends it («زفاف سلمى يوم الخميس», «اسمها الرؤية في الرياض»; so a name
+# with «في» in the middle is cut there, a known limit); kept apart from _STOP because weekdays are also dashboard labels
+_WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "في", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
 _ABBR = re.compile(r"[ء-ي]{1,2}\.")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")

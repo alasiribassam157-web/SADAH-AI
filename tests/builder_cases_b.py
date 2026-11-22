@@ -107,4 +107,23 @@ CASES = [
     case("ask", "ابغى موقع لدفعة الثانوية"),
     case("refuse", "ابغى مدونة مع قاعدة بيانات للقراء"),
     case("refuse", "ابغى مدونة وتطبيق اندرويد"),
+    # moved from held-out v8 after measuring it (13/16 before tuning; misses: «في الرياض» kept in the name,
+    # and two unsupported features, shopping cart and live stream, built or asked a name instead of refusing)
+
+    case("landing", 'ابغى موقع لمقهى باسم "نجوم" وفيه الاسعار', name="نجوم", sections=["pricing"]),
+    case("landing", "أبغى موقع لشركة باسم Alpha Tech", name="Alpha Tech"),
+    case("landing", "ابغى موقع لمطعم باسم المذاق وفية تواصل", name="المذاق"),
+    case("landing", "موقع تعريفي لشركة اسمها الرؤية في الرياض", name="الرؤية"),
+    case("dashboard", "ابغى داشبورد باسم الايرادات فيها الربع الاول 500 الربع الثاني 650", name="الايرادات", data_labels=["الربع الاول", "الربع الثاني"]),
+    case("shop", "ابي متجر باسم مكتبتي وفيه كتاب ٢٠ ريال وقلم ٥ ريال", name="مكتبتي", items_n=2),
+    case("webapp", "ابغى تطبيق قائمة مهام باسم اولوياتي ولونه اسود", name="اولوياتي", app="tasks", accent="#111827"),
+    case("portfolio", "ابغى بورتفوليو لمصورة باسم لقطة ولونها اسود", name="لقطة", accent="#111827"),
+    case("blog", "ابي مدونة اكتب فيها مقالات عن الصحة باسم عافية", name="عافية"),
+    case("event", "دعوة لحفل استقبال مولود باسم مولودنا الجديد", name="مولودنا الجديد"),
+    case("event", "موقع لفعالية رياضية باسم ماراثون الرياض الساعة 5", name="ماراثون الرياض"),
+    case("ask", "ابغى مدونة عن السفر"),
+    case("ask", "ابغى موقع لمطعم البيك"),
+    case("refuse", "ابغى متجر فيه سلة مشتريات"),
+    case("refuse", "ابغى تطبيق ايفون وموقع باسم رحلتي"),
+    case("refuse", "ابغى مدونة فيها بث مباشر"),
 ]
