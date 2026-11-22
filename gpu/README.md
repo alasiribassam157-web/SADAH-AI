@@ -45,3 +45,13 @@
 
 من صفحة الـ notebook → **Output** → نزّل `ckpt.pt` و `tokenizer.json`، وحطهم في:
 `models/gpt/ckpt.pt` و `models/gpt/tokenizer.json` على جهازك، وأنا أربطهم بالسيرفر.
+
+## Data pipeline (stage 1 of the generative plan)
+
+- `data/sources.json`: every text source with its license; `gpu/sources.py` refuses any source that is not human-written and `approved`. A dataset's `sources.json` manifest is written beside `train.bin`.
+- `gpu/clean.py`: normalisation, quality filters, near-duplicate removal, and a leak guard that drops any text sharing a 4-6 word run with a held-out evaluation question.
+- Test: `python -m tests.gen_data_test` (offline, no PyTorch).
+
+## Evaluation gate for the generative brain
+
+`core/geneval.py` scores any `generate(question, context) -> str` on grounded facts, abstention (invented entities) and unsupported content, and returns the same report shape as `core/evalsuite.py`, so `core/gate.py` can reject a candidate that bluffs. Test: `python -m tests.geneval_test`.

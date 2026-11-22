@@ -13,6 +13,8 @@ from pathlib import Path
 
 import numpy as np
 
+from gpu import clean, sources
+
 ROOT = Path(__file__).resolve().parent.parent
 SPECIAL = ["<|endoftext|>", "<|user|>", "<|assistant|>", "<|pad|>"]
 _CLEAN = re.compile(r"\s+")
@@ -46,10 +48,27 @@ def wiki_texts(english_share: float = 0.25):
         yield row["text"]
 
 
-def documents(local: bool):
+def used_sources(local: bool) -> list[str]:
+    return ["sadah-kb", "sadah-corpus"] + ([] if local else ["ar-wikipedia", "en-wikipedia"])
+
+
+def leak_guard() -> "clean.LeakGuard":
+    """Held-out evaluation questions (router, coder, extra suites) must never appear in training text."""
+    from core import evalsuite
+    qs = [q for brain in ("router", "coder") for suite in evalsuite.load_suites(brain).values() for q, _ in suite]
+    return clean.LeakGuard(qs)
+
+
+def documents(local: bool, stats: dict | None = None):
+    """Registered, approved sources only -> clean, de-duplicated, leak-free text."""
+    sources.require(used_sources(local))
+    raw = local_texts() if local else _chain()
+    yield from clean.pipeline(raw, guard=leak_guard(), stats=stats)
+
+
+def _chain():
     yield from local_texts()
-    if not local:
-        yield from wiki_texts()
+    yield from wiki_texts()
 
 
 def train_tokenizer(texts, out: Path, vocab: int = 32000):
@@ -97,6 +116,8 @@ def build(out_dir: Path, local: bool = False, tokenizer_docs: int = 300_000, val
                         break
             else:
                 _flush(tok, batch, eot, tr, va, n, val_every)
+    (out_dir / "sources.json").write_text(
+        json.dumps(sources.manifest(used_sources(local)), ensure_ascii=False, indent=1), encoding="utf-8")
     sizes = {s: (out_dir / f"{s}.bin").stat().st_size // 2 for s in ("train", "val")}
     print(f"tokens: train {sizes['train']:,}  val {sizes['val']:,}  vocab {tok.get_vocab_size()}")
     return {"vocab": tok.get_vocab_size(), **sizes}
