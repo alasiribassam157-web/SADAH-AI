@@ -68,4 +68,8 @@ CASES = [
     case("ask", "ابغى دعوة"),
     case("refuse", "ابغى مدونة فيها تعليقات وتسجيل دخول"),
     case("refuse", "ابغى موقع فعالية فيه حجز تذاكر"),
+    # found on the live preview: a word that merely contains a refused word ("دفعة" contains "دفع")
+    case("event", "ابغى دعوة لحفل تخرج 2026 باسم دفعة النور", name="دفعة النور"),
+    case("refuse", "ابغى موقع للدفع الالكتروني"),
+    case("refuse", "ابغى موقع وفيه الحجز والدفع"),
 ]

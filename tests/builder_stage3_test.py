@@ -68,6 +68,11 @@ class Understanding(unittest.TestCase):
         for q in ("ابغى مدونة فيها حجز مواعيد", "ابغى مدونة فيها تسجيل دخول", "ابغى موقع فعالية فيه حجز تذاكر"):
             self.assertIn("غير مدعوم", build(q).message, q)
 
+    def test_a_refused_word_is_matched_as_a_whole_word_not_inside_another_word(self):
+        self.assertTrue(build("ابغى دعوة لحفل تخرج باسم دفعة النور").ok)  # دفعة (a class) is not دفع (payment)
+        for q in ("ابغى موقع للدفع", "ابغى موقع وفيه الدفع", "ابغى موقع مع الحجز"):
+            self.assertIn("غير مدعوم", build(q).message, q)
+
     def test_the_refusal_message_lists_the_new_kinds(self):
         msg = build("ابغى تطبيق اندرويد باسم رحلة").message
         for word in ("ملف أعمال", "مدونة", "دعوة"):

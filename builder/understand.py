@@ -33,6 +33,8 @@ _PAIR = re.compile(rf"((?:{_PERIOD}\s+)?[ء-ي]+)\s*[:=]?\s*(\d+(?:\.\d+)?)")
 _PAGE_WORDS = {"portfolio": ("ملف شخصي", "معرض أعمال", "بورتفوليو", "portfolio", "أعمالي"),
                "blog": ("مدونة", "مدونتي", "مقالاتي", "مقالات"),
                "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف")}
+# whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
+_OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
 
@@ -102,7 +104,7 @@ def _app(norm: str) -> str:
 def understand(request: str) -> Understood:
     text = " ".join(request.translate(_DIGITS).split())
     norm = _n(text).lower()
-    hit = next((w for w in OUT_OF_SCOPE if _n(w) in norm), "") or ("جوال" if _MOBILE.search(norm) else "")
+    hit = next((w for w, rx in _OUT if rx.search(norm)), "") or ("جوال" if _MOBILE.search(norm) else "")
     if hit:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
     kind = _kind(norm)
