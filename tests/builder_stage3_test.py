@@ -58,6 +58,13 @@ class Understanding(unittest.TestCase):
         self.assertEqual(understand("ملف شخصي لطبيبة اسمه د. هند").spec.name, "د. هند")
         self.assertEqual(understand("موقع لمطعم اسمه الشاطئ. وفيه اسعار").spec.name, "الشاطئ")
 
+    def test_a_date_or_time_after_the_name_ends_it_but_weekday_labels_still_work_in_dashboards(self):
+        self.assertEqual(understand("دعوة لحفل زفاف باسم زفاف سلمى يوم الخميس").spec.name, "زفاف سلمى")
+        self.assertEqual(understand("فعالية باسم ماراثون الرياض الساعة 5").spec.name, "ماراثون الرياض")
+        self.assertEqual(understand("دعوة باسم يوم المبرمج").spec.name, "يوم المبرمج")  # the first word is always the name
+        spec = understand("لوحة بيانات باسم الزوار السبت 40 الاحد 55").spec
+        self.assertEqual((spec.name, [lbl for lbl, _ in spec.data]), ("الزوار", ["السبت", "الاحد"]))
+
     def test_numbers_after_a_name_are_still_dashboard_data(self):
         spec = understand("لوحة بيانات باسم المبيعات يناير 100 فبراير 150").spec
         self.assertEqual((spec.name, [lbl for lbl, _ in spec.data]), ("المبيعات", ["يناير", "فبراير"]))
