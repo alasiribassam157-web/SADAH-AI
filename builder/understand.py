@@ -35,6 +35,8 @@ _PAGE_WORDS = {"portfolio": ("ملف شخصي", "معرض أعمال", "بورت
                "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف")}
 # whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
 _OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
+# a date or time after the name ends it («زفاف سلمى يوم الخميس»); kept apart from _STOP because weekdays are also dashboard labels
+_WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
 _ABBR = re.compile(r"[ء-ي]{1,2}\.")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
@@ -65,7 +67,7 @@ def _name(text: str) -> str:
                     if out:
                         out.pop()  # the word before a number is a data label, not part of the name
                     break
-                if not bare or (out and _n(bare) in _STOP):  # the first word is the name even if it is a stop word (لون)
+                if not bare or (out and (_n(bare) in _STOP or _n(bare) in _WHEN)):  # the first word is the name even if it is a stop word (لون)
                     break
                 abbr = bool(_ABBR.fullmatch(nxt))  # a title such as «د.» keeps its dot and does not end the name
                 out.append(nxt if abbr else bare)
