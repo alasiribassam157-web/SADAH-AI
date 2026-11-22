@@ -1,0 +1,75 @@
+"""Builder requests, part B: held-out sets v3 to v5 after they were measured, and the stage-3 dev cases."""
+from tests.builder_case import case
+
+CASES = [
+    # moved from held-out v3 after measuring it (14/16 before tuning)
+
+    case("landing", "ابغى موقع لمكتب سياحة باسم رحلاتنا وفيه خدماتنا وتواصل", name="رحلاتنا", sections=["services", "contact"]),
+    case("landing", "سو لي موقع لمعهد لغات اسمه لسان ولونه ازرق", name="لسان", accent="#1d4ed8"),
+    case("landing", "ودي بموقع لعيادة بيطرية باسم رفق", name="رفق"),
+    case("landing", "موقع شخصي لي باسم محمد العتيبي فيه من نحن وصور", name="محمد العتيبي", sections=["about", "gallery"]),
+    case("landing", "أبغى موقع لشركة نقل اسمها السريع ولون الموقع اخضر", name="السريع", accent="#15803d"),
+    case("landing", "عاوز موقع لمخبز اسمه فرن البلد", name="فرن البلد"),
+    case("dashboard", "لوحة بيانات باسم الرحلات فيها السبت 12 الاحد 18 الاثنين 7 الثلاثاء 22", name="الرحلات", data_labels=["السبت", "الاحد", "الاثنين", "الثلاثاء"]),
+    case("dashboard", "ابغى داشبورد للحضور باسم دوام موظف 30 مدير 5", name="دوام", data_labels=["موظف", "مدير"]),
+    case("shop", "متجر باسم عبق وفيه بخور 50 ودهن عود 200 ومعطر 35", name="عبق", items_n=3),
+    case("shop", "اعرض منتجاتي: شنطة 150 وحذاء 220 باسم خطوة", name="خطوة"),
+    case("webapp", "ابي تطبيق لتنظيم مهامي باسم ترتيب", name="ترتيب", app="tasks"),
+    case("webapp", "نموذج تسجيل لحضور الفعالية باسم لقاء", name="لقاء", app="register"),
+    case("ask", "ابغى متجر"),
+    case("refuse", "ابغى موقع باسم تواصل فيه دردشة مباشرة مع الزوار"),
+    case("refuse", "ابغى تطبيق ويندوز باسم حاسب"),
+    case("refuse", "ابغى موقع باسم حوالات يرسل اموال للناس"),
+    # moved from held-out v4 after measuring it (10/10 before tuning)
+
+    case("landing", "ابغى موقع لمكتب محاسبة باسم الميزان وفيه خدمات", name="الميزان", sections=["services"]),
+    case("landing", "موقع لحضانة اطفال اسمها براعم ولونه برتقالي", name="براعم", accent="#c2410c"),
+    case("landing", "ابغى موقع باسم عبدالله وفيه نبذة", name="عبدالله", sections=["about"]),
+    case("dashboard", "لوحة بيانات باسم الطلبات فيها اليوم 40 امس 35", name="الطلبات", data_labels=["اليوم", "امس"]),
+    case("shop", "متجر باسم لمسة وفيه كعك 12 وبسكويت 8", name="لمسة", items_n=2),
+    case("webapp", "تطبيق قائمة مهام باسم واجبات", name="واجبات", app="tasks"),
+    case("webapp", "ابغى تطبيق نموذج اشتراك باسم مجلتي", name="مجلتي", app="register"),
+    case("ask", "ابغى لوحة"),
+    case("refuse", "ابغى موقع باسم دورات وفيه محادثة مع المدرب"),
+    case("refuse", "ابغى موقع فيه ارسال اموال"),
+    # found failing in the v5 baseline (a colour word used as a name); tuned on, so it lives here
+    case("landing", "موقع لمكتب تصميم باسم لون وفيه اسعار", name="لون", sections=["pricing"]),
+    # new kinds (stage 3), written while building the templates
+    case("portfolio", "ابغى ملف شخصي لمطور باسم ياسر", name="ياسر"),
+    case("portfolio", "موقع معرض اعمال لمهندسة ديكور اسمها فرح ولونه بنفسجي", name="فرح", accent="#6d28d9"),
+    case("portfolio", "سوّ لي بورتفوليو باسم ماجد", name="ماجد"),
+    case("blog", "ابغى مدونة باسم افكاري", name="افكاري"),
+    case("blog", "موقع مدونة عن السفر باسم رحال ولونها اخضر", name="رحال", accent="#15803d"),
+    case("blog", "ابي موقع لنشر مقالاتي اسمه قلم", name="قلم"),
+    case("event", "ابغى دعوة لحفل زفاف باسم زفاف ليلى", name="زفاف ليلى"),
+    case("event", "موقع لمؤتمر باسم ملتقى الاعمال ولونه ذهبي", name="ملتقى الاعمال", accent="#a16207"),
+    case("event", "ابي صفحة لفعالية باسم يوم المبرمج", name="يوم المبرمج"),
+    case("ask", "ابغى ملف شخصي"),
+    case("refuse", "ابغى مدونة فيها حجز مواعيد"),
+    # moved from held-out v5 after measuring it (19/20 before tuning; the miss was a year inside a name)
+
+    case("portfolio", "ابغى ملف شخصي لمصممة باسم سارة", name="سارة"),
+    case("portfolio", "موقع معرض أعمال لمصور اسمه عدسة", name="عدسة"),
+    case("portfolio", "سوّ لي بورتفوليو باسم خالد المطيري ولونه أسود", name="خالد المطيري", accent="#111827"),
+    case("portfolio", "ابي موقع اعرض فيه اعمالي باسم ريشة", name="ريشة"),
+    case("blog", "ابغى مدونة باسم يوميات مسافر", name="يوميات مسافر"),
+    case("blog", "موقع مدونة عن الطبخ اسمه مطبخ امي ولونه برتقالي", name="مطبخ امي", accent="#c2410c"),
+    case("blog", "سوّ لي موقع لنشر مقالاتي باسم حبر", name="حبر"),
+    case("blog", "ابي مدونة تقنية باسم بايت وفيها تواصل", name="بايت"),
+    case("event", "ابغى صفحة دعوة لحفل زفاف باسم زفاف نورة وفهد", name="زفاف نورة وفهد"),
+    case("event", "موقع لمؤتمر باسم قمة التقنية ولونه ازرق", name="قمة التقنية", accent="#1d4ed8"),
+    case("event", "ابي دعوة لحفلة تخرج باسم تخرج 2026", name="تخرج 2026"),
+    case("event", "ابغى موقع لمناسبة عائلية باسم لمة العيلة", name="لمة العيلة"),
+    case("landing", "موقع لمكتب استشارات باسم رؤية وفيه خدماتنا", name="رؤية", sections=["services"]),
+    case("dashboard", "لوحة بيانات باسم الاستهلاك فيها الصيف 90 الشتاء 40", name="الاستهلاك", data_labels=["الصيف", "الشتاء"]),
+    case("shop", "متجر باسم عسل الجبل وفيه سدر 120 وطلح 90", name="عسل الجبل", items_n=2),
+    case("webapp", "تطبيق مهام باسم تقدم", name="تقدم", app="tasks"),
+    case("ask", "ابغى مدونة"),
+    case("ask", "ابغى دعوة"),
+    case("refuse", "ابغى مدونة فيها تعليقات وتسجيل دخول"),
+    case("refuse", "ابغى موقع فعالية فيه حجز تذاكر"),
+    # found on the live preview: a word that merely contains a refused word ("دفعة" contains "دفع")
+    case("event", "ابغى دعوة لحفل تخرج 2026 باسم دفعة النور", name="دفعة النور"),
+    case("refuse", "ابغى موقع للدفع الالكتروني"),
+    case("refuse", "ابغى موقع وفيه الحجز والدفع"),
+]

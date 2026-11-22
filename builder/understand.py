@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from builder import content
 from builder.spec import COLORS, DEFAULT_ACCENT, Spec
 
-SUPPORTED = "المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر عرض، وتطبيق ويب صغير (قائمة مهام أو نموذج تسجيل)."
+SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر عرض، ملف أعمال، مدونة، دعوة فعالية، "
+             "وتطبيق ويب صغير (قائمة مهام أو نموذج تسجيل).")
 OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانات", "تسجيل دخول", "حجز", "سيرفر", "ذكاء",
                 "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
@@ -29,6 +30,12 @@ _STOP = {_n(w) for w in (
 _EDGE = "«»\"“”،,.؟!:؛"
 _PERIOD = "(?:ال[أا]سبوع|الشهر|اليوم|الربع|السنة|[أا]سبوع|شهر|يوم|ربع|سنة)"
 _PAIR = re.compile(rf"((?:{_PERIOD}\s+)?[ء-ي]+)\s*[:=]?\s*(\d+(?:\.\d+)?)")
+_PAGE_WORDS = {"portfolio": ("ملف شخصي", "معرض أعمال", "بورتفوليو", "portfolio", "أعمالي"),
+               "blog": ("مدونة", "مدونتي", "مقالاتي", "مقالات"),
+               "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف")}
+# whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
+_OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
+_YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
 
 
@@ -50,11 +57,14 @@ def _name(text: str) -> str:
             out = []
             for nxt in words[i + 1:i + 5]:
                 bare = nxt.strip(_EDGE)
+                if _YEAR.fullmatch(bare) and out:
+                    out.append(bare)  # a year after a name word is part of the name (تخرج 2026), not data
+                    break
                 if any(c.isdigit() for c in bare):
                     if out:
                         out.pop()  # the word before a number is a data label, not part of the name
                     break
-                if not bare or _n(bare) in _STOP:
+                if not bare or (out and _n(bare) in _STOP):  # the first word is the name even if it is a stop word (لون)
                     break
                 out.append(bare)
                 if nxt[-1] in _EDGE:
@@ -79,6 +89,9 @@ def _kind(norm: str) -> str:
         return "shop"
     if "موقع" not in norm and _has(norm, ("تطبيق", "نموذج تسجيل", "قائمة مهام")):
         return "webapp"
+    for kind, words in _PAGE_WORDS.items():
+        if _has(norm, words):
+            return kind
     return "landing"
 
 
@@ -91,7 +104,7 @@ def _app(norm: str) -> str:
 def understand(request: str) -> Understood:
     text = " ".join(request.translate(_DIGITS).split())
     norm = _n(text).lower()
-    hit = next((w for w in OUT_OF_SCOPE if _n(w) in norm), "") or ("جوال" if _MOBILE.search(norm) else "")
+    hit = next((w for w, rx in _OUT if rx.search(norm)), "") or ("جوال" if _MOBILE.search(norm) else "")
     if hit:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
     kind = _kind(norm)
@@ -109,7 +122,7 @@ def understand(request: str) -> Understood:
     elif kind == "shop":
         spec.sections = ["contact"]
         spec.items = [(n, f"{int(v) if v.is_integer() else v} ريال") for n, v in _pairs(text)]
-    else:
+    elif kind == "dashboard":
         pairs = _pairs(text)
         spec.data = pairs if len(pairs) >= 2 else []
     return Understood(spec, question="" if spec.name else "ما اسم المشروع؟")
