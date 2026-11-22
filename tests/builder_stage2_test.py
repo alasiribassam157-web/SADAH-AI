@@ -12,7 +12,7 @@ from builder.build import build, to_zip
 from builder.evaluate import evaluate
 from core import gate
 from tests.builder_heldout import HELDOUT
-from tests.builder_requests import SUITE
+from tests.builder_requests import SKILLS, SUITE
 
 
 def req(skill, i=0):
@@ -75,9 +75,14 @@ class EvaluationAndGate(unittest.TestCase):
         failed = [c["q"] for c in rep["cases"] if not c["ok"]]
         self.assertEqual(failed, [])
 
-    def test_heldout_set_meets_the_stage_threshold(self):
-        rep = evaluate(suite=HELDOUT)["suites"]["builder_requests"]
-        self.assertGreaterEqual(rep["correct"] / rep["total"], 0.8, [c["q"] for c in rep["cases"] if not c["ok"]])
+    def test_heldout_set_is_well_formed_and_disjoint_from_the_dev_suite(self):
+        # The held-out set is measured once and the number recorded in the PR; it is never a pass/fail test,
+        # because tuning to make it pass would defeat its purpose.
+        dev = {c["q"] for c in SUITE}
+        self.assertTrue(HELDOUT)
+        for c in HELDOUT:
+            self.assertIn(c["skill"], SKILLS)
+            self.assertNotIn(c["q"], dev)
 
     def test_gate_rejects_a_builder_that_forgets_a_kind_and_passes_itself(self):
         base = evaluate()

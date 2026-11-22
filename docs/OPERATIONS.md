@@ -108,9 +108,10 @@ tests/eval_extra/                  أسئلة اختبار إضافية لكل �
 
 ## 8. المنشئ (builder)
 
-- **الاختبارات** (بلا شبكة): `python -m tests.builder_stage1_test` و`tests.builder_stage2_test` و`tests.builder_api_test`.
-- **القياس**: `builder.evaluate.evaluate(suite=...)` يعيد تقريرًا بشكل تقرير البوابة نفسه، فيعمل `core.gate.compare` عليه لرفض أي تراجع في مهارة (landing/dashboard/shop/webapp/ask/refuse).
-- **قاعدة المجموعة المحجوزة**: `tests/builder_heldout.py` تُقاس مرة واحدة قبل أي ضبط للقواعد؛ بعدها تُنقل حالاتها إلى `tests/builder_requests.py` (`SUITE`) وتُكتب مجموعة محجوزة جديدة. لا تضبط القواعد على حالة ما زالت محجوزة.
+- **الاختبارات** (بلا شبكة): `python -m tests.builder_stage1_test` و`tests.builder_stage2_test` و`tests.builder_stage3_test` و`tests.builder_api_test`.
+- **القياس**: `builder.evaluate.evaluate(suite=...)` يعيد تقريرًا بشكل تقرير البوابة نفسه، فيعمل `core.gate.compare` عليه لرفض أي تراجع في مهارة (landing/dashboard/shop/webapp/portfolio/blog/event/ask/refuse).
+- **قاعدة المجموعة المحجوزة**: `tests/builder_heldout.py` تُقاس مرة واحدة قبل أي ضبط للقواعد؛ بعدها تُنقل حالاتها إلى `tests/builder_cases_b.py` (`SUITE` في `tests/builder_requests.py`) وتُكتب مجموعة محجوزة جديدة. لا تضبط القواعد على حالة ما زالت محجوزة.
+- **نوع صفحة جديد**: أضف اسمه إلى `KINDS` في `builder/spec.py`، وقالبًا في `builder/pages.py` (أو ملفًا جديدًا)، وكلماته إلى `_PAGE_WORDS` في `builder/understand.py`، وسجّله في `RENDERERS`، واكتب حالات محجوزة قبل أن تكتب القواعد.
 - **ميزة جديدة غير مدعومة**: أضف كلمتها إلى `OUT_OF_SCOPE` في `builder/understand.py` حتى يرفضها المنشئ صراحة بدل أن يتجاهلها.
 - **الأمان**: الملفات المسموحة `index.html` و`style.css` و`app.js` فقط، و`app.js` نص ثابت من القالب لا يتغير بالطلب؛ معاينة الواجهة داخل iframe بلا `allow-same-origin`.
 - **لم يُختبر هنا**: تشغيل `app.py` فعليًا (FastAPI غير مثبّت في بيئة التطوير)، وعرض كل القوالب في متصفح حقيقي (فُحصت صفحة الهبوط بصريًا فقط).

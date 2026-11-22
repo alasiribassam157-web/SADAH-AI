@@ -1,7 +1,7 @@
 """Project specification: the structured form of an Arabic request, shared by every template."""
 from dataclasses import dataclass, field
 
-KINDS = ("landing", "dashboard", "shop", "webapp")
+KINDS = ("landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event")
 APPS = ("tasks", "register")
 SECTIONS = ("about", "services", "gallery", "pricing", "testimonials", "contact")
 COLORS = {"أزرق": "#1d4ed8", "أخضر": "#15803d", "أحمر": "#b91c1c", "أسود": "#111827",
