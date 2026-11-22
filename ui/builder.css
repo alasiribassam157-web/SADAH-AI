@@ -4,11 +4,13 @@
 .bld label { display: block; margin-bottom: 6px; }
 .bld textarea { width: 100%; padding: 12px; background: var(--surface); color: var(--ink);
   border: 1px solid var(--line); border-radius: 8px; font: inherit; resize: vertical; }
-.bld textarea:focus-visible, .bld button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.bld input { flex: 1; min-width: 200px; padding: 10px 12px; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; font: inherit; }
+.bld input:focus-visible, .bld textarea:focus-visible, .bld button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .bld-row { display: flex; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
 .bld button { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
   color: var(--ink); font: inherit; cursor: pointer; }
-.bld #go { background: var(--btn); color: var(--on-btn); border-color: var(--btn); }
+.bld #go, .bld #edit { background: var(--btn); color: var(--on-btn); border-color: var(--btn); }
 .bld button:disabled { opacity: .5; cursor: default; }
 #msg { min-height: 1.5em; margin: 8px 0 16px; }
 #msg.err { color: var(--danger); }

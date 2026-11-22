@@ -32,9 +32,9 @@ def _assemble(spec: Spec, tagline: str, sections: list[tuple[str, str, str]], ct
 
 def portfolio(spec: Spec) -> dict[str, str]:
     sections = [("about", "نبذة", f"<p>{escape(spec.name)}. {PH}</p>"),
-                ("skills", "المهارات", _cards(["المهارة الأولى", "المهارة الثانية", "المهارة الثالثة"])),
+                ("skills", "المهارات", _cards(spec.services, "") if spec.services else _cards(["المهارة الأولى", "المهارة الثانية", "المهارة الثالثة"])),
                 ("projects", "الأعمال", _cards(["العمل الأول", "العمل الثاني", "العمل الثالث"])),
-                ("contact", "تواصل معي", f"<p>البريد: {PH}</p><p>الحسابات: {PH}</p>")]
+                ("contact", "تواصل معي", base.contact(spec) + f"<p>الحسابات: {PH}</p>")]
     return _assemble(spec, "ملف أعمال", sections, "تواصل معي")
 
 
@@ -42,13 +42,13 @@ def blog(spec: Spec) -> dict[str, str]:
     posts = _cards(["عنوان المقال الأول", "عنوان المقال الثاني", "عنوان المقال الثالث"], f"{PH}: ملخص المقال وتاريخه.")
     sections = [("posts", "أحدث المقالات", posts),
                 ("about", "عن المدونة", f"<p>{escape(spec.name)}. {PH}</p>"),
-                ("contact", "تواصل معنا", f"<p>البريد: {PH}</p>")]
+                ("contact", "تواصل معنا", base.contact(spec))]
     return _assemble(spec, "مدونة", sections, "تواصل معنا")
 
 
 def event(spec: Spec) -> dict[str, str]:
-    details = f"<p>التاريخ: {PH}</p><p>الوقت: {PH}</p><p>المكان: {PH}</p>"
+    details = base.fact(spec, "date", "التاريخ") + base.fact(spec, "time", "الوقت") + base.fact(spec, "place", "المكان")
     program = "<ul>" + "".join(f"<li><span>{t}</span><span>{PH}</span></li>" for t in ("الاستقبال", "الفقرة الرئيسية", "الختام")) + "</ul>"
     sections = [("details", "تفاصيل الحضور", details), ("program", "البرنامج", program),
-                ("contact", "للاستفسار", f"<p>الهاتف: {PH}</p>")]
+                ("contact", "للاستفسار", base.fact(spec, "phone", "الهاتف") + base.fact(spec, "email", "البريد", placeholder=False))]
     return _assemble(spec, "يسعدنا حضوركم", sections, "للاستفسار")

@@ -108,12 +108,14 @@ tests/eval_extra/                  أسئلة اختبار إضافية لكل �
 
 ## 8. المنشئ (builder)
 
-- **الاختبارات** (بلا شبكة): `python -m tests.builder_stage1_test` و`tests.builder_stage2_test` و`tests.builder_stage3_test` و`tests.builder_api_test`.
+- **الاختبارات** (بلا شبكة): `python -m tests.builder_stage1_test` و`tests.builder_stage2_test` و`tests.builder_stage3_test` و`tests.builder_facts_test` و`tests.builder_api_test` و`tests.builder_gate_test` و`tests.builder_design_test` و`tests.builder_edit_test`.
 - **القياس**: `builder.evaluate.evaluate(suite=...)` يعيد تقريرًا بشكل تقرير البوابة نفسه، فيعمل `core.gate.compare` عليه لرفض أي تراجع في مهارة (landing/dashboard/shop/webapp/portfolio/blog/event/ask/refuse).
-- **قاعدة المجموعة المحجوزة**: `tests/builder_heldout.py` تُقاس مرة واحدة قبل أي ضبط للقواعد؛ بعدها تُنقل حالاتها إلى `tests/builder_cases_b.py` (`SUITE` في `tests/builder_requests.py`) وتُكتب مجموعة محجوزة جديدة. لا تضبط القواعد على حالة ما زالت محجوزة.
+- **قاعدة المجموعة المحجوزة**: `tests/builder_heldout.py` تُقاس مرة واحدة قبل أي ضبط للقواعد؛ بعدها تُنقل حالاتها إلى `tests/builder_cases_d.py` (`SUITE` في `tests/builder_requests.py`) وتُكتب مجموعة محجوزة جديدة. لا تضبط القواعد على حالة ما زالت محجوزة.
 - **نوع صفحة جديد**: أضف اسمه إلى `KINDS` في `builder/spec.py`، وقالبًا في `builder/pages.py` (أو ملفًا جديدًا)، وكلماته إلى `_PAGE_WORDS` في `builder/understand.py`، وسجّله في `RENDERERS`، واكتب حالات محجوزة قبل أن تكتب القواعد.
 - **ميزة جديدة غير مدعومة**: أضف كلمتها إلى `OUT_OF_SCOPE` في `builder/understand.py` حتى يرفضها المنشئ صراحة بدل أن يتجاهلها.
+- **التعديل**: `builder/edit.py` (قواعد: لون، اسم، إضافة/حذف قسم أو خدمة أو منتج أو نقطة بيانات، جوال/بريد/مدينة/ساعات/يوم/وقت/مكان) و`builder/specio.py` (تحقق صارم من المواصفات القادمة من المتصفح: أنواع وأحجام ولون سداسي فقط لأنه يُكتب في CSS). نقطة النهاية `POST /api/build/edit` و`/api/build/zip` يقبل `spec`. المجموعتان: `tests/builder_edit_suite.py` (تطوير) و`tests/builder_edit_heldout.py` (محجوزة تُقاس مرة واحدة ثم تُنقل). قاعدة التعديل التي لا تنطبق تقول السبب ولا تغيّر شيئًا بصمت؛ التواصل لا يُحذف.
 - **الأمان**: الملفات المسموحة `index.html` و`style.css` و`app.js` فقط، و`app.js` نص ثابت من القالب لا يتغير بالطلب؛ معاينة الواجهة داخل iframe بلا `allow-same-origin`.
 - **حدود معروفة**: الاسم الذي فيه «في» في وسطه يُقطع عندها (لأنها تُستعمل للمكان بعد الاسم)، وقائمة الميزات غير المدعومة يدوية: ميزة لم تُكتب كلمتها تُتجاهل بصمت حتى تظهر في قياس محجوز.
+- **حدود إضافية**: اسم من ثلاث كلمات أو أكثر لا يُستثنى من فحص الميزات غير المدعومة (قد يُرفض اسم فيه كلمة مرفوضة)، والتعديل لا يفهم إلا الجمل القصيرة بصيغ الأمر الشائعة، ولا يحرّر نصوص الأقسام الحرة (من نحن) بعد.
 - **لم يُختبر هنا**: تشغيل `app.py` فعليًا (FastAPI غير مثبّت في بيئة التطوير)، وعرض كل القوالب في متصفح حقيقي (فُحصت صفحة الهبوط بصريًا فقط).
 

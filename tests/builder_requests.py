@@ -10,5 +10,7 @@ skill   landing / dashboard / shop / webapp / portfolio / blog / event : build a
 from tests.builder_case import SKILLS, case  # noqa: F401  (re-exported for the tests)
 from tests.builder_cases_a import CASES as _A
 from tests.builder_cases_b import CASES as _B
+from tests.builder_cases_c import CASES as _C
+from tests.builder_cases_d import CASES as _D
 
-SUITE = _A + _B
+SUITE = _A + _B + _C + _D

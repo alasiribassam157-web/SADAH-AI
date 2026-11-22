@@ -1,11 +1,27 @@
 """Hand-written Arabic defaults per business type. Placeholders are marked so nobody mistakes them for facts."""
 
+import re
+
+from builder.norm import n
+
 PLACEHOLDER = "(عدّل هذا النص)"
 SECTION_TITLES = {"about": "من نحن", "services": "خدماتنا", "gallery": "معرض الصور",
                   "pricing": "الأسعار", "testimonials": "آراء العملاء", "contact": "تواصل معنا"}
 
-# keyword(s) -> (label, tagline, three services)
+# keyword(s) -> (label, tagline, three services). The first match wins, so specific kinds come before general ones.
 BUSINESS = {
+    ("مغسلة", "غسيل سيارات"): ("مغسلة سيارات", "سيارتك تلمع كأنها جديدة", ["غسيل داخلي وخارجي", "تلميع وحماية", "تنظيف المحرك"]),
+    ("ورشة",): ("ورشة", "صيانة بإتقان وأمانة", ["صيانة دورية", "إصلاح الأعطال", "فحص شامل"]),
+    ("صيدلية",): ("صيدلية", "صحتك أمانة عندنا", ["صرف الأدوية", "مستلزمات صحية", "استشارات دوائية"]),
+    ("مخبز", "حلويات", "كيك"): ("مخبز وحلويات", "طعم يصنع المناسبة", ["مخبوزات طازجة", "حلويات وكيك", "طلبات المناسبات"]),
+    ("نادي رياضي", "جيم", "نادي لياقة"): ("نادي رياضي", "لياقتك تبدأ من هنا", ["تمارين فردية", "حصص جماعية", "تدريب شخصي"]),
+    ("فندق", "شقق مفروشة"): ("فندق", "إقامة مريحة بخدمة راقية", ["الغرف والأجنحة", "المرافق", "الاستفسار والتواصل"]),
+    ("هندسي", "مقاولات", "مقاول"): ("مكتب هندسي", "نصمم ونبني بجودة", ["التصميم الهندسي", "الإشراف على التنفيذ", "الاستشارات"]),
+    ("مزرعة",): ("مزرعة", "من أرضنا إلى مائدتك", ["منتجات طازجة", "الزيارات", "التوريد"]),
+    ("سياحة", "سفريات", "مكتب سفر"): ("مكتب سياحة", "رحلتك تبدأ بخطة جيدة", ["برامج سياحية", "تذاكر وتأشيرات", "رحلات خاصة"]),
+    ("شركة نقل", "شحن"): ("شركة نقل", "نوصّلها بأمان", ["نقل الأثاث", "الشحن", "التخزين"]),
+    ("حضانة",): ("حضانة", "رعاية وتعلّم في بيئة آمنة", ["الرعاية اليومية", "الأنشطة التعليمية", "الأنشطة الترفيهية"]),
+    ("محل ورد", "زهور", "كوشة"): ("محل ورد", "كل مناسبة تستحق وردة", ["باقات الورد", "تنسيق المناسبات", "الهدايا"]),
     ("سيارات", "سيارة"): ("معرض سيارات", "سيارة تناسبك بسعر واضح", ["سيارات جديدة", "سيارات مستعملة", "تمويل وتأمين"]),
     ("مطعم", "مطبخ"): ("مطعم", "أطباق طازجة تُحضَّر بعناية", ["الوجبات الرئيسية", "المقبلات والسلطات", "الحلويات والمشروبات"]),
     ("مقهى", "كافيه", "قهوة"): ("مقهى", "قهوتك المفضلة في مكان هادئ", ["قهوة مختصة", "مشروبات باردة", "حلويات ومعجنات"]),
@@ -20,9 +36,22 @@ BUSINESS = {
 GENERIC = ("مشروع", "نقدّم لك الأفضل", ["خدمتنا الأولى", "خدمتنا الثانية", "خدمتنا الثالثة"])
 
 
+def _rx(words) -> re.Pattern:
+    """Whole words only («ورشة» must not match inside another word), with the usual one-letter prefixes, ال,
+    and a plural / adjective ending («قانون» also matches «القانوني»)."""
+    alt = "|".join(re.escape(n(w)) for w in words)
+    return re.compile(rf"(?<![ء-ي])[لبوفك]{{0,2}}(?:ال)?(?:{alt})(?:ي|يه|ات|ين)?(?![ء-ي])")
+
+
+_RULES = [(_rx(words), data) for words, data in BUSINESS.items()]
+
+
 def for_business(request: str) -> tuple[str, str, list[str]]:
     """(label, tagline, services) for the first business keyword found in the request, else generic."""
-    for words, data in BUSINESS.items():
-        if any(w in request for w in words):
-            return data
-    return GENERIC
+    norm = n(request)
+    return next((data for rx, data in _RULES if rx.search(norm)), GENERIC)
+
+
+def defaults_for(label: str) -> list[str]:
+    """The default services shown for a business label (so an added service joins them instead of replacing them)."""
+    return next((list(s) for lab, _, s in BUSINESS.values() if lab == label), list(GENERIC[2]))
