@@ -36,4 +36,6 @@
     const a = document.createElement("a"); a.href = url; a.download = "project.zip"; a.click();
     URL.revokeObjectURL(url);
   });
+  const preset = new URLSearchParams(location.search).get("request");   // link from the chat
+  if (preset) { req.value = preset.slice(0, 1000); go.click(); }
 })();
