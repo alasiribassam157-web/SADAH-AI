@@ -16,6 +16,7 @@ function newId() {
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function inline(s) {
   return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`\n]+)`/g, "<code>$1</code>")
+    .replace(/\[([^\]\n]+)\]\((\/builder\?request=[A-Za-z0-9%._~-]*)\)/g, '<a class="src" href="$2">$1</a>')   // only our own builder link
     .replace(/\s*🔗\s*(https?:\/\/[^\s<]+)/g, (_, url) => `<div><a class="src" href="${url}" target="_blank" rel="noopener">${svg("link")}${t("source")} · ${new URL(url).hostname.replace("www.", "")}</a></div>`)
     .replace(/\n/g, "<br>");
 }

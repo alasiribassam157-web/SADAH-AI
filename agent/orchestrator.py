@@ -7,7 +7,7 @@ Companion writes the reply in SADAH's voice.  The response keeps the same shape 
 import time
 import uuid
 
-from agent import composer, lexicon, understand
+from agent import builder_gate, composer, lexicon, understand
 from agent.base_agent import AgentResult, Task
 from agent.chat_replies import chat_reply
 from agent.chrono_agent import ChronoAgent
@@ -91,6 +91,9 @@ class SadahAgent:
             return {"steps": steps, "answer": _clip(answer), "files": list(files), "intent": intent,
                     "neural_intent": neural, "confidence": round(conf, 3), "ms": int((time.time() - t0) * 1000)}
 
+        if built := builder_gate.reply(task.text):   # «اصنع لي موقع»: the builder answers; the router had guessed weather
+            neural = "builder"
+            return done(built, "builder", 1.0)
         neural, conf, dist = self.supervisor.perceive(task.text)
         top = " · ".join(f"{k} {v:.0%}" for k, v in sorted(dist.items(), key=lambda kv: -kv[1])[:4])
         step("plan", f"العقل الموجّه: {neural} ({conf:.0%})", top)
