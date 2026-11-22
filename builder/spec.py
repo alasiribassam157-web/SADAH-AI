@@ -20,6 +20,8 @@ class Spec:
     data: list[tuple[str, float]] = field(default_factory=list)   # dashboard: (label, value)
     items: list[tuple[str, str]] = field(default_factory=list)    # shop: (product, price text or "")
     app: str = "tasks"                                            # webapp: one of APPS
+    facts: dict = field(default_factory=dict)                     # stated in the request: phone, email, city, hours, date, time, place
+    services: list[str] = field(default_factory=list)             # stated services / skills / products (else the defaults)
 
 
 def problems(spec: Spec) -> list[str]:

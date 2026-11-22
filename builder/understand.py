@@ -4,7 +4,9 @@ Matching ignores hamza/alef variants (أ إ آ ا) and ى/ي, because people typ
 import re
 from dataclasses import dataclass
 
-from builder import content
+from builder import content, facts
+from builder.products import products
+from builder.norm import n as _n
 from builder.spec import COLORS, DEFAULT_ACCENT, Spec
 
 SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر عرض، ملف أعمال، مدونة، دعوة فعالية، "
@@ -13,16 +15,11 @@ OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانا
                 "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال",
                 # features that need a server or live data: said plainly, never silently dropped
                 "سلة مشتريات", "سلة التسوق", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
-                "مدفوع", "اشتراك شهري", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط")
+                "مدفوع", "اشتراك شهري", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
                  "gallery": ("معرض صور", "صور", "ألبوم"), "pricing": ("أسعار", "باقات", "تسعير"),
                  "testimonials": ("آراء", "تقييمات", "شهادات"), "contact": ("اتصال", "تواصل", "واتساب")}
-_ALEF = str.maketrans("أإآىة", "اااYه".replace("Y","ي"))
 _DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩٫", "0123456789.")
-
-
-def _n(s: str) -> str:
-    return s.translate(_ALEF)
 
 
 _MARKERS = {_n(w) for w in ("باسم", "اسمه", "اسمها", "اسم", "واسمه", "واسمها")}
@@ -31,6 +28,7 @@ _STOP = {_n(w) for w in (
     "ويحتوي", "يحتوي", "ولون", "لون", "مع", "على", "و", "وبيانات", "بيانات", "ولونها", "لونها", "لبيع", "للبيع", "يبيع",
     "ببيع", "وبيع")}
 _EDGE = "«»\"“”،,.؟!:؛"
+_SECTION_SKIP = {_n(w) for ws in SECTION_WORDS.values() for w in ws} | {_n("واتساب")}
 _PERIOD = "(?:ال[أا]سبوع|الشهر|اليوم|الربع|السنة|[أا]سبوع|شهر|يوم|ربع|سنة)"
 _PAIR = re.compile(rf"((?:{_PERIOD}\s+)?[ء-ي]+)\s*[:=]?\s*(\d+(?:\.\d+)?)")
 _PAGE_WORDS = {"portfolio": ("ملف شخصي", "ملف أعمال", "معرض أعمال", "بورتفوليو", "portfolio", "أعمالي"),
@@ -40,7 +38,8 @@ _PAGE_WORDS = {"portfolio": ("ملف شخصي", "ملف أعمال", "معرض �
 _OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
 # a date, time or place after the name ends it («زفاف سلمى يوم الخميس», «اسمها الرؤية في الرياض»; so a name
 # with «في» in the middle is cut there, a known limit); kept apart from _STOP because weekdays are also dashboard labels
-_WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "في", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
+_WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "في", "نقدم", "نوفر", "خدماتنا", "مهاراتي", "نبيع", "منتجاتنا", "جوالي", "جوال",
+                                          "رقم", "رقمي", "واتساب", "ايميل", "ايميلنا", "ايميلي", "بريدنا", "نعمل", "دوامنا", "دوام", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
 _ABBR = re.compile(r"[ء-ي]{1,2}\.")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
@@ -57,6 +56,11 @@ def _has(text: str, words) -> bool:
     return any(_n(w) in text for w in words)
 
 
+def _ends(w: str) -> bool:
+    """A word that ends a name; also when a و is glued to it («وخدماتنا», «وواتساب»)."""
+    return w in _STOP or w in _WHEN or (w.startswith("و") and (w[1:] in _STOP or w[1:] in _WHEN))
+
+
 def _name(text: str) -> str:
     words = text.split()
     for i, w in enumerate(words):
@@ -71,7 +75,7 @@ def _name(text: str) -> str:
                     if out:
                         out.pop()  # the word before a number is a data label, not part of the name
                     break
-                if not bare or (out and (_n(bare) in _STOP or _n(bare) in _WHEN)):  # the first word is the name even if it is a stop word (لون)
+                if not bare or (out and _ends(_n(bare))):  # the first word is the name even if it is a stop word (لون)
                     break
                 abbr = bool(_ABBR.fullmatch(nxt))  # a title such as «د.» keeps its dot and does not end the name
                 out.append(nxt if abbr else bare)
@@ -117,7 +121,9 @@ def understand(request: str) -> Understood:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
     kind = _kind(norm)
     label, _, _ = content.for_business(text)
-    spec = Spec(kind=kind, business=label if kind == "landing" else "", name=_name(text))
+    got = facts.extract(text, _SECTION_SKIP)   # phone / e-mail / hours leave the text, so they are never names or numbers
+    spec = Spec(kind=kind, business=label if kind == "landing" else "", name=_name(got.text),
+                facts=got.facts, services=got.services)
     spec.accent = next((hex_ for ar, hex_ in COLORS.items() if _n(ar) in norm), DEFAULT_ACCENT)
     if kind == "landing":
         found = {s for s, ws in SECTION_WORDS.items() if _has(norm, ws)}
@@ -129,8 +135,8 @@ def understand(request: str) -> Understood:
             return Understood(None, unsupported=f"هذا النوع من التطبيقات غير مدعوم بعد. {SUPPORTED}")
     elif kind == "shop":
         spec.sections = ["contact"]
-        spec.items = [(n, f"{int(v) if v.is_integer() else v} ريال") for n, v in _pairs(text)]
+        spec.items = [(n, f"{int(v) if v.is_integer() else v} ريال") for n, v in products(got.text)] or [(x, "") for x in got.services]
     elif kind == "dashboard":
-        pairs = _pairs(text)
+        pairs = _pairs(got.text)
         spec.data = pairs if len(pairs) >= 2 else []
     return Understood(spec, question="" if spec.name else "ما اسم المشروع؟")

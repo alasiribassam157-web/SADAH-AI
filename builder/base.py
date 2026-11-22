@@ -28,6 +28,22 @@ footer{text-align:center;padding:24px;background:var(--soft);font-size:.9rem}
 """
 
 
+def fact(spec: Spec, key: str, label: str, placeholder: bool = True) -> str:
+    """One «label: value» line from the request's facts; the editable placeholder when the request gave none."""
+    from builder.content import PLACEHOLDER
+    value = spec.facts.get(key)
+    if not value and not placeholder:
+        return ""
+    return f'<p>{label}: <bdi dir="ltr">{escape(value)}</bdi></p>' if key in ("phone", "email") and value else \
+        f"<p>{label}: {escape(value) if value else PLACEHOLDER}</p>"
+
+
+def contact(spec: Spec) -> str:
+    """Contact lines: stated facts first; phone / e-mail / address keep a placeholder, opening hours only when stated."""
+    return (fact(spec, "phone", "الهاتف") + fact(spec, "email", "البريد") + fact(spec, "city", "المدينة")
+            + fact(spec, "hours", "ساعات العمل", placeholder=False))
+
+
 def css(spec: Spec) -> str:
     return CSS % {"accent": spec.accent}
 
