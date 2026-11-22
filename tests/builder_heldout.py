@@ -1,25 +1,26 @@
-"""Held-out requests (v6) for the builder, written before looking at how the rules treat them.
+"""Held-out requests (v7) for the builder, written before looking at how the rules treat them.
 The rules in builder/understand.py are tuned on tests/builder_requests.py only. Measure once, then record the
 number and promote these cases into SUITE. Earlier sets (all promoted after measuring):
-  v1 15/20, v2 16/20, v3 14/16, v4 10/10, v5 19/20.
-One v6 case ('دفعة' = a graduating class) was seen refused as 'دفع' (payment) on the live preview, so it moved to SUITE
-and was replaced here.
+  v1 15/20, v2 16/20, v3 14/16, v4 10/10, v5 19/20, v6 13/14.
 Never tune the rules on a case here without first moving it into SUITE and writing a fresh held-out set."""
 from tests.builder_requests import case
 
 HELDOUT = [
-    case("portfolio", "ابغى موقع لعرض اعمالي كمصمم جرافيك باسم بصمة", name="بصمة"),
-    case("portfolio", "ملف شخصي لطبيبة اسمه د. هند", name="د. هند"),
-    case("blog", "ابغى مدونة عن الكتب باسم صفحات ولونها بنفسجي", name="صفحات", accent="#6d28d9"),
-    case("blog", "موقع لكتابة مقالاتي الرياضية اسمه ملعب", name="ملعب"),
-    case("event", "ابغى دعوة لحفل تخرج 2026 باسم اصدقاء الجامعة", name="اصدقاء الجامعة"),
-    case("event", "صفحة لمناسبة عيد ميلاد باسم يوم سعيد ولونها برتقالي", name="يوم سعيد", accent="#c2410c"),
-    case("event", "موقع لملتقى رواد الاعمال باسم رواد", name="رواد"),
-    case("landing", "موقع لمركز تدريب باسم مهارة وفيه خدماتنا واسعار", name="مهارة", sections=["services", "pricing"]),
-    case("landing", "ابغى موقع لمزرعة ابل باسم الصحراء ولونه ذهبي", name="الصحراء", accent="#a16207"),
-    case("dashboard", "لوحة بيانات باسم المخزون فيها سكر 30 ارز 45 شاي 12", name="المخزون", data_labels=["سكر", "ارز", "شاي"]),
-    case("shop", "متجر باسم صنع بيدي وفيه صابون 15 وشموع 25", name="صنع بيدي", items_n=2),
-    case("webapp", "ابغى تطبيق نموذج تسجيل باسم ورشة التصوير", name="ورشة التصوير", app="register"),
-    case("ask", "ابغى موقع لمؤتمر"),
-    case("refuse", "ابغى مدونة فيها دفع للاشتراك"),
+    case("landing", "عاوز صفحة لمحل ورد اسمه روز", name="روز"),
+    case("landing", "ابغى موقع لحلويات باسم السكر وفيه من نحن واتصال", name="السكر", sections=["about", "contact"]),
+    case("landing", "ابغى موقع لورشة سيارات باسم الميكانيكي وفيه تواصل", name="الميكانيكي"),
+    case("dashboard", "لوحة بيانات باسم المتوسط فيها يناير 10.5 فبراير 20.25", name="المتوسط", data_labels=["يناير", "فبراير"]),
+    case("shop", "متجر باسم الخير وفيه تمر 30 ريال وقهوة 45 ريال", name="الخير", items_n=2),
+    case("shop", "ابغى متجر باسم ركن الهدايا ولونه ذهبي", name="ركن الهدايا", accent="#a16207"),
+    case("webapp", "ابغى تطبيق ويب لادارة المهام باسم مرتب", name="مرتب", app="tasks"),
+    case("portfolio", "ابغى portfolio باسم نور", name="نور"),
+    case("portfolio", "ابغى موقع لعرض اعمالي كمبرمج باسم كود", name="كود"),
+    case("blog", "مدونة شخصية باسم خواطر", name="خواطر"),
+    case("event", "دعوة لعقد قران باسم ليلة العمر", name="ليلة العمر"),
+    case("event", "موقع لحفلة عيد ميلاد باسم عيد ريم ولونه بنفسجي", name="عيد ريم", accent="#6d28d9"),
+    case("event", "دعوة لحفل زفاف باسم زفاف سلمى يوم الخميس", name="زفاف سلمى"),
+    case("ask", "ابغى موقع لمعرض اعمال"),
+    case("ask", "ابغى موقع لدفعة الثانوية"),
+    case("refuse", "ابغى مدونة مع قاعدة بيانات للقراء"),
+    case("refuse", "ابغى مدونة وتطبيق اندرويد"),
 ]
