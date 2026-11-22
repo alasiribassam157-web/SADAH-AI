@@ -1,0 +1,60 @@
+"""Builder requests, part C: held-out sets v7 onward after they were measured, and fixes found on the live site."""
+from tests.builder_case import case
+
+CASES = [
+    # moved from held-out v7 after measuring it (16/17 before tuning; the miss was a date swallowed into the name)
+
+    case("landing", "عاوز صفحة لمحل ورد اسمه روز", name="روز"),
+    case("landing", "ابغى موقع لحلويات باسم السكر وفيه من نحن واتصال", name="السكر", sections=["about", "contact"]),
+    case("landing", "ابغى موقع لورشة سيارات باسم الميكانيكي وفيه تواصل", name="الميكانيكي"),
+    case("dashboard", "لوحة بيانات باسم المتوسط فيها يناير 10.5 فبراير 20.25", name="المتوسط", data_labels=["يناير", "فبراير"]),
+    case("shop", "متجر باسم الخير وفيه تمر 30 ريال وقهوة 45 ريال", name="الخير", items_n=2),
+    case("shop", "ابغى متجر باسم ركن الهدايا ولونه ذهبي", name="ركن الهدايا", accent="#a16207"),
+    case("webapp", "ابغى تطبيق ويب لادارة المهام باسم مرتب", name="مرتب", app="tasks"),
+    case("portfolio", "ابغى portfolio باسم نور", name="نور"),
+    case("portfolio", "ابغى موقع لعرض اعمالي كمبرمج باسم كود", name="كود"),
+    case("blog", "مدونة شخصية باسم خواطر", name="خواطر"),
+    case("event", "دعوة لعقد قران باسم ليلة العمر", name="ليلة العمر"),
+    case("event", "موقع لحفلة عيد ميلاد باسم عيد ريم ولونه بنفسجي", name="عيد ريم", accent="#6d28d9"),
+    case("event", "دعوة لحفل زفاف باسم زفاف سلمى يوم الخميس", name="زفاف سلمى"),
+    case("ask", "ابغى موقع لمعرض اعمال"),
+    case("ask", "ابغى موقع لدفعة الثانوية"),
+    case("refuse", "ابغى مدونة مع قاعدة بيانات للقراء"),
+    case("refuse", "ابغى مدونة وتطبيق اندرويد"),
+    # moved from held-out v8 after measuring it (13/16 before tuning; misses: «في الرياض» kept in the name,
+    # and two unsupported features, shopping cart and live stream, built or asked a name instead of refusing)
+
+    case("landing", 'ابغى موقع لمقهى باسم "نجوم" وفيه الاسعار', name="نجوم", sections=["pricing"]),
+    case("landing", "أبغى موقع لشركة باسم Alpha Tech", name="Alpha Tech"),
+    case("landing", "ابغى موقع لمطعم باسم المذاق وفية تواصل", name="المذاق"),
+    case("landing", "موقع تعريفي لشركة اسمها الرؤية في الرياض", name="الرؤية"),
+    case("dashboard", "ابغى داشبورد باسم الايرادات فيها الربع الاول 500 الربع الثاني 650", name="الايرادات", data_labels=["الربع الاول", "الربع الثاني"]),
+    case("shop", "ابي متجر باسم مكتبتي وفيه كتاب ٢٠ ريال وقلم ٥ ريال", name="مكتبتي", items_n=2),
+    case("webapp", "ابغى تطبيق قائمة مهام باسم اولوياتي ولونه اسود", name="اولوياتي", app="tasks", accent="#111827"),
+    case("portfolio", "ابغى بورتفوليو لمصورة باسم لقطة ولونها اسود", name="لقطة", accent="#111827"),
+    case("blog", "ابي مدونة اكتب فيها مقالات عن الصحة باسم عافية", name="عافية"),
+    case("event", "دعوة لحفل استقبال مولود باسم مولودنا الجديد", name="مولودنا الجديد"),
+    case("event", "موقع لفعالية رياضية باسم ماراثون الرياض الساعة 5", name="ماراثون الرياض"),
+    case("ask", "ابغى مدونة عن السفر"),
+    case("ask", "ابغى موقع لمطعم البيك"),
+    case("refuse", "ابغى متجر فيه سلة مشتريات"),
+    case("refuse", "ابغى تطبيق ايفون وموقع باسم رحلتي"),
+    case("refuse", "ابغى مدونة فيها بث مباشر"),
+    # moved from held-out v9 after measuring it (8/15 before tuning: unsupported features without a refusal word,
+    # «نموذج اشتراك», «ملف اعمال»). Left out on purpose: a dashboard label of two words («واي فاي 20»), a known limit.
+
+    case("landing", "ابغى موقع لمركز رياضي باسم لياقة ولونه احمر وفيه اسعار", name="لياقة", accent="#b91c1c", sections=["pricing"]),
+    case("landing", "ابغى موقع لصيدلية باسم الشفاء وفيه ساعات العمل", name="الشفاء"),
+    case("landing", "موقع لمكتب سفريات اسمه آفاق ولونه ازرق", name="آفاق", accent="#1d4ed8"),
+    case("shop", "متجر باسم زهرة وفيه باقة ورد 80 وبوكيه 120", name="زهرة", items_n=2),
+    case("webapp", "ابغى نموذج اشتراك بالنشرة باسم اخبار", name="اخبار", app="register"),
+    case("portfolio", "ابغى ملف اعمال لمهندس باسم م. سعد", name="م. سعد"),
+    case("blog", "مدونة لنشر قصصي القصيرة باسم حكايا", name="حكايا"),
+    case("event", "ابغى دعوة لحفل خطوبة باسم خطوبة ريم وسلطان", name="خطوبة ريم وسلطان"),
+    case("ask", "ابغى متجر الكتروني"),
+    case("ask", "ابغى تطبيق مهام"),
+    case("refuse", "ابغى موقع فيه اشتراك شهري مدفوع"),
+    case("refuse", "ابغى متجر فيه تقييمات ومراجعات من العملاء"),
+    case("refuse", "ابغى مدونة مع نشرة بريدية ترسل تلقائي"),
+    case("refuse", "ابغى موقع فيه خريطة تفاعلية"),
+]

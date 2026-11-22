@@ -13,6 +13,10 @@ def _matches(spec, expect: dict) -> bool:
             ok = [label for label, _ in spec.data] == want
         elif key == "items_n":
             ok = len(spec.items) == want
+        elif key == "services":
+            ok = list(spec.services) == want
+        elif key in ("phone", "email", "city", "hours", "date", "time", "place"):
+            ok = spec.facts.get(key) == want
         else:
             ok = getattr(spec, key) == want
         if not ok:
