@@ -1,0 +1,61 @@
+"""Builder requests, part D: held-out set v11 after it was measured."""
+from tests.builder_case import case
+
+CASES = [
+    # moved from held-out v11 after measuring it (10/15 before tuning). Causes found: a plain word in a product line («منتجات»)
+    # decided the kind; a two-word name after «باسم» was read as a feature request («ندوة الذكاء»); hour suffixes عصرا/ليلا;
+    # accounts / order delivery / tracking were not on the refusal list; ندوة was not an event word.
+    case("landing", "موقع لمكتب هندسي باسم الاتقان نقدم تصميم ومتابعة تنفيذ وايميلنا contact@itqan.sa",
+         name="الاتقان", services=["تصميم", "متابعة تنفيذ"], email="contact@itqan.sa"),
+    case("landing", "ابغى موقع لعيادة جلدية باسم نقاء في الدمام جوال 0551234567", name="نقاء", city="الدمام", phone="0551234567"),
+    case("landing", "موقع لمحل عطور باسم عود ودوامنا من 4 عصرا الى 12 ليلا", name="عود", hours="من 4 عصرا الى 12 ليلا"),
+    case("landing", "ابغى موقع لدار نشر باسم حبر وورق ونبيع كتب ومجلات ودفاتر", name="حبر وورق", services=["كتب", "مجلات", "دفاتر"]),
+    case("landing", "ابغى موقع لمركز تجميل باسم لؤلؤة", name="لؤلؤة", services=[]),
+    case("shop", "متجر باسم دانة وفيه خاتم ذهب 900 وسوار فضة 350 وجوالي 0561112233", name="دانة", items_n=2, phone="0561112233"),
+    case("event", "دعوة لحفل تخرج باسم تخرج سارة بتاريخ 3/6 الساعة 7 مساء في قاعة النخيل",
+         name="تخرج سارة", date="3/6", time="7 مساء", place="قاعة النخيل"),
+    case("event", "موقع لندوة باسم ندوة الذكاء يوم الاثنين في جامعة الملك سعود", name="ندوة الذكاء", date="الاثنين", place="جامعة الملك سعود"),
+    case("portfolio", "ملف اعمال لمصورة باسم هديل في جدة ومهاراتي تصوير منتجات وتصوير مناسبات",
+         name="هديل", city="جدة", services=["تصوير منتجات", "تصوير مناسبات"]),
+    case("blog", "مدونة باسم وجبة اسبوعية وايميلي hello@wajba.com", name="وجبة اسبوعية", email="hello@wajba.com"),
+    case("dashboard", "لوحة بيانات باسم المبيعات فيها الصباح 120 المساء 200 وجوالي 0501234567", name="المبيعات", data_labels=["الصباح", "المساء"]),
+    case("webapp", "تطبيق قائمة مهام باسم انجاز جوالي 0501234567", name="انجاز", app="tasks"),
+    case("ask", "موقع لمغسلة جوالي 0501234567 ونقدم غسيل"),
+    case("refuse", "ابغى موقع فيه حساب لكل عميل"),
+    case("refuse", "ابغى متجر فيه توصيل للطلبات"),
+    # moved from held-out v12 after measuring it (10/13 before tuning). Causes: a name ran into the first dashboard label
+    # («المصروفات الاسبوع الاول 300»); translation and sync were not on the refusal list.
+    case("landing", "ابغى موقع لمحل جوالات باسم السرعة وخدماتنا صيانة وبيع اكسسوارات وجوالي 0561234567",
+         name="السرعة", services=["صيانة", "بيع اكسسوارات"], phone="0561234567"),
+    case("landing", "موقع لمركز تدريب باسم المهارة في الخبر ونعمل من 5 مساء الى 10 ليلا", name="المهارة", city="الخبر",
+         hours="من 5 مساء الى 10 ليلا"),
+    case("shop", "متجر باسم لمسة وفيه شمعة 30 ومعطر 45 وصابون 20", name="لمسة", items_n=3),
+    case("dashboard", "لوحة بيانات باسم المصروفات الاسبوع الاول 300 الاسبوع الثاني 450", name="المصروفات"),
+    case("blog", "مدونة باسم يوميات مسافر ولونها اخضر", name="يوميات مسافر", accent="#15803d"),
+    case("portfolio", "ملف شخصي باسم م. خالد ومهاراتي برمجة وتصميم", name="م. خالد", services=["برمجة", "تصميم"]),
+    case("event", "دعوة لحفل زفاف باسم نورة وفهد يوم الخميس الساعة 9 مساء في قاعة اللؤلؤة",
+         name="نورة وفهد", date="الخميس", time="9 مساء", place="قاعة اللؤلؤة"),
+    case("webapp", "تطبيق قائمة مهام باسم انجازي", name="انجازي", app="tasks"),
+    case("ask", "ابغى موقع لمطعم وفيه قائمة طعام"),
+    case("refuse", "ابغى متجر فيه تسجيل دخول للعملاء"),
+    case("refuse", "ابغى موقع فيه شات مباشر"),
+    case("refuse", "ابغى موقع فيه ترجمة تلقائية"),
+    case("refuse", "ابغى تطبيق مهام مع مزامنة بين الاجهزة"),
+    # moved from held-out v13 after measuring it (11/13 before tuning). Cause: cashier and notifications were not on the refusal list.
+    case("landing", "موقع لمحل حلاقة باسم الاناقة وخدماتنا قص شعر وحلاقة ذقن ولونه اسود", name="الاناقة", accent="#111827",
+         services=["قص شعر", "حلاقة ذقن"]),
+    case("landing", "ابي موقع لشركة تسويق باسم انتشار في الرياض وايميلنا hi@intishar.sa", name="انتشار", city="الرياض",
+         email="hi@intishar.sa"),
+    case("landing", "موقع لعيادة بيطرية باسم رفقة", name="رفقة", business="عيادة"),
+    case("shop", "متجر باسم تمور القصيم وفيه سكري 80 وخلاص 60", name="تمور القصيم", items_n=2),
+    case("dashboard", "داشبورد باسم الايرادات يناير 5000 فبراير 6200 مارس 5800", name="الايرادات"),
+    case("blog", "مدونتي اسمها دفتر الطبخ وايميلي chef@mail.com", name="دفتر الطبخ", email="chef@mail.com"),
+    case("portfolio", "بورتفوليو باسم ليلى ومهاراتي تصوير ومونتاج وجوالي 0541234567", name="ليلى", services=["تصوير", "مونتاج"],
+         phone="0541234567"),
+    case("event", "فعالية باسم ملتقى الريادة بتاريخ 12/5 في جامعة الملك فهد", name="ملتقى الريادة", date="12/5"),
+    case("webapp", "نموذج تسجيل باسم دورة التصوير", name="دورة التصوير", app="register"),
+    case("ask", "موقع لمحل ورد ولونه وردي"),
+    case("refuse", "ابغى موقع فيه نظام حجز مواعيد"),
+    case("refuse", "ابغى متجر فيه كاشير"),
+    case("refuse", "ابغى موقع يرسل تنبيهات للعملاء"),
+]

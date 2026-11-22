@@ -1,28 +1,26 @@
-"""Held-out requests (v11) for the builder, written before looking at how the rules treat them (facts inside requests,
-names that contain a refused word, hours in unusual wording, unseen unsupported features).
-The rules are tuned on tests/builder_requests.py only. Measure once, then record the number and promote.
+"""Held-out requests (v14), written before looking at how the rules treat them (fresh trades, Gulf spellings,
+requests that mention a feature only in passing, several facts at once). NOT MEASURED YET: measure once, record
+the number here, promote into tests/builder_cases_d.py and write v15.
 Earlier sets (all promoted after measuring): v1 15/20, v2 16/20, v3 14/16, v4 10/10, v5 19/20, v6 13/14, v7 16/17,
-v8 13/16, v9 8/15, v10 9/14 (a two-word dashboard label stays a known limit).
+v8 13/16, v9 8/15, v10 9/14 (a two-word dashboard label stays a known limit), v11 10/15, v12 10/13, v13 11/13.
 Never tune the rules on a case here without first moving it into SUITE and writing a fresh held-out set."""
 from tests.builder_requests import case
 
 HELDOUT = [
-    case("landing", "موقع لمكتب هندسي باسم الاتقان نقدم تصميم ومتابعة تنفيذ وايميلنا contact@itqan.sa",
-         name="الاتقان", services=["تصميم", "متابعة تنفيذ"], email="contact@itqan.sa"),
-    case("landing", "ابغى موقع لعيادة جلدية باسم نقاء في الدمام جوال 0551234567", name="نقاء", city="الدمام", phone="0551234567"),
-    case("landing", "موقع لمحل عطور باسم عود ودوامنا من 4 عصرا الى 12 ليلا", name="عود", hours="من 4 عصرا الى 12 ليلا"),
-    case("landing", "ابغى موقع لدار نشر باسم حبر وورق ونبيع كتب ومجلات ودفاتر", name="حبر وورق", services=["كتب", "مجلات", "دفاتر"]),
-    case("landing", "ابغى موقع لمركز تجميل باسم لؤلؤة", name="لؤلؤة", services=[]),
-    case("shop", "متجر باسم دانة وفيه خاتم ذهب 900 وسوار فضة 350 وجوالي 0561112233", name="دانة", items_n=2, phone="0561112233"),
-    case("event", "دعوة لحفل تخرج باسم تخرج سارة بتاريخ 3/6 الساعة 7 مساء في قاعة النخيل",
-         name="تخرج سارة", date="3/6", time="7 مساء", place="قاعة النخيل"),
-    case("event", "موقع لندوة باسم ندوة الذكاء يوم الاثنين في جامعة الملك سعود", name="ندوة الذكاء", date="الاثنين", place="جامعة الملك سعود"),
-    case("portfolio", "ملف اعمال لمصورة باسم هديل في جدة ومهاراتي تصوير منتجات وتصوير مناسبات",
-         name="هديل", city="جدة", services=["تصوير منتجات", "تصوير مناسبات"]),
-    case("blog", "مدونة باسم وجبة اسبوعية وايميلي hello@wajba.com", name="وجبة اسبوعية", email="hello@wajba.com"),
-    case("dashboard", "لوحة بيانات باسم المبيعات فيها الصباح 120 المساء 200 وجوالي 0501234567", name="المبيعات", data_labels=["الصباح", "المساء"]),
-    case("webapp", "تطبيق قائمة مهام باسم انجاز جوالي 0501234567", name="انجاز", app="tasks"),
-    case("ask", "موقع لمغسلة جوالي 0501234567 ونقدم غسيل"),
-    case("refuse", "ابغى موقع فيه حساب لكل عميل"),
-    case("refuse", "ابغى متجر فيه توصيل للطلبات"),
+    case("landing", "ابغى موقع لمعهد لغات باسم لسان وخدماتنا انجليزي وفرنسي وجوالي 0571234567", name="لسان",
+         services=["انجليزي", "فرنسي"], phone="0571234567"),
+    case("landing", "موقع لمحل نظارات باسم رؤية في جدة ودوامنا من 4 عصرا الى 11 ليلا", name="رؤية", city="جدة",
+         hours="من 4 عصرا الى 11 ليلا"),
+    case("landing", "موقع لمزرعة باسم الواحة ولونه اخضر", name="الواحة", accent="#15803d", business="مزرعة"),
+    case("shop", "ابغى متجر باسم حلا وفيه كيكة 120 وكوكيز 40", name="حلا", items_n=2),
+    case("dashboard", "لوحة بيانات باسم الحضور الاحد 30 الاثنين 28 الثلاثاء 35", name="الحضور", data_labels=["الاحد", "الاثنين", "الثلاثاء"]),
+    case("blog", "ابي مدونة باسم رحلات صغيرة وفيها قسم عن الكاتب", name="رحلات صغيرة"),
+    case("portfolio", "ملف اعمال باسم م. ريم ومهاراتي هندسة وتصميم داخلي", name="م. ريم", services=["هندسة", "تصميم داخلي"]),
+    case("event", "دعوة لمؤتمر باسم مستقبل التقنية يوم الاحد الساعة 10 صباحا في فندق الريتز", name="مستقبل التقنية", date="الاحد",
+         time="10 صباحا"),
+    case("webapp", "تطبيق مهام باسم اولوياتي", name="اولوياتي", app="tasks"),
+    case("ask", "ابي موقع لمكتبة"),
+    case("refuse", "ابغى موقع فيه نظام تذاكر دعم"),
+    case("refuse", "ابغى موقع فيه صفحة لكل موظف مع تسجيل دخول"),
+    case("refuse", "ابغى متجر ببوابة دفع الكترونية"),
 ]

@@ -19,6 +19,10 @@
       <button id="zip" type="button" disabled>تنزيل المشروع (zip)</button>
     </div>
     <p id="msg" role="status"></p>
+    <div id="editbox" class="bld-row" hidden>
+      <input id="ins" type="text" maxlength="300" aria-label="تعديل" placeholder="عدّل المشروع: غيّر اللون إلى أخضر، أضف قسم الأسعار، أضف خدمة…" />
+      <button id="edit" type="button">عدّل</button>
+    </div>
     <iframe id="view" title="معاينة المشروع" sandbox="allow-scripts" hidden></iframe>
   </main>
   <script src="/ui/builder.js"></script>

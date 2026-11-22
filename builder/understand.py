@@ -15,7 +15,7 @@ OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانا
                 "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال",
                 # features that need a server or live data: said plainly, never silently dropped
                 "سلة مشتريات", "سلة التسوق", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
-                "مدفوع", "اشتراك شهري", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
+                "مدفوع", "اشتراك شهري", "كاشير", "نقاط البيع", "تنبيهات", "ترجمة تلقائية", "ترجمة فورية", "مزامنة", "حساب", "حسابات", "عضوية", "تتبع", "توصيل للطلبات", "توصيل الطلبات", "استقبال الطلبات", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
                  "gallery": ("معرض صور", "صور", "ألبوم"), "pricing": ("أسعار", "باقات", "تسعير"),
                  "testimonials": ("آراء", "تقييمات", "شهادات"), "contact": ("اتصال", "تواصل", "واتساب")}
@@ -33,13 +33,14 @@ _PERIOD = "(?:ال[أا]سبوع|الشهر|اليوم|الربع|السنة|[أ
 _PAIR = re.compile(rf"((?:{_PERIOD}\s+)?[ء-ي]+)\s*[:=]?\s*(\d+(?:\.\d+)?)")
 _PAGE_WORDS = {"portfolio": ("ملف شخصي", "ملف أعمال", "معرض أعمال", "بورتفوليو", "portfolio", "أعمالي"),
                "blog": ("مدونة", "مدونتي", "مقالاتي", "مقالات"),
-               "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف")}
+               "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف", "ندوة", "محاضرة")}
 # whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
 _OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
 # a date, time or place after the name ends it («زفاف سلمى يوم الخميس», «اسمها الرؤية في الرياض»; so a name
 # with «في» in the middle is cut there, a known limit); kept apart from _STOP because weekdays are also dashboard labels
 _WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "في", "نقدم", "نوفر", "خدماتنا", "مهاراتي", "نبيع", "منتجاتنا", "جوالي", "جوال",
                                           "رقم", "رقمي", "واتساب", "ايميل", "ايميلنا", "ايميلي", "بريدنا", "نعمل", "دوامنا", "دوام", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
+_PERIOD_WORD = re.compile(_PERIOD)
 _ABBR = re.compile(r"[ء-ي]{1,2}\.")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
@@ -71,6 +72,8 @@ def _name(text: str) -> str:
                 if _YEAR.fullmatch(bare) and out:
                     out.append(bare)  # a year after a name word is part of the name (تخرج 2026), not data
                     break
+                if out and _PERIOD_WORD.fullmatch(_n(bare)) and any(c.isdigit() for t in words[i + 2 + len(out):i + 4 + len(out)] for c in t):
+                    break  # «المصروفات الاسبوع الاول 300»: the period word starts the first data label
                 if any(c.isdigit() for c in bare):
                     if out:
                         out.pop()  # the word before a number is a data label, not part of the name
@@ -97,14 +100,14 @@ def _pairs(text: str) -> list[tuple[str, float]]:
 def _kind(norm: str) -> str:
     if _has(norm, ("لوحة", "داشبورد", "dashboard")):
         return "dashboard"
-    if _has(norm, ("متجر إلكتروني", "متجر الكتروني")) or _has(norm, ("منتجات", "منتجاتي")) or (_has(norm, ("متجر",)) and "موقع" not in norm):
+    if _has(norm, ("متجر إلكتروني", "متجر الكتروني")) or (_has(norm, ("متجر",)) and "موقع" not in norm):
         return "shop"
     if "موقع" not in norm and _has(norm, ("تطبيق", "نموذج تسجيل", "نموذج اشتراك", "قائمة مهام")):
         return "webapp"
-    for kind, words in _PAGE_WORDS.items():
+    for kind, words in _PAGE_WORDS.items():   # «ملف أعمال لمصورة … تصوير منتجات» is a portfolio, not a shop
         if _has(norm, words):
             return kind
-    return "landing"
+    return "shop" if _has(norm, ("منتجات", "منتجاتي")) else "landing"
 
 
 def _app(norm: str) -> str:
@@ -116,13 +119,17 @@ def _app(norm: str) -> str:
 def understand(request: str) -> Understood:
     text = " ".join(request.translate(_DIGITS).split())
     norm = _n(text).lower()
-    hit = next((w for w, rx in _OUT if rx.search(norm)), "") or ("جوال" if _MOBILE.search(norm) else "")
+    got = facts.extract(text, _SECTION_SKIP)   # phone / e-mail / hours leave the text, so they are never names or numbers
+    name = _name(got.text)
+    # a name after «باسم» is a label, not a feature request («ندوة الذكاء»); only an explicit marker earns this
+    # (two words at most: «حوالات يرسل اموال» is a name that swallowed a feature request)
+    asked = norm.replace(_n(name), " ", 1) if name and len(name.split()) <= 2 else norm
+    hit = next((w for w, rx in _OUT if rx.search(asked)), "") or ("جوال" if _MOBILE.search(asked) else "")
     if hit:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
     kind = _kind(norm)
     label, _, _ = content.for_business(text)
-    got = facts.extract(text, _SECTION_SKIP)   # phone / e-mail / hours leave the text, so they are never names or numbers
-    spec = Spec(kind=kind, business=label if kind == "landing" else "", name=_name(got.text),
+    spec = Spec(kind=kind, business=label if kind == "landing" else "", name=name,
                 facts=got.facts, services=got.services)
     spec.accent = next((hex_ for ar, hex_ in COLORS.items() if _n(ar) in norm), DEFAULT_ACCENT)
     if kind == "landing":

@@ -50,3 +50,8 @@ def for_business(request: str) -> tuple[str, str, list[str]]:
     """(label, tagline, services) for the first business keyword found in the request, else generic."""
     norm = n(request)
     return next((data for rx, data in _RULES if rx.search(norm)), GENERIC)
+
+
+def defaults_for(label: str) -> list[str]:
+    """The default services shown for a business label (so an added service joins them instead of replacing them)."""
+    return next((list(s) for lab, _, s in BUSINESS.values() if lab == label), list(GENERIC[2]))

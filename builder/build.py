@@ -26,14 +26,19 @@ def build(request: str) -> Result:
         return Result(False, message=u.unsupported)
     if u.question:
         return Result(False, question=u.question, spec=u.spec)
-    bad = spec_mod.problems(u.spec)
+    return render(u.spec)
+
+
+def render(spec: spec_mod.Spec) -> Result:
+    """A spec (from a request or from an edit) -> site, validated before and after rendering."""
+    bad = spec_mod.problems(spec)
     if bad:
-        return Result(False, problems=bad, spec=u.spec)
-    files = RENDERERS[u.spec.kind](u.spec)
+        return Result(False, problems=bad, spec=spec)
+    files = RENDERERS[spec.kind](spec)
     found = checks.check_site(files)
     if found:
-        return Result(False, problems=found, spec=u.spec)
-    return Result(True, files=files, spec=u.spec)
+        return Result(False, problems=found, spec=spec)
+    return Result(True, files=files, spec=spec)
 
 
 def to_zip(files: dict[str, str]) -> bytes:
