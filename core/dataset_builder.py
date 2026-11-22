@@ -78,15 +78,12 @@ def load_auto_labels() -> list[tuple[str, str, int]]:
     the cases where the critic corrected the brain. Held-out test questions are never used."""
     if not ARCHIVE.exists():
         return []
-    try:
-        from tests.heldout import HELDOUT
-        exclude = {q for qs in HELDOUT.values() for q in qs}
-    except ImportError:
-        exclude = set()
+    from core.evalsuite import held_out_questions, normalize   # never learn from a question the gate tests on
+    exclude = held_out_questions()
     out = []
     for line in ARCHIVE.read_text(encoding="utf-8").splitlines():
         r = json.loads(line) if line.strip() else {}
-        if not r.get("ok") or r.get("intent") not in INTENTS or not r.get("neural") or r.get("text") in exclude:
+        if not r.get("ok") or r.get("intent") not in INTENTS or not r.get("neural") or normalize(r.get("text", "")) in exclude:
             continue
         if r["neural"] != r["intent"]:
             out.append((r["text"], r["intent"], CRITIC_WEIGHT))
@@ -118,8 +115,12 @@ def build_dataset(brain: str = "router", seed: int = 7) -> tuple[list[tuple[str,
 
 
 def train_val_split(data: list, val_ratio: float = 0.15):
+    """Shuffled data -> (train, validation). Validation drops every text that also occurs in train: the oversampled
+    taught examples and repeated template fills used to appear on both sides and inflated val_acc to ~1.0."""
     cut = int(len(data) * (1 - val_ratio))
-    return data[:cut], data[cut:]
+    train, val = data[:cut], data[cut:]
+    seen = {text for text, _ in train}
+    return train, [pair for pair in val if pair[0] not in seen]
 
 
 if __name__ == "__main__":

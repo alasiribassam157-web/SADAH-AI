@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from agent import home_feed
+from agent import home_feed, session_id
 from agent.orchestrator import SadahAgent
 from agent.stats import UsageStats
 from agent.tools import SAFE_MODE
@@ -82,7 +82,7 @@ def chat(body: ChatIn, request: Request):
         raise HTTPException(400, "Empty message")
     # Real code/system execution only for the developer sitting at this machine.
     allow_exec = not SAFE_MODE and dev_api is not None and dev_api.is_local(request)
-    result = agent.handle(message, allow_exec=allow_exec, session=body.session[:64], context=body.context)
+    result = agent.handle(message, allow_exec=allow_exec, session=session_id.clean(body.session), context=body.context)
     stats.record(message, result)
     return result
 

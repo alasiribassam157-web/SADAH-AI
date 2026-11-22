@@ -16,3 +16,6 @@ data/corpus/
 # SADAH private keys (the old names stay ignored on purpose)
 .sadah_cloud.json
 .sadah_token
+
+# Local registry copies of the weights (the served ones in models/ ship with the image)
+models/registry/**/*.pt

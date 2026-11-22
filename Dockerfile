@@ -19,7 +19,7 @@ COPY --chown=sadah:sadah . .
 USER sadah
 
 # The trained brains ship in models/; train here only if they are missing
-RUN test -f models/router.pt -a -f models/coder.pt || python -m core.trainer all medium
+RUN test -f models/router.pt -a -f models/coder.pt || python -m core.trainer all medium --promote
 
 EXPOSE 7860
 CMD ["python", "app.py"]

@@ -1,0 +1,6 @@
+{
+ "max_overall_drop": 0.01,
+ "max_skill_drop": 0.05,
+ "min_new_skill_accuracy": 0.8,
+ "skill_overrides": {}
+}
