@@ -105,3 +105,13 @@ tests/eval_extra/                  أسئلة اختبار إضافية لكل �
 - `truncated: true` في meta يعني أن سقف الوقت (`SADAH_MAX_TRAIN_SECONDS`) أوقف التدريب قبل اكتمال الحلقات.
 - لوحة المطوّر (`TrainingJob`) تعيد تحميل العقل الحي فقط إذا نجح المرشح في البوابة.
 - `Dockerfile` يدرّب عند غياب الأوزان بـ `--promote`: أول نسخة تُعتمد بلا مقارنة لأنه لا يوجد ما يُقارَن به.
+
+## 8. المنشئ (builder)
+
+- **الاختبارات** (بلا شبكة): `python -m tests.builder_stage1_test` و`tests.builder_stage2_test` و`tests.builder_api_test`.
+- **القياس**: `builder.evaluate.evaluate(suite=...)` يعيد تقريرًا بشكل تقرير البوابة نفسه، فيعمل `core.gate.compare` عليه لرفض أي تراجع في مهارة (landing/dashboard/shop/webapp/ask/refuse).
+- **قاعدة المجموعة المحجوزة**: `tests/builder_heldout.py` تُقاس مرة واحدة قبل أي ضبط للقواعد؛ بعدها تُنقل حالاتها إلى `tests/builder_requests.py` (`SUITE`) وتُكتب مجموعة محجوزة جديدة. لا تضبط القواعد على حالة ما زالت محجوزة.
+- **ميزة جديدة غير مدعومة**: أضف كلمتها إلى `OUT_OF_SCOPE` في `builder/understand.py` حتى يرفضها المنشئ صراحة بدل أن يتجاهلها.
+- **الأمان**: الملفات المسموحة `index.html` و`style.css` و`app.js` فقط، و`app.js` نص ثابت من القالب لا يتغير بالطلب؛ معاينة الواجهة داخل iframe بلا `allow-same-origin`.
+- **لم يُختبر هنا**: تشغيل `app.py` فعليًا (FastAPI غير مثبّت في بيئة التطوير)، وعرض كل القوالب في متصفح حقيقي (فُحصت صفحة الهبوط بصريًا فقط).
+

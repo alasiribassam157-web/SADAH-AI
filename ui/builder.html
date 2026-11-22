@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>منشئ سَداة</title>
+  <link rel="icon" href="/ui/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/ui/style.css" />
+  <link rel="stylesheet" href="/ui/builder.css" />
+</head>
+<body>
+  <main class="bld">
+    <h1>منشئ سَداة</h1>
+    <p class="bld-sub">صِف موقعك أو تطبيقك بالعربي: صفحة هبوط، لوحة بيانات، متجر عرض، قائمة مهام أو نموذج تسجيل.</p>
+    <label for="req">طلبك</label>
+    <textarea id="req" rows="3" maxlength="1000" placeholder="مثال: أبغى موقع لمطعم باسم بيت الشواء وفيه أسعار ولونه أحمر"></textarea>
+    <div class="bld-row">
+      <button id="go" type="button">ابنِ</button>
+      <button id="zip" type="button" disabled>تنزيل المشروع (zip)</button>
+    </div>
+    <p id="msg" role="status"></p>
+    <iframe id="view" title="معاينة المشروع" sandbox="allow-scripts" hidden></iframe>
+  </main>
+  <script src="/ui/builder.js"></script>
+</body>
+</html>
