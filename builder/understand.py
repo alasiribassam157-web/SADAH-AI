@@ -35,6 +35,7 @@ _PAGE_WORDS = {"portfolio": ("ملف شخصي", "معرض أعمال", "بورت
                "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف")}
 # whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
 _OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
+_ABBR = re.compile(r"[ء-ي]{1,2}\.")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
 
@@ -66,8 +67,9 @@ def _name(text: str) -> str:
                     break
                 if not bare or (out and _n(bare) in _STOP):  # the first word is the name even if it is a stop word (لون)
                     break
-                out.append(bare)
-                if nxt[-1] in _EDGE:
+                abbr = bool(_ABBR.fullmatch(nxt))  # a title such as «د.» keeps its dot and does not end the name
+                out.append(nxt if abbr else bare)
+                if nxt[-1] in _EDGE and not abbr:
                     break
             return " ".join(out)
     return ""

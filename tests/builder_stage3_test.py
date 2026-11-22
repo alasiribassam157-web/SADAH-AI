@@ -54,6 +54,10 @@ class Understanding(unittest.TestCase):
     def test_a_year_after_a_name_word_belongs_to_the_name(self):
         self.assertEqual(understand("ابي دعوة لحفلة تخرج باسم تخرج 2026").spec.name, "تخرج 2026")
 
+    def test_a_title_with_a_dot_stays_in_the_name_but_a_full_stop_still_ends_it(self):
+        self.assertEqual(understand("ملف شخصي لطبيبة اسمه د. هند").spec.name, "د. هند")
+        self.assertEqual(understand("موقع لمطعم اسمه الشاطئ. وفيه اسعار").spec.name, "الشاطئ")
+
     def test_numbers_after_a_name_are_still_dashboard_data(self):
         spec = understand("لوحة بيانات باسم المبيعات يناير 100 فبراير 150").spec
         self.assertEqual((spec.name, [lbl for lbl, _ in spec.data]), ("المبيعات", ["يناير", "فبراير"]))
