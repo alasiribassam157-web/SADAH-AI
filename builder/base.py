@@ -1,8 +1,11 @@
 """Shared page frame and styles for every template (RTL, Arabic, no external resources)."""
 from html import escape
 
-from builder import theme
+from builder import art, theme
 from builder.spec import Spec
+
+
+HERO_OPEN = '<div class="hero">'
 
 
 def fact(spec: Spec, key: str, label: str, placeholder: bool = True) -> str:
@@ -31,5 +34,5 @@ def page(spec: Spec, nav: str, hero: str, main: str, script: bool = False) -> st
     return (f'<!DOCTYPE html>\n<html lang="{spec.lang}" dir="rtl">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
             f'<title>{escape(spec.name)}</title>\n<link rel="stylesheet" href="style.css">\n</head>\n<body>\n'
-            f'<header><strong>{escape(spec.name)}</strong><nav>{nav}</nav></header>\n{hero}\n<main>\n{main}\n</main>\n'
+            f'<header><strong>{escape(spec.name)}</strong><nav>{nav}</nav></header>\n{hero.replace(HERO_OPEN, HERO_OPEN + art.hero(spec), 1)}\n<main>\n{main}\n</main>\n'
             f'<footer>© {escape(spec.name)}</footer>{tail}\n</body>\n</html>\n')

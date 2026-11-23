@@ -3,6 +3,8 @@ import re
 
 from builder.norm import n
 
+_PFX = r"(?:[وف]?لل|[وفبل]?(?:ال)?)"   # a one-letter prefix, ال, or «لل» (للمصاريف = لـ + المصاريف)
+
 TITLES = {"tasks": "قائمة مهام", "register": "نموذج تسجيل", "calculator": "حاسبة", "counter": "عداد", "timer": "مؤقت",
           "expenses": "مصروفات", "notes": "ملاحظات", "converter": "محوّل وحدات", "habits": "عادات"}
 WORDS = {"expenses": ("مصروفات", "مصاريف", "مصروف", "ميزانية", "مصروفاتي", "صرفت", "أصرف"),
@@ -12,7 +14,7 @@ WORDS = {"expenses": ("مصروفات", "مصاريف", "مصروف", "ميزا�
          "notes": ("ملاحظات", "ملاحظة", "مذكرات", "اكتب", "أكتب", "أفكاري", "افكاري", "خواطر", "يوميات"),
          "converter": ("محول", "محوّل", "يحول", "احول", "أحول", "تحويل الوحدات", "تحويل وحدات", "الوحدات"), "habits": ("عادات", "عادة", "عاداتي")}
 ASK = "أي تطبيق تبي؟ قائمة مهام، حاسبة، عدّاد، مؤقت، مصروفات، ملاحظات، محوّل وحدات، عادات، أو نموذج تسجيل."
-_RX = {a: re.compile(r"(?<![ء-ي])[وفبل]?(?:ال)?(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for a, ws in WORDS.items()}
+_RX = {a: re.compile(r"(?<![ء-ي])" + _PFX + r"(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for a, ws in WORDS.items()}
 
 
 # «احسب فيه الدرجات» is a calculator, but «احسب فيه السعرات» is a different app that does not exist: the verb alone proves nothing

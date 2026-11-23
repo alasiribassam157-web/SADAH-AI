@@ -102,6 +102,7 @@ def understand(request: str) -> Understood:
         made = _game(bare, name, got, accent)
         if made.spec:
             made.spec = themeword.with_theme(made.spec, theme, colour)
+            made.spec.art = themeword.art_flag(bare) is not False
         return made
     kind = _kind(norm)
     label, _, _ = content.for_business(text)
@@ -124,4 +125,6 @@ def understand(request: str) -> Understood:
     elif kind == "dashboard":
         pairs = _pairs(got.text)
         spec.data = pairs if len(pairs) >= 2 else []
-    return Understood(themeword.with_theme(spec, theme, colour), question="" if spec.name else "ما اسم المشروع؟")
+    spec = themeword.with_theme(spec, theme, colour)
+    spec.art = themeword.art_flag(bare) is not False
+    return Understood(spec, question="" if spec.name else "ما اسم المشروع؟")

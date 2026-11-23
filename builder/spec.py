@@ -25,6 +25,7 @@ class Spec:
     app: str = "tasks"                                            # webapp: one of APPS
     game: str = "memory"                                          # game: one of GAMES
     topic: str = "general"                                        # quiz game: one of TOPICS
+    art: bool = True                                              # decorative SVG in the hero band (builder/art.py)
     theme: str = "default"                                        # one of THEMES
     facts: dict = field(default_factory=dict)                     # stated in the request: phone, email, city, hours, date, time, place
     services: list[str] = field(default_factory=list)             # stated services / skills / products (else the defaults)

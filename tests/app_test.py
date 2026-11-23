@@ -31,6 +31,21 @@ class Server(unittest.TestCase):
         for path in ("/api/chat", "/api/home", "/dev"):
             self.assertIn(self.c.post(path, json={}).status_code, (404, 405), path)
 
+    def test_a_project_can_be_published_to_a_link_and_opened(self):
+        built = self.c.post("/api/build", json={"request": "موقع فخم لمطعم باسم السفرة"}).json()
+        url = self.c.post("/api/share", json={"spec": built["spec"]}).json()["url"]
+        self.assertTrue(url.startswith("/s/") and url.endswith("/"))
+        page = self.c.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertIn("السفرة", page.text)
+        self.assertIn("صُنع بأداة", page.text)
+        self.assertIn("default-src 'none'", page.headers["content-security-policy"])
+        self.assertEqual(self.c.get(url + "style.css").status_code, 200)
+        self.assertEqual(self.c.get(url.rstrip("/"), follow_redirects=False).headers["location"], url)
+        self.assertEqual(self.c.get(url + "app.js").status_code, 404)   # a landing page has no script
+        self.assertEqual(self.c.get("/s/not-a-token/").status_code, 404)
+        self.assertEqual(self.c.post("/api/share", json={"spec": {"kind": "x"}}).status_code, 400)
+
     def test_health(self):
         self.assertEqual(self.c.get("/api/health").json(), {"status": "ok"})
 

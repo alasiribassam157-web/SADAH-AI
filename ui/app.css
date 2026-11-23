@@ -32,3 +32,5 @@
 
 .foot { text-align: center; color: var(--ink-2); font-size: 13px; padding: 28px 16px 40px; border-top: 1px solid var(--line); }
 @media (max-width: 640px) { .tag { display: none; } .actions .btn { flex: 1; } }
+.sharebox { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 4px 4px 0; }
+#sharelink { direction: ltr; unicode-bidi: isolate; word-break: break-all; color: var(--accent); }
