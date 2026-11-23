@@ -1,4 +1,4 @@
-"""Builder requests, part E: held-out sets v14 and v15 after they were measured (12/13 and 13/14 before tuning; the miss was «نظام تذاكر» not being
+"""Builder requests, part E: held-out sets v14, v15 and v16 after they were measured (12/13, 13/14 and 10/11 before tuning; the miss was «نظام تذاكر» not being
 on the refusal list), and the game requests the builder was given when it learned to make games."""
 from tests.builder_case import case
 
@@ -48,4 +48,42 @@ CASES = [
     case("event", "دعوة لحفل تخرج باسم دفعة 2026 يوم الخميس", name="دفعة 2026", date="الخميس"),
     case("portfolio", "ملف اعمال باسم سارة ومهاراتي تصوير ومونتاج", name="سارة", services=["تصوير", "مونتاج"]),
     case("dashboard", "لوحة بيانات باسم المبيعات يناير 100 فبراير 140", name="المبيعات", data_labels=["يناير", "فبراير"]),
+    # moved from held-out v16 after measuring it (10/11 before tuning; the miss was a request with the verb «العب» and no word «لعبة»)
+    case("game", "ابغى لعبة بسيطة للجوال اطابق فيها الصور باسم تطابق", name="تطابق", game="memory"),
+    case("game", "ابي لعبة اسئلة دينية وثقافية باسم اختبر نفسك", name="اختبر نفسك", game="quiz"),
+    case("game", "لعبة تخمين الارقام ولونها اسود", game="guess", accent="#111827"),
+    case("game", "ابغى لعبة ثعبان كلاسيكية ولونها برتقالي باسم سلك", name="سلك", game="snake", accent="#c2410c"),
+    case("game", "العب اكس او مع الكمبيوتر", game="xo"),
+    case("landing", "موقع لمركز تدريب باسم مهارات فيه قسم عن الالعاب التعليمية", name="مهارات"),
+    case("shop", "متجر الكتروني باسم هواة وفيه لعبة بزل 60 وشطرنج 90", name="هواة", items_n=2),
+    case("ask", "ابغى لعبة ممتعة"),
+    case("refuse", "ابغى لعبة ثلاثية الابعاد"),
+    case("blog", "مدونة باسم عالم الالعاب", name="عالم الالعاب"),
+    case("event", "دعوة لبطولة العاب باسم كاس المحترفين يوم السبت", name="كاس المحترفين", date="السبت"),
+    # apps (v17 cases that were run while the apps were being built, so they are development cases, not held-out)
+    case("webapp", "ابغى حاسبة باسم حسابي", name="حسابي", app="calculator"),
+    case("webapp", "تطبيق عداد للتسبيح باسم سبحتي", name="سبحتي", app="counter"),
+    case("webapp", "ابي مؤقت للمذاكرة باسم ركز", name="ركز", app="timer"),
+    case("webapp", "تطبيق لتتبع مصروفاتي باسم ميزانيتي", name="ميزانيتي", app="expenses"),
+    case("webapp", "تطبيق ملاحظات باسم دفتري ولونه اخضر", name="دفتري", app="notes", accent="#15803d"),
+    case("webapp", "ابغى تطبيق يحول بين الكيلو والرطل باسم محول", name="محول", app="converter"),
+    case("webapp", "تطبيق عادات يومية باسم التزام", name="التزام", app="habits"),
+    case("webapp", "تطبيق تحويل وحدات باسم قياس", name="قياس", app="converter"),
+    case("refuse", "تطبيق مصروفات يربط حسابي البنكي"),
+    case("ask", "ابغى تطبيق"),
+    case("blog", "مدونة باسم عادات", name="عادات"),
+    case("landing", "موقع لشركة عدادات باسم قياس", name="قياس"),
+    # moved from held-out v17 after measuring it (5/11 before tuning: a game or app described by what the person does («اسبح فيه»,
+    # «اكتب فيه افكاري», «احسب كم صرفت», «احول الوحدات»), «تحدي» / «مسابقة» without the word «لعبة», «حساب سريع» read as an account)
+    case("game", "لعبة اسئلة عن الفضاء باسم رواد", name="رواد", game="quiz", topic="space"),
+    case("game", "ابغى لعبة 2048 باسم الارقام", name="الارقام", game="g2048"),
+    case("game", "لعبة التقاط النجوم باسم نجمة", name="نجمة", game="catch"),
+    case("game", "ابي تحدي حساب سريع باسم ذكي", name="ذكي", game="math"),
+    case("game", "مسابقة معلومات عن الحيوانات باسم عالم الحيوان", name="عالم الحيوان", game="quiz", topic="animals"),
+    case("webapp", "ابي تطبيق احسب فيه كم صرفت هالشهر باسم حسابي الشهري", name="حسابي الشهري", app="expenses"),
+    case("webapp", "تطبيق اكتب فيه افكاري باسم خواطر", name="خواطر", app="notes"),
+    case("webapp", "ابغى مؤقت اركز فيه باسم تركيز ولونه برتقالي", name="تركيز", app="timer", accent="#c2410c"),
+    case("webapp", "ابغى تطبيق اسبح فيه باسم ذكر", name="ذكر", app="counter"),
+    case("webapp", "تطبيق اقدر احول فيه الوحدات باسم قياساتي", name="قياساتي", app="converter"),
+    case("ask", "سوي لي تطبيق"),
 ]

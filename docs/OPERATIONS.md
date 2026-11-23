@@ -16,6 +16,8 @@
 ## إضافة شيء جديد
 
 - **نوع صفحة:** أضفه إلى `KINDS` في `builder/spec.py`، وقالبًا (`builder/pages.py` أو ملف جديد)، وكلماته إلى `_PAGE_WORDS` في `builder/understand.py`، وسجّله في `RENDERERS` في `builder/build.py`. اكتب حالات محجوزة قبل القواعد.
+- **تطبيق جديد:** اسمه في `APPS` (`builder/spec.py`)، وكلماته في `builder/appword.py`، وHTML/JS/CSS في `builder/app_main.py` و`app_js*.py`. البيانات تُحفظ عبر `STORE` (localStorage مع رجوع إلى الذاكرة داخل iframe المعاينة).
+- **موضوع أسئلة جديد:** في `TOPICS` (`builder/spec.py`) و`builder/quizbank.py` (ست أسئلة بأربع إجابات)، وكلماته في `quizbank.WORDS`.
 - **لعبة جديدة:** اسمها في `GAMES` (`builder/spec.py`)، وكلماتها وعنوانها في `builder/gameword.py`، وHTML في `MAINS` (`builder/games.py`) وسكربتها في `builder/game_js*.py`. السكربت DOM فقط: بلا `innerHTML` ولا `eval` ولا شبكة (`builder/checks.py` يرفضها).
 - **ميزة غير مدعومة:** أضف كلمتها إلى `OUT_OF_SCOPE` في `builder/understand.py` حتى يرفضها المنشئ صراحة بدل أن يتجاهلها.
 - **التعديل:** `builder/edit.py` (قواعد: لون، اسم، قسم، خدمة، منتج، نقطة بيانات، جوال/بريد/مدينة/ساعات/يوم/وقت/مكان، تبديل اللعبة) و`builder/specio.py` (تحقق صارم من المواصفات القادمة من المتصفح؛ اللون سداسي فقط لأنه يُكتب في CSS).
