@@ -1,8 +1,9 @@
 """Project specification: the structured form of an Arabic request, shared by every template."""
 from dataclasses import dataclass, field
 
-KINDS = ("landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event")
+KINDS = ("landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event", "game")
 APPS = ("tasks", "register")
+GAMES = ("memory", "guess", "xo", "quiz", "snake")
 SECTIONS = ("about", "services", "gallery", "pricing", "testimonials", "contact")
 COLORS = {"أزرق": "#1d4ed8", "أخضر": "#15803d", "أحمر": "#b91c1c", "أسود": "#111827",
           "ذهبي": "#a16207", "بنفسجي": "#6d28d9", "برتقالي": "#c2410c"}
@@ -20,6 +21,7 @@ class Spec:
     data: list[tuple[str, float]] = field(default_factory=list)   # dashboard: (label, value)
     items: list[tuple[str, str]] = field(default_factory=list)    # shop: (product, price text or "")
     app: str = "tasks"                                            # webapp: one of APPS
+    game: str = "memory"                                          # game: one of GAMES
     facts: dict = field(default_factory=dict)                     # stated in the request: phone, email, city, hours, date, time, place
     services: list[str] = field(default_factory=list)             # stated services / skills / products (else the defaults)
 
@@ -38,6 +40,8 @@ def problems(spec: Spec) -> list[str]:
         out.append("قسم التواصل مطلوب")
     if spec.kind == "webapp" and spec.app not in APPS:
         out.append(f"نوع التطبيق غير مدعوم: {spec.app}")
+    if spec.kind == "game" and spec.game not in GAMES:
+        out.append(f"نوع اللعبة غير مدعوم: {spec.game}")
     if not (spec.accent.startswith("#") and len(spec.accent) == 7):
         out.append("لون غير صالح")
     return out

@@ -5,4 +5,4 @@ def case(skill: str, q: str, **expect) -> dict:
     return {"skill": skill, "q": q, "expect": expect}
 
 
-SKILLS = ["landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event", "ask", "refuse"]
+SKILLS = ["landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event", "game", "ask", "refuse"]
