@@ -84,8 +84,11 @@ def understand(request: str) -> Understood:
     got = facts.extract(text, _SECTION_SKIP)   # phone / e-mail / hours leave the text, so they are never names or numbers
     name = _name(got.text)
     # a name after «باسم» is a label, not a feature request («ندوة الذكاء»); only an explicit marker earns this
-    # (two words at most: «حوالات يرسل اموال» is a name that swallowed a feature request)
-    asked = norm.replace(_n(name), " ", 1) if name and len(name.split()) <= 2 else norm
+    # (two words, or three when none after the first starts with «ي»: «حوالات يرسل اموال» is a name that swallowed a feature request,
+    # «حسابات الشركة الصغيرة» is a name)
+    words = name.split()
+    label = len(words) <= 2 or (len(words) == 3 and not any(w.startswith("ي") for w in words[1:]))
+    asked = norm.replace(_n(name), " ", 1) if name and label else norm
     asked = asked.replace(_n("تحويل الوحدات"), " ").replace(_n("تحويل وحدات"), " ")   # unit conversion is an app, money transfer is not
     asked = re.sub(rf"{_n('حساب')}\s+(?:سريع|ذهني)", " ", asked)   # a quick-maths game is not «حساب» (an account)
     asked = re.sub(rf"{_n('تتبع')}\s+(?:ال)?(?:مصروف|مصاريف|عاد|ميزاني)", " ", asked)   # tracking expenses or habits is an app, not order tracking
