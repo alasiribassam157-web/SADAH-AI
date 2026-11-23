@@ -9,7 +9,7 @@ TITLES = {"memory": "لعبة الذاكرة", "guess": "خمّن الرقم", "
 WORDS = {"memory": ("ذاكرة", "بطاقات", "تطابق", "أزواج", "شبيه"), "guess": ("خمن", "تخمين", "خمّن", "رقم"),
          "xo": ("إكس أو", "اكس او", "xo", "x o", "أو إكس"), "quiz": ("أسئلة", "اسئلة", "سؤال", "مسابقة", "كويز", "اختبار", "معلومات"),
          "snake": ("ثعبان", "سنيك", "snake", "حية")}
-_GAME = tuple(n(w) for w in ("لعبة", "ألعاب", "العاب", "game"))
+_GAME = tuple(n(w) for w in ("لعبة", "ألعاب", "العاب", "game", "العب", "نلعب"))
 # a site ABOUT games (a toy shop, a company) is not a game: these words mean a site, shop or page is wanted
 _SITE = tuple(n(w) for w in ("موقع", "متجر", "محل", "شركة", "مكتب", "معرض", "ملف", "مدونة", "دعوة", "لوحة", "نادي", "مركز"))
 _RX = {g: re.compile(r"(?<![ء-ي])(?:[وفبل]?(?:ال)?)(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for g, ws in WORDS.items()}

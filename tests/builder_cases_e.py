@@ -1,4 +1,4 @@
-"""Builder requests, part E: held-out sets v14 and v15 after they were measured (12/13 and 13/14 before tuning; the miss was «نظام تذاكر» not being
+"""Builder requests, part E: held-out sets v14, v15 and v16 after they were measured (12/13, 13/14 and 10/11 before tuning; the miss was «نظام تذاكر» not being
 on the refusal list), and the game requests the builder was given when it learned to make games."""
 from tests.builder_case import case
 
@@ -48,4 +48,16 @@ CASES = [
     case("event", "دعوة لحفل تخرج باسم دفعة 2026 يوم الخميس", name="دفعة 2026", date="الخميس"),
     case("portfolio", "ملف اعمال باسم سارة ومهاراتي تصوير ومونتاج", name="سارة", services=["تصوير", "مونتاج"]),
     case("dashboard", "لوحة بيانات باسم المبيعات يناير 100 فبراير 140", name="المبيعات", data_labels=["يناير", "فبراير"]),
+    # moved from held-out v16 after measuring it (10/11 before tuning; the miss was a request with the verb «العب» and no word «لعبة»)
+    case("game", "ابغى لعبة بسيطة للجوال اطابق فيها الصور باسم تطابق", name="تطابق", game="memory"),
+    case("game", "ابي لعبة اسئلة دينية وثقافية باسم اختبر نفسك", name="اختبر نفسك", game="quiz"),
+    case("game", "لعبة تخمين الارقام ولونها اسود", game="guess", accent="#111827"),
+    case("game", "ابغى لعبة ثعبان كلاسيكية ولونها برتقالي باسم سلك", name="سلك", game="snake", accent="#c2410c"),
+    case("game", "العب اكس او مع الكمبيوتر", game="xo"),
+    case("landing", "موقع لمركز تدريب باسم مهارات فيه قسم عن الالعاب التعليمية", name="مهارات"),
+    case("shop", "متجر الكتروني باسم هواة وفيه لعبة بزل 60 وشطرنج 90", name="هواة", items_n=2),
+    case("ask", "ابغى لعبة ممتعة"),
+    case("refuse", "ابغى لعبة ثلاثية الابعاد"),
+    case("blog", "مدونة باسم عالم الالعاب", name="عالم الالعاب"),
+    case("event", "دعوة لبطولة العاب باسم كاس المحترفين يوم السبت", name="كاس المحترفين", date="السبت"),
 ]
