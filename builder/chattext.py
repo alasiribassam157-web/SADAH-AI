@@ -1,6 +1,7 @@
 """What the assistant says: Arabic replies for the chat, built from the project's spec. No model: every sentence here is written by hand and
 chosen by what the person said, so the same conversation always gets the same answer (and can be tested)."""
 from builder import themes
+from builder.ml import design
 from builder.spec import COLORS, Spec
 
 KIND = {"landing": "موقع تعريفي", "dashboard": "لوحة بيانات", "shop": "متجر عرض", "webapp": "تطبيق ويب", "portfolio": "ملف أعمال",
@@ -64,19 +65,31 @@ def missing(spec: Spec) -> list[str]:
     return out[:4] or ["غير اللون الى بنفسجي", "خله زجاجي"]
 
 
-FIELDS = ("phone", "colour", "theme")
+FIELDS = ("design", "phone", "colour", "theme")
 QUESTION = {"phone": "تبي أحط رقم جوال للتواصل؟ اكتبه هنا، أو قل «لا».",
             "colour": "وش اللون اللي يعجبك؟ أزرق، أخضر، أحمر، أسود، ذهبي، بنفسجي، برتقالي. أو قل «لا» وأخليه كذا.",
             "theme": "وش الشكل اللي تبيه؟ فخم، داكن، بسيط، زجاجي. أو قل «لا» وأخليه كذا."}
-CHOICES = {"phone": ["لا"], "colour": ["أخضر", "أحمر", "بنفسجي", "لا"], "theme": ["فخم", "داكن", "زجاجي", "لا"]}
+CHOICES = {"design": ["طبّقه", "لا"], "phone": ["لا"], "colour": ["أخضر", "أحمر", "بنفسجي", "لا"], "theme": ["فخم", "داكن", "زجاجي", "لا"]}
 DONE = "هذا كل اللي أسألك عنه. جرّب المشروع، وقل لي لو تبي أي تعديل ثاني."
 
 
-def next_field(spec: Spec, skipped: tuple) -> str:
+def question(field: str, spec: Spec, about: str = "") -> str:
+    """The question for a field; the design one explains the model's reading of the project."""
+    s = design.suggest(spec, about) if field == "design" else None
+    if not s:
+        return QUESTION.get(field, "")
+    words = "، ".join(f"«{w}»" for w in s.because)
+    return (f"من كلامك فهمت إن مشروعك من مجال «{s.label}» (من {words}). {s.why}. أقترح لك اللون {COLOUR.get(s.accent, 'الذهبي')} "
+            f"{'بالشكل المعتاد' if s.theme == 'default' else 'وشكل ' + themes.LABELS[s.theme]}. أطبّقه؟")
+
+
+def next_field(spec: Spec, skipped: tuple, about: str = "") -> str:
     """The next thing worth asking about: what the request left out and the person has not waved away."""
     for f in FIELDS:
         if f in skipped:
             continue
+        if f == "design" and not design.decided(spec) and design.suggest(spec, about):
+            return f
         if f == "phone" and spec.kind in ("landing", "shop", "portfolio") and not spec.facts.get("phone"):
             return f
         if f == "colour" and spec.accent == "#1d4ed8" and spec.kind != "game":
@@ -86,12 +99,19 @@ def next_field(spec: Spec, skipped: tuple) -> str:
     return ""
 
 
-def built(spec: Spec, new: bool, seed: str, note: str = "", field: str = "") -> str:
-    ask = QUESTION[field] if field else DONE
+def built(spec: Spec, new: bool, seed: str, note: str = "", field: str = "", about: str = "") -> str:
+    ask = question(field, spec, about) if field else DONE
     if new:
         return f"{pick(['تمام، سويته لك!', 'أبشر، جاهز.', 'خلصت، شوف المعاينة.'], seed)} فهمت إنك تبي {summary(spec)} {ask}"
     return f"تم. {note} صار المشروع الحين: {summary(spec)} {ask}"
 
 
 def ask_name(spec_kind_hint: str, seed: str) -> str:
-    return pick(["حلو! وش اسم المشروع؟", "تمام، بس قل لي وش الاسم اللي تبيه له؟", "فهمت الفكرة. وش تحب نسميه؟"], seed)
+    return pick(["حلو! وش اسم المشروع؟", "تمام، بس قل لي وش الاسم اللي تبيه له؟", "فهمت الفكرة. وش تحب نسميه؟"], seed) + " وإذا ما عندك فكرة قل «اقترح لي»."
+
+
+NO_DOMAIN = "ما قدرت أعرف مجال مشروعك من كلامي معك. قل لي وش نشاطك (مطعم، عيادة، مكتب…) وأقترح لك الأنسب."
+
+
+def name_ideas(picks: list[str]) -> str:
+    return "اقتراحاتي لك: " + "، ".join(f"«{x}»" for x in picks) + ". اختر واحد منها أو اكتب اسمك."

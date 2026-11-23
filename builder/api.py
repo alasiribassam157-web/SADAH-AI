@@ -8,6 +8,8 @@ POST /api/build/zip  {request} or {spec} -> the project as a .zip (400 when it c
 (css and app.js inlined) for a sandboxed iframe in the UI; the zip always holds the separate files.
 """
 from builder import edit, specio
+from builder.ml import design
+from builder.norm import n
 from builder.build import Result, build, render, to_zip
 
 MAX_REQUEST = 1000
@@ -39,6 +41,9 @@ def respond_edit(spec_data, instruction: str) -> dict:
     spec, bad = specio.check(spec_data)
     if bad:
         return _answer(Result(False, problems=bad))
+    if design.wants(n(instruction)) and (s := design.suggest(spec)):
+        out = _answer(render(design.apply(spec, s)))
+        return {**out, "note": f"اخترت لك التصميم المناسب لمجال «{s.label}»: {s.why}.", "changed": True}
     done = edit.apply(spec, instruction[:MAX_REQUEST])
     out = _answer(render(done.spec))
     return {**out, "note": done.note, "changed": done.changed}

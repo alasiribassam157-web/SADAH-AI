@@ -96,24 +96,26 @@ class Rules(unittest.TestCase):
 class Interview(unittest.TestCase):
     def test_after_the_build_it_asks_one_thing_at_a_time_and_applies_the_answer(self):
         t = talk("ابغى موقع لمطعم باسم السفرة")
+        self.assertIn("أطبّقه", t.reply)
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا")
         self.assertIn("رقم جوال", t.reply)
-        t = talk("ابغى موقع لمطعم باسم السفرة", "0551234567")
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "0551234567")
         self.assertEqual(t.spec.facts.get("phone"), "0551234567")
         self.assertIn("اللون", t.reply)
-        t = talk("ابغى موقع لمطعم باسم السفرة", "0551234567", "اخضر")
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "0551234567", "اخضر")
         self.assertEqual(t.spec.accent, "#15803d")
         self.assertIn("الشكل", t.reply)
-        t = talk("ابغى موقع لمطعم باسم السفرة", "0551234567", "اخضر", "فخم")
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "0551234567", "اخضر", "فخم")
         self.assertEqual(t.spec.theme, "luxe")
         self.assertIn("كل اللي أسألك", t.reply)
 
     def test_a_question_can_be_waved_away_and_is_not_asked_again(self):
-        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "لا", "لا")
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "لا", "لا", "لا")
         self.assertIn("كل اللي أسألك", t.reply)
         self.assertEqual((t.spec.accent, t.spec.theme, t.spec.facts.get("phone")), ("#1d4ed8", "default", None))
 
     def test_a_reply_nobody_understands_repeats_the_question_and_never_starts_a_new_project(self):
-        t = talk("ابغى موقع لمطعم باسم السفرة", "كلام غريب جدا")
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "كلام غريب جدا")
         self.assertIn("ما فهمت", t.reply)
         self.assertIn("رقم جوال", t.reply)
         self.assertEqual(t.spec.name, "السفرة")
@@ -127,7 +129,7 @@ class Interview(unittest.TestCase):
 class NothingLeavesTheServer(unittest.TestCase):
     def test_no_source_file_can_reach_the_network_or_read_a_key(self):
         root = __import__("pathlib").Path(__file__).resolve().parent.parent
-        for path in [*(root / "builder").glob("*.py"), root / "app.py"]:
+        for path in [*(root / "builder").glob("*.py"), *(root / "builder" / "ml").glob("*.py"), root / "app.py"]:
             src = path.read_text(encoding="utf-8")
             for bad in ("urllib.request", "import requests", "import httpx", "import socket", "http.client", "anthropic", "openai", "API_KEY", "os.environ"):
                 self.assertNotIn(bad, src.replace("os.getenv(\"HOST\"", "").replace("os.getenv(\"PORT\"", ""), f"{path.name}: {bad}")

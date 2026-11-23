@@ -4,6 +4,8 @@ import zipfile
 from dataclasses import dataclass, field
 
 from builder import checks, dashboard, games, landing, pages, shop, webapp, spec as spec_mod
+from builder.ml import design
+from builder.norm import n
 from builder.understand import understand
 
 RENDERERS = {"landing": landing.render, "dashboard": dashboard.render, "shop": shop.render, "webapp": webapp.render,
@@ -26,7 +28,10 @@ def build(request: str) -> Result:
         return Result(False, message=u.unsupported)
     if u.question:
         return Result(False, question=u.question, spec=u.spec)
-    return render(u.spec)
+    spec = u.spec
+    if design.wants(n(request)) and not design.decided(spec) and (s := design.suggest(spec, request)):   # «…واختر لي التصميم المناسب»
+        spec = design.apply(spec, s)
+    return render(spec)
 
 
 def render(spec: spec_mod.Spec) -> Result:
