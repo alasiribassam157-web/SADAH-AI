@@ -51,10 +51,42 @@ class Sites(unittest.TestCase):
         self.assertTrue(bad)
 
 
+class Design(unittest.TestCase):
+    def test_every_theme_stops_its_motion_for_people_who_ask_for_less(self):
+        for t in THEMES:
+            css = theme.css("#1d4ed8", t)
+            self.assertIn("prefers-reduced-motion:reduce", css, t)
+            self.assertIn("animation:none!important", css, t)
+
+    def test_nothing_is_fetched_by_the_stylesheet(self):
+        for t in THEMES:
+            css = theme.css("#1d4ed8", t)
+            for bad in ("url(", "@import", "http:", "https:", "expression("):
+                self.assertNotIn(bad, css, f"{t} {bad}")
+
+    def test_a_light_accent_gets_light_shading_and_a_dark_one_dark_shading_so_the_text_on_it_keeps_its_contrast(self):
+        dark_accent, light_accent = theme.css("#1d4ed8"), theme.css("#c9a24b")
+        self.assertIn("--deep:#000000", dark_accent)
+        self.assertIn("--deep:#ffffff", light_accent)
+        self.assertIn("--on:#1a1409", light_accent)
+
+    def test_the_modern_parts_are_there(self):
+        css = theme.css("#1d4ed8")
+        for part in ("backdrop-filter", "animation-timeline:view()", "counter(c,arabic-indic)", "@keyframes grow", "text-wrap:balance"):
+            self.assertIn(part, css, part)
+        self.assertIn("backdrop-filter", theme.css("#1d4ed8", "glass"))
+
+    def test_no_theme_adds_an_inline_script_or_a_second_h1(self):
+        for t in THEMES:
+            r = render(Spec(kind="landing", name="تجربة", theme=t))
+            self.assertEqual(r.files["index.html"].count("<h1"), 1, t)
+            self.assertNotIn("<script", r.files["index.html"], t)
+
+
 class Requests(unittest.TestCase):
     def test_the_look_comes_from_the_request(self):
         for q, want in [("موقع فخم لمطعم باسم السفرة", "luxe"), ("متجر بثيم داكن باسم ليل", "dark"), ("موقع مينيمال لعيادة باسم سكون", "simple"),
-                        ("موقع بتصميم فاتح لعيادة باسم نور", "light"), ("موقع لعيادة باسم نور", "default")]:
+                        ("موقع بتصميم فاتح لعيادة باسم نور", "light"), ("موقع زجاجي لشركة باسم نبراس", "glass"), ("موقع عصري لمطعم باسم الواحة", "glass"), ("موقع لعيادة باسم نور", "default")]:
             self.assertEqual(build(q).spec.theme, want, q)
 
     def test_the_same_words_in_a_name_or_a_colour_or_a_small_app_do_not_change_the_look(self):

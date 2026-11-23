@@ -11,7 +11,7 @@ _E = r"(?![ء-ي])"
 _CTX = "(?:تصميم|ثيم|شكل|وضع|ستايل|نمط|خلفيه|مظهر)"
 # a word that is a look by itself, and a word that is one only after «تصميم / ثيم / شكل …» («تطبيق بسيط» is a small app, «ازرق داكن» is a colour)
 _SOLO = {"dark": ("دارك", "dark", "ليلي", "مظلم", "داكن", "داكنة", "مظلمة", "ليلية"), "luxe": ("فخم", "فخمة", "فاخر", "فاخرة", "راقي", "راقية", "ملكي", "ملكية", "لاكشري", "luxury", "luxe"),
-         "simple": ("مينيمال", "minimal", "نظيف", "نظيفة", "هادئ", "هادئة", "هادي"), "light": ()}
+         "simple": ("مينيمال", "minimal", "نظيف", "نظيفة", "هادئ", "هادئة", "هادي"), "light": (), "glass": ("زجاجي", "زجاجيه", "زجاج", "glass", "جلاس", "مستقبلي", "مستقبليه", "عصري", "عصريه")}
 _NEEDS_CONTEXT = {"dark": ("اسود", "غامق"), "light": ("فاتح", "ابيض", "نهاري", "light"), "simple": ("بسيط", "بسيطه")}
 _COLOUR_SHADE = re.compile(rf"(?:{'|'.join(n(c) for c in COLORS)})\s+(?:داكن|غامق|فاتح)")
 _RX = {t: re.compile(rf"{_B}(?:{'|'.join(map(n, ws))}){_E}") for t, ws in _SOLO.items() if ws}
