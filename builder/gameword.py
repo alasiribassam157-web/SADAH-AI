@@ -4,6 +4,8 @@ from dataclasses import replace
 
 from builder import quizbank
 from builder.norm import n
+
+_PFX = r"(?:[وف]?لل|[وفبل]?(?:ال)?)"   # a one-letter prefix, ال, or «لل» (للمصاريف = لـ + المصاريف)
 from builder.spec import Spec
 
 TITLES = {"memory": "لعبة الذاكرة", "guess": "خمّن الرقم", "xo": "إكس أو", "quiz": "مسابقة المعلومات", "snake": "لعبة الثعبان",
@@ -16,10 +18,10 @@ _GAME = tuple(n(w) for w in ("لعبة", "ألعاب", "العاب", "game", "ا
 # a site ABOUT games (a toy shop, a company) is not a game: these words mean a site, shop or page is wanted
 _WEAK = tuple(n(w) for w in ("تحدي", "مسابقة", "كويز"))   # «تحدي حساب سريع»: a game only when a game is also named
 _SITE = tuple(n(w) for w in ("موقع", "متجر", "محل", "شركة", "مكتب", "معرض", "ملف", "مدونة", "دعوة", "لوحة", "نادي", "مركز"))
-_RX = {g: re.compile(r"(?<![ء-ي])(?:[وفبل]?(?:ال)?)(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for g, ws in WORDS.items()}
+_RX = {g: re.compile(r"(?<![ء-ي])" + _PFX + r"(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for g, ws in WORDS.items()}
 
 
-_TOPIC = {t: re.compile(r"(?<![ء-ي])[وفبل]?(?:ال)?(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for t, ws in quizbank.WORDS.items()}
+_TOPIC = {t: re.compile(r"(?<![ء-ي])" + _PFX + r"(?:" + "|".join(re.escape(n(w)) for w in ws) + r")(?![ء-ي])") for t, ws in quizbank.WORDS.items()}
 
 
 def topic(norm: str) -> str:
@@ -29,7 +31,7 @@ def topic(norm: str) -> str:
 
 def wants_game(norm: str) -> bool:
     """A request for a game itself: «لعبة …» without a word that makes it a site about games. `norm` has the project name cut out."""
-    word = lambda ws: any(re.search(rf"(?<![ء-ي])[وفبل]?(?:ال)?{w}(?![ء-ي])", norm) for w in ws)  # noqa: E731
+    word = lambda ws: any(re.search(rf"(?<![ء-ي]){_PFX}{w}(?![ء-ي])", norm) for w in ws)  # noqa: E731
     return (word(_GAME) or (word(_WEAK) and bool(detect(norm)))) and not any(w in norm for w in _SITE)
 
 

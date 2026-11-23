@@ -1,7 +1,7 @@
 // The one page: send the request, show the answer (a question, a refusal, or the preview), edit it, offer the zip.
 (() => {
   const $ = (id) => document.getElementById(id);
-  const req = $("req"), go = $("go"), zip = $("zip"), msg = $("msg"), view = $("view");
+  const req = $("req"), go = $("go"), zip = $("zip"), share = $("share"), sharebox = $("sharebox"), sharelink = $("sharelink"), msg = $("msg"), view = $("view");
   const ins = $("ins"), editBtn = $("edit"), editbox = $("editbox"), result = $("result");
   let spec = null;   // the project as the server understood it; edits send it back (the server keeps no state)
 
@@ -31,13 +31,13 @@
   go.addEventListener("click", async () => {
     const text = req.value.trim();
     if (!text) { say("اكتب طلبك أولًا.", true); return; }
-    go.disabled = true; zip.disabled = true; result.hidden = true; say("جارٍ البناء…");
+    go.disabled = true; zip.disabled = true; share.disabled = true; sharebox.hidden = true; result.hidden = true; say("جارٍ البناء…");
     try {
       const res = await post("/api/build", { request: text });
       if (!res.ok) throw new Error("server");
       const r = await res.json();
       if (r.ok) {
-        spec = r.spec; zip.disabled = false; show(r);
+        spec = r.spec; zip.disabled = false; share.disabled = false; sharebox.hidden = true; show(r);
         say("تم بناء «" + r.name + "»." + (r.kind === "game" ? " اضغط داخل المعاينة لتلعب." : " هذه معاينة، والملفات في الـ zip."));
       } else if (r.question) say(r.question, false);
       else if (r.message) say(r.message, true);
@@ -55,12 +55,29 @@
       const res = await post("/api/build/edit", { spec, instruction: text });
       if (!res.ok) throw new Error("server");
       const r = await res.json();
-      if (r.ok && r.changed) { spec = r.spec; view.srcdoc = r.preview; ins.value = ""; say(r.note); }
+      if (r.ok && r.changed) { spec = r.spec; sharebox.hidden = true; view.srcdoc = r.preview; ins.value = ""; say(r.note); }
       else say(r.ok ? r.note : "تعذّر التعديل: " + r.problems.join("، "), !r.ok || !r.changed);
     } catch (e) { say("تعذّر الاتصال بالخادم. حاول مرة أخرى.", true); }
     editBtn.disabled = false;
   });
   ins.addEventListener("keydown", (e) => { if (e.key === "Enter") editBtn.click(); });
+
+  share.addEventListener("click", async () => {
+    if (!spec) return;
+    share.disabled = true;
+    try {
+      const res = await post("/api/share", { spec });
+      if (!res.ok) throw new Error("server");
+      const { url } = await res.json();
+      sharelink.href = url; sharelink.textContent = location.origin + url; sharebox.hidden = false;
+      say("هذا رابط مشروعك. يشتغل عند أي شخص يفتحه، والرابط نفسه يحمل المشروع بدون حساب ولا تخزين.");
+    } catch (e) { say("تعذّر إنشاء الرابط (قد يكون المشروع كبيرًا).", true); }
+    share.disabled = false;
+  });
+  $("copy").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(sharelink.href); say("نُسخ الرابط."); }
+    catch (e) { say("انسخ الرابط يدويًا من الأعلى.", true); }
+  });
 
   zip.addEventListener("click", async () => {
     if (!spec) return;

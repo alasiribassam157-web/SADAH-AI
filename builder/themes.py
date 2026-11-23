@@ -18,6 +18,7 @@ header a{color:var(--ink)}
 header a:hover{border-bottom-color:var(--accent)}
 .hero{background:radial-gradient(circle at 50% 0,color-mix(in srgb,var(--accent) 38%,var(--bg)),var(--bg) 72%);color:var(--ink)}
 .hero h1{letter-spacing:.02em}
+.hero .art{color:var(--accent);opacity:.2}
 .hero .btn{background:var(--accent);color:var(--on)}
 .card{border-color:var(--accent);border-width:1px}
 th{background:var(--soft);color:var(--ink);border-bottom:2px solid var(--accent)}

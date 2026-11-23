@@ -6,7 +6,7 @@ from builder import themes
 from builder.norm import n
 from builder.spec import COLORS, DEFAULT_ACCENT, Spec
 
-_B = r"(?<![ء-ي])[وفب]?(?:ال)?"
+_B = r"(?<![ء-ي])(?:[وف]?لل|[وفب]?(?:ال)?)"
 _E = r"(?![ء-ي])"
 _CTX = "(?:تصميم|ثيم|شكل|وضع|ستايل|نمط|خلفيه|مظهر)"
 # a word that is a look by itself, and a word that is one only after «تصميم / ثيم / شكل …» («تطبيق بسيط» is a small app, «ازرق داكن» is a colour)
@@ -16,6 +16,9 @@ _NEEDS_CONTEXT = {"dark": ("اسود", "غامق"), "light": ("فاتح", "اب�
 _COLOUR_SHADE = re.compile(rf"(?:{'|'.join(n(c) for c in COLORS)})\s+(?:داكن|غامق|فاتح)")
 _RX = {t: re.compile(rf"{_B}(?:{'|'.join(map(n, ws))}){_E}") for t, ws in _SOLO.items() if ws}
 _CTX_RX = {t: re.compile(rf"{_CTX}\s+(?:ال)?(?:{'|'.join(map(n, ws))}){_E}") for t, ws in _NEEDS_CONTEXT.items()}
+_DECOR = r"(?:ال)?(?:زخارف|زخرفه|زخرفات|رسومات|ديكور|تزيين)"
+_OFF = re.compile(rf"(?<![ء-ي])(?:بدون|بلا|شيل|احذف|ازل|الغ|الغي|امسح)\s+{_DECOR}")
+_ON = re.compile(rf"(?<![ء-ي])(?:اضف|زود|حط|ضيف|رجع|ارجع)\s+{_DECOR}")
 _VERB = re.compile(r"(?<![ء-ي])(?:غير|بدل|خلي|خل|حول|اجعل|صير|ابغى|ابي|نبي)")
 
 
@@ -36,7 +39,17 @@ def with_theme(spec: Spec, theme: str, explicit_colour: bool) -> Spec:
 
 def switch(spec: Spec, nt: str) -> tuple[Spec, list[str]]:
     """«خله فخم», «غير الثيم الى داكن»: the instruction (normalised) changes the theme."""
+    notes = []
+    flag = art_flag(nt)
+    if flag is not None and flag != spec.art:
+        spec = replace(spec, art=flag)
+        notes.append("أضفت الزخارف" if flag else "أزلت الزخارف")
     theme = detect(nt)
     if theme == "default" or theme == spec.theme or not _VERB.search(nt):
-        return spec, []
-    return with_theme(spec, theme, False), [f"صار الشكل «{themes.LABELS[theme]}»"]
+        return spec, notes
+    return with_theme(spec, theme, False), notes + [f"صار الشكل «{themes.LABELS[theme]}»"]
+
+
+def art_flag(nt: str) -> bool | None:
+    """«بدون زخارف» -> False, «أضف زخارف» -> True, nothing said -> None (normalised text)."""
+    return False if _OFF.search(nt) else True if _ON.search(nt) else None
