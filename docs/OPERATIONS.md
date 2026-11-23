@@ -16,6 +16,7 @@
 ## إضافة شيء جديد
 
 - **نوع صفحة:** أضفه إلى `KINDS` في `builder/spec.py`، وقالبًا (`builder/pages.py` أو ملف جديد)، وكلماته إلى `_PAGE_WORDS` في `builder/understand.py`، وسجّله في `RENDERERS` في `builder/build.py`. اكتب حالات محجوزة قبل القواعد.
+- **ثيم جديد:** في `PALETTE`/`_LUXE`/`_SIMPLE` داخل `builder/themes.py` وفي `THEMES` (`builder/spec.py`) وكلماته في `builder/themeword.py`؛ `tests/builder_themes_test.py` يفحص التباين لكل لون.
 - **تطبيق جديد:** اسمه في `APPS` (`builder/spec.py`)، وكلماته في `builder/appword.py`، وHTML/JS/CSS في `builder/app_main.py` و`app_js*.py`. البيانات تُحفظ عبر `STORE` (localStorage مع رجوع إلى الذاكرة داخل iframe المعاينة).
 - **موضوع أسئلة جديد:** في `TOPICS` (`builder/spec.py`) و`builder/quizbank.py` (ست أسئلة بأربع إجابات)، وكلماته في `quizbank.WORDS`.
 - **لعبة جديدة:** اسمها في `GAMES` (`builder/spec.py`)، وكلماتها وعنوانها في `builder/gameword.py`، وHTML في `MAINS` (`builder/games.py`) وسكربتها في `builder/game_js*.py`. السكربت DOM فقط: بلا `innerHTML` ولا `eval` ولا شبكة (`builder/checks.py` يرفضها).

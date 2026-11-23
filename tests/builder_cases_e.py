@@ -73,17 +73,4 @@ CASES = [
     case("ask", "ابغى تطبيق"),
     case("blog", "مدونة باسم عادات", name="عادات"),
     case("landing", "موقع لشركة عدادات باسم قياس", name="قياس"),
-    # moved from held-out v17 after measuring it (5/11 before tuning: a game or app described by what the person does («اسبح فيه»,
-    # «اكتب فيه افكاري», «احسب كم صرفت», «احول الوحدات»), «تحدي» / «مسابقة» without the word «لعبة», «حساب سريع» read as an account)
-    case("game", "لعبة اسئلة عن الفضاء باسم رواد", name="رواد", game="quiz", topic="space"),
-    case("game", "ابغى لعبة 2048 باسم الارقام", name="الارقام", game="g2048"),
-    case("game", "لعبة التقاط النجوم باسم نجمة", name="نجمة", game="catch"),
-    case("game", "ابي تحدي حساب سريع باسم ذكي", name="ذكي", game="math"),
-    case("game", "مسابقة معلومات عن الحيوانات باسم عالم الحيوان", name="عالم الحيوان", game="quiz", topic="animals"),
-    case("webapp", "ابي تطبيق احسب فيه كم صرفت هالشهر باسم حسابي الشهري", name="حسابي الشهري", app="expenses"),
-    case("webapp", "تطبيق اكتب فيه افكاري باسم خواطر", name="خواطر", app="notes"),
-    case("webapp", "ابغى مؤقت اركز فيه باسم تركيز ولونه برتقالي", name="تركيز", app="timer", accent="#c2410c"),
-    case("webapp", "ابغى تطبيق اسبح فيه باسم ذكر", name="ذكر", app="counter"),
-    case("webapp", "تطبيق اقدر احول فيه الوحدات باسم قياساتي", name="قياساتي", app="converter"),
-    case("ask", "سوي لي تطبيق"),
 ]

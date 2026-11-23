@@ -7,14 +7,14 @@ _MARKERS = {_n(w) for w in ("باسم", "اسمه", "اسمها", "اسم", "و�
 _STOP = {_n(w) for w in (
     "وفيه", "وفيها", "فيه", "فيها", "ويكون", "ولونه", "لونه", "باللون", "وأبغى", "وابغى", "ابغى", "أبغى", "وأبي", "وابي",
     "ويحتوي", "يحتوي", "ولون", "لون", "مع", "على", "و", "وبيانات", "بيانات", "ولونها", "لونها", "لبيع", "للبيع", "يبيع",
-    "ببيع", "وبيع")}
+    "ببيع", "وبيع", "ستايل", "بستايل", "طابع", "بطابع", "اجواء", "باجواء", "وضع", "بالوضع", "فخم", "فخمة", "فاخر", "فاخرة", "داكن", "داكنة", "دارك", "مينيمال", "ثيم", "بثيم", "تصميم", "بتصميم", "شكل", "بشكل", "نمط", "بنمط")}
 _EDGE = "«»\"“”،,.؟!:؛"
 _PERIOD = "(?:ال[أا]سبوع|الشهر|اليوم|الربع|السنة|[أا]سبوع|شهر|يوم|ربع|سنة)"
 _PAIR = re.compile(rf"((?:{_PERIOD}\s+)?[ء-ي]+)\s*[:=]?\s*(\d+(?:\.\d+)?)")
 # a date, time or place after the name ends it («زفاف سلمى يوم الخميس», «اسمها الرؤية في الرياض»; so a name
 # with «في» in the middle is cut there, a known limit); kept apart from _STOP because weekdays are also dashboard labels
 _WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "في", "نقدم", "نوفر", "خدماتنا", "مهاراتي", "نبيع", "منتجاتنا", "جوالي", "جوال",
-                                          "رقم", "رقمي", "واتساب", "ايميل", "ايميلنا", "ايميلي", "بريدنا", "نعمل", "دوامنا", "دوام", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
+                                          "رقم", "رقمي", "جوالنا", "رقمنا", "واتسابنا", "معرض", "معرضي", "اعمالي", "اعمالنا", "عن", "لدينا", "عندنا", "واتساب", "ايميل", "ايميلنا", "ايميلي", "بريدنا", "نعمل", "دوامنا", "دوام", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
 _PERIOD_WORD = re.compile(_PERIOD)
 _ABBR = re.compile(r"[ء-ي]{1,2}\.")
 _YEAR = re.compile(r"(?:19|20)\d\d")
@@ -47,6 +47,16 @@ def _name(text: str) -> str:
                     break
             return " ".join(out)
     return ""
+
+
+def strip_name(norm: str, name: str) -> str:
+    """The normalised request without the project name: the name right after its marker, not an earlier look-alike
+    («باسم الليل» must not cut the «الليل» out of «الليلي»)."""
+    if not name:
+        return norm
+    marker = "|".join(sorted(_MARKERS, key=len, reverse=True))
+    out, count = re.subn(rf"(?<![ء-ي])({marker})\s+{re.escape(_n(name))}", r"\1 ", norm, count=1)
+    return out if count else norm.replace(_n(name), " ", 1)
 
 
 def _pairs(text: str) -> list[tuple[str, float]]:
