@@ -99,10 +99,16 @@ JS = """"use strict";
   document.getElementById("cart-clear").addEventListener("click", function () { cart = []; draw(); say("فرّغت السلة."); });
   document.getElementById("cart-copy").addEventListener("click", function () {
     if (!orderEl.value) { say("السلة فارغة."); return; }
-    orderEl.select();
-    var done = false;
-    try { done = document.execCommand("copy"); } catch (e) { done = false; }
-    say(done ? "نسخت الطلب. أرسله لنا برقم التواصل أدناه." : "حدّد النص وانسخه يدويًا.");
+    var sent = "نسخت الطلب. أرسله لنا برقم التواصل أدناه.";
+    function manual() {
+      var done = false;
+      orderEl.select();
+      try { done = document.execCommand("copy"); } catch (e) { done = false; }
+      say(done ? sent : "حدّد النص وانسخه يدويًا.");
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(orderEl.value).then(function () { say(sent); }, manual);
+    } else { manual(); }
   });
   load();
   draw();
