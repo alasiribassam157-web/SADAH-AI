@@ -1,4 +1,4 @@
-"""Builder tests, part 2: dashboard / shop / web-app templates, the JavaScript checker, and the evaluation + gate.
+"""Builder tests, part 2: dashboard / shop / web-app templates, the JavaScript checker, and the evaluation.
 Offline, no PyTorch.
 
 Run:  python -m tests.builder_stage2_test
@@ -10,7 +10,6 @@ import zipfile
 from builder import checks
 from builder.build import build, to_zip
 from builder.evaluate import evaluate
-from core import gate
 from tests.builder_heldout import HELDOUT
 from tests.builder_requests import SKILLS, SUITE
 
@@ -84,19 +83,19 @@ class EvaluationAndGate(unittest.TestCase):
             self.assertIn(c["skill"], SKILLS)
             self.assertNotIn(c["q"], dev)
 
-    def test_gate_rejects_a_builder_that_forgets_a_kind_and_passes_itself(self):
-        base = evaluate()
-        self.assertTrue(gate.compare(base, evaluate())["passed"])
-
+    def test_a_builder_that_forgets_a_kind_scores_lower_on_that_kind(self):
         def landing_only(request):
             r = build(request)
             if r.ok and r.spec.kind != "landing":
                 r.ok, r.message, r.files = False, "غير مدعوم", {}
             return r
 
-        verdict = gate.compare(base, evaluate(landing_only))
-        self.assertFalse(verdict["passed"])
-        self.assertTrue(any("dashboard" in x or "shop" in x or "webapp" in x for x in verdict["reasons"]))
+        full = evaluate()["suites"]["builder_requests"]
+        weak = evaluate(landing_only)["suites"]["builder_requests"]
+        self.assertEqual(full["correct"], full["total"])
+        self.assertLess(weak["correct"], full["correct"])
+        for kind in ("dashboard", "shop", "webapp", "game"):
+            self.assertLess(weak["by_skill"][kind]["correct"], full["by_skill"][kind]["correct"], kind)
 
 
 if __name__ == "__main__":

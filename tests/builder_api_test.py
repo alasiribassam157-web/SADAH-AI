@@ -58,19 +58,21 @@ class Wiring(unittest.TestCase):
         src = (ROOT / "app.py").read_text(encoding="utf-8")
         ast.parse(src)
         self.assertIn("builder_api.build_router()", src)
-        self.assertIn('@app.get("/builder")', src)
+        self.assertIn('@app.get("/")', src)
+        for gone in ("agent", "SadahAgent", "/api/chat", "/api/home"):   # the chat product is gone for good
+            self.assertNotIn(gone, src)
 
     def test_the_page_is_rtl_arabic_sandboxed_and_loads_its_assets(self):
-        html = (ROOT / "ui" / "builder.html").read_text(encoding="utf-8")
+        html = (ROOT / "ui" / "index.html").read_text(encoding="utf-8")
         self.assertIn('lang="ar" dir="rtl"', html)
         self.assertIn('sandbox="allow-scripts"', html)  # no same-origin: generated code cannot touch the app
-        for asset in ("builder.js", "builder.css"):
+        for asset in ("app.js", "app.css", "hero.js", "hero.css"):
             self.assertIn(asset, html)
             self.assertTrue((ROOT / "ui" / asset).is_file())
 
-    def test_the_page_script_never_writes_server_text_as_html(self):
-        js = (ROOT / "ui" / "builder.js").read_text(encoding="utf-8")
-        self.assertNotIn("innerHTML", js)
+    def test_the_page_scripts_never_write_html_strings(self):
+        for name in ("app.js", "hero.js"):
+            self.assertNotIn("innerHTML", (ROOT / "ui" / name).read_text(encoding="utf-8"), name)
 
 
 if __name__ == "__main__":

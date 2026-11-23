@@ -5,99 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="google" content="notranslate" />
   <meta name="theme-color" content="#050506" />
-  <title>sadah · ابنِ موقعك بالعربي</title>
+  <title>sadah · ابنِ موقعك أو تطبيقك أو لعبتك بالعربي</title>
+  <meta name="description" content="sadah يبني مواقع وتطبيقات وألعاب من جملة عربية: تكتب طلبك فتستلم مشروعًا جاهزًا." />
   <link rel="icon" href="/ui/logo.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@200;300;400;500;600;700&family=Syne:wght@800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@200;300;400;500;600;700&family=Syne:wght@800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/ui/style.css" />
-  <link rel="stylesheet" href="/ui/home.css" />
-  <link rel="stylesheet" href="/ui/chat.css" />
-  <link rel="stylesheet" href="/ui/cv.css" />
-  <link rel="stylesheet" href="/ui/trace.css" />
-  <link rel="stylesheet" href="/ui/intro.css" />
   <link rel="stylesheet" href="/ui/hero.css" />
+  <link rel="stylesheet" href="/ui/app.css" />
+  <link rel="stylesheet" href="/ui/intro.css" />
 </head>
 <body>
   <div id="intro" class="intro-screen" aria-hidden="true"><p class="intro-word">sadah</p></div>
   <header class="topbar">
-    <a class="brand" href="/" aria-label="sadah">
-      <img src="/ui/logo.svg" alt="" class="mark" />
-      <span class="word"><b data-t="brand"></b><small data-t="tagline"></small></span>
-    </a>
-    <div class="top-actions">
-      <button class="tb-new" data-new><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
-      <button id="btn-lang" class="tb-icon lang"></button>
-      <button id="btn-history" class="tb-icon" data-label="menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></button>
-    </div>
+    <a class="brand" href="/" aria-label="sadah"><img src="/ui/logo.svg" alt="" /><b>sadah</b></a>
+    <span class="tag">مواقع · تطبيقات · ألعاب، من جملة عربية</span>
   </header>
-
-  <aside id="drawer" class="drawer">
-    <div class="drawer-head"><b data-t="history"></b><button class="tb-icon" data-close data-label="close">×</button></div>
-    <button class="drawer-row primary" data-new><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="newChat"></span></button>
-    <button class="drawer-row" id="btn-cv"><svg viewBox="0 0 24 24"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8zM14 3v5h5M9 13h6M9 17h4"/></svg><span data-t="cv"></span></button>
-    <nav id="history" class="history"></nav>
-    <p class="drawer-foot" data-t="localOnly"></p>
-  </aside>
-  <div class="scrim" id="scrim"></div>
-
-  <main id="main">
-    <section class="home">
-      <div class="hero" id="hero">
-        <canvas id="stage" aria-hidden="true"></canvas>
-      </div>
-      <p id="caption" class="caption" aria-live="off"></p>
-      <div class="hero-copy">
-        <p class="hero-title">من جملة عربية <em>إلى موقع يعمل</em></p>
-        <a class="hero-cta" href="/builder"><span data-t="build"></span><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></a>
-      </div>
-      <div class="intro">
-        <h1 data-t="ask"></h1>
-      </div>
-      <div id="home-slot" class="home-slot"></div>
-      <div class="ideas">
-        <div id="cats" class="cats" role="tablist"></div>
-        <p class="ideas-label" data-t="try"></p>
-        <div id="examples" class="examples"></div>
-      </div>
-      <section class="board" aria-labelledby="board-title">
-        <div class="board-head"><h2 id="board-title" data-t="board"></h2>
-        <p class="dateline"><span id="hello"></span><span class="sep" aria-hidden="true">·</span><span id="hijri"></span><span class="sep" aria-hidden="true">·</span>
-          <label class="city"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-            <span class="sr" data-t="city"></span><select id="city"></select></label></p>
+  <main class="wrap">
+    <div class="hero" id="hero"><canvas id="stage" aria-hidden="true"></canvas></div>
+    <p id="caption" class="caption" aria-live="off"></p>
+    <div class="hero-copy">
+      <h1 class="hero-title">من جملة عربية <em>إلى موقع أو تطبيق أو لعبة</em></h1>
+      <p class="hero-sub">صِف اللي تبيه بكلامك، وsadah يبنيه ويعطيك المعاينة والملفات جاهزة.</p>
+    </div>
+    <section class="narrow" aria-label="ابنِ مشروعك">
+      <div class="box">
+        <label for="req">وش تبي تبني؟</label>
+        <textarea id="req" rows="3" maxlength="1000"></textarea>
+        <div class="actions">
+          <button id="go" type="button" class="btn">ابنِ</button>
+          <button id="zip" type="button" class="btn ghost" disabled>تنزيل المشروع (zip)</button>
         </div>
-        <div class="board-row">
-          <button class="cell" id="tile-weather"></button>
-          <button class="cell" id="tile-prayer"></button>
-          <button class="cell" id="tile-fx"></button>
-        </div>
-      </section>
-      <p class="own"><img src="/ui/logo.svg" alt="" /><span data-t="own"></span></p>
+      </div>
+      <p id="msg" role="status"></p>
+      <div class="kinds">
+        <h2>مواقع وتطبيقات، اضغط لتجرّب مثالًا</h2><div id="kinds" class="chips"></div>
+        <h2>ألعاب</h2><div id="games" class="chips"></div>
+      </div>
     </section>
-    <section id="thread" class="thread" aria-live="polite"></section>
+    <section id="result" class="result" hidden>
+      <div id="editbox">
+        <input id="ins" type="text" maxlength="300" aria-label="تعديل" placeholder="عدّل المشروع: غيّر اللون إلى أخضر، أضف قسم الأسعار، غيّر اللعبة إلى ثعبان…" />
+        <button id="edit" type="button" class="btn">عدّل</button>
+      </div>
+      <iframe id="view" title="معاينة المشروع" sandbox="allow-scripts"></iframe>
+    </section>
   </main>
-
-  <div id="dock" class="dock">
-    <form id="composer" class="composer">
-      <textarea id="input" rows="1" dir="auto" autocomplete="off"></textarea>
-      <button id="send" type="submit" class="send"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
-    </form>
-    <p class="hint" data-t="hint"></p>
-  </div>
-
-  <div id="wake" class="wake" role="status" aria-live="polite">
-    <img src="/ui/logo.svg" alt="" class="wake-mark" />
-    <b data-t="waking"></b><span data-t="wakingNote"></span>
-  </div>
-
+  <footer class="foot">sadah يعمل بقواعد عربية مكتوبة من الصفر، بدون أي نموذج ذكاء خارجي، ولا يرسل طلبك لأي جهة.</footer>
   <script src="/ui/intro.js"></script>
-  <script src="/ui/content.js"></script>
-  <script src="/ui/trace.js"></script>
-  <script src="/ui/history.js"></script>
-  <script src="/ui/home.js"></script>
-  <script src="/ui/chat.js"></script>
-  <script src="/ui/cv.js"></script>
-  <script src="/ui/wake.js"></script>
   <script src="/ui/hero.js"></script>
+  <script src="/ui/app.js"></script>
 </body>
 </html>

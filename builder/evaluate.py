@@ -1,5 +1,4 @@
-"""Scores the builder on the Arabic request suite, in the same report shape as core.evalsuite,
-so core.gate can compare a new builder (rules, templates or model) with the stable one."""
+"""Scores the builder on the Arabic request suite: correct / total overall and per kind (landing, game, ask, refuse …)."""
 from builder import checks
 from builder.build import build as default_build
 from tests.builder_requests import SKILLS, SUITE

@@ -3,11 +3,11 @@ import io
 import zipfile
 from dataclasses import dataclass, field
 
-from builder import checks, dashboard, landing, pages, shop, webapp, spec as spec_mod
+from builder import checks, dashboard, games, landing, pages, shop, webapp, spec as spec_mod
 from builder.understand import understand
 
 RENDERERS = {"landing": landing.render, "dashboard": dashboard.render, "shop": shop.render, "webapp": webapp.render,
-             "portfolio": pages.portfolio, "blog": pages.blog, "event": pages.event}
+             "portfolio": pages.portfolio, "blog": pages.blog, "event": pages.event, "game": games.render}
 
 
 @dataclass

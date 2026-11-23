@@ -2,20 +2,5 @@
 venv/
 .venv/
 __pycache__/
-checkpoints/
-devtools/
-.nexus_cloud.json
-.render_hook
-data/cloud_questions.jsonl
-workspace/
-deploy/bin/
-.nexus_token
-PERMANENT_LINK.txt
-data/corpus/
-
-# SADAH private keys (the old names stay ignored on purpose)
-.sadah_cloud.json
-.sadah_token
-
-# Local registry copies of the weights (the served ones in models/ ship with the image)
-models/registry/**/*.pt
+tests/
+docs/

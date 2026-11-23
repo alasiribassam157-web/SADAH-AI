@@ -4,17 +4,18 @@ Matching ignores hamza/alef variants (أ إ آ ا) and ى/ي, because people typ
 import re
 from dataclasses import dataclass
 
-from builder import content, facts
+from builder import content, facts, gameword
 from builder.products import products
+from builder.naming import _name, _pairs
 from builder.norm import n as _n
 from builder.spec import COLORS, DEFAULT_ACCENT, Spec
 
 SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر عرض، ملف أعمال، مدونة، دعوة فعالية، "
-             "وتطبيق ويب صغير (قائمة مهام أو نموذج تسجيل).")
+             "وتطبيق ويب صغير (قائمة مهام أو نموذج تسجيل)، وألعاب (ذاكرة، تخمين رقم، إكس أو، أسئلة، ثعبان).")
 OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانات", "تسجيل دخول", "حجز", "سيرفر", "ذكاء",
                 "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال",
                 # features that need a server or live data: said plainly, never silently dropped
-                "سلة مشتريات", "سلة التسوق", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
+                "سلة مشتريات", "سلة التسوق", "نظام تذاكر", "اونلاين", "اون لاين", "متصدرين", "ثلاثية الابعاد", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
                 "مدفوع", "اشتراك شهري", "كاشير", "نقاط البيع", "تنبيهات", "ترجمة تلقائية", "ترجمة فورية", "مزامنة", "حساب", "حسابات", "عضوية", "تتبع", "توصيل للطلبات", "توصيل الطلبات", "استقبال الطلبات", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
                  "gallery": ("معرض صور", "صور", "ألبوم"), "pricing": ("أسعار", "باقات", "تسعير"),
@@ -22,27 +23,12 @@ SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "ser
 _DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩٫", "0123456789.")
 
 
-_MARKERS = {_n(w) for w in ("باسم", "اسمه", "اسمها", "اسم", "واسمه", "واسمها")}
-_STOP = {_n(w) for w in (
-    "وفيه", "وفيها", "فيه", "فيها", "ويكون", "ولونه", "لونه", "باللون", "وأبغى", "وابغى", "ابغى", "أبغى", "وأبي", "وابي",
-    "ويحتوي", "يحتوي", "ولون", "لون", "مع", "على", "و", "وبيانات", "بيانات", "ولونها", "لونها", "لبيع", "للبيع", "يبيع",
-    "ببيع", "وبيع")}
-_EDGE = "«»\"“”،,.؟!:؛"
 _SECTION_SKIP = {_n(w) for ws in SECTION_WORDS.values() for w in ws} | {_n("واتساب")}
-_PERIOD = "(?:ال[أا]سبوع|الشهر|اليوم|الربع|السنة|[أا]سبوع|شهر|يوم|ربع|سنة)"
-_PAIR = re.compile(rf"((?:{_PERIOD}\s+)?[ء-ي]+)\s*[:=]?\s*(\d+(?:\.\d+)?)")
 _PAGE_WORDS = {"portfolio": ("ملف شخصي", "ملف أعمال", "معرض أعمال", "بورتفوليو", "portfolio", "أعمالي"),
                "blog": ("مدونة", "مدونتي", "مقالاتي", "مقالات"),
                "event": ("دعوة", "فعالية", "حفل", "مؤتمر", "مناسبة", "ملتقى", "زفاف", "ندوة", "محاضرة")}
 # whole words only (with the usual one-letter prefixes and ال): "دفع" must not match "دفعة" (a graduating class)
 _OUT = [(w, re.compile(rf"(?<![ء-ي])(?:[وفبك]?(?:ال)?|[وف]?لل|[وف]?ل){re.escape(_n(w))}(?![ء-ي])")) for w in OUT_OF_SCOPE]
-# a date, time or place after the name ends it («زفاف سلمى يوم الخميس», «اسمها الرؤية في الرياض»; so a name
-# with «في» in the middle is cut there, a known limit); kept apart from _STOP because weekdays are also dashboard labels
-_WHEN = {_n(w) for w in ("يوم", "بتاريخ", "الساعة", "في", "نقدم", "نوفر", "خدماتنا", "مهاراتي", "نبيع", "منتجاتنا", "جوالي", "جوال",
-                                          "رقم", "رقمي", "واتساب", "ايميل", "ايميلنا", "ايميلي", "بريدنا", "نعمل", "دوامنا", "دوام", "السبت", "الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة")}
-_PERIOD_WORD = re.compile(_PERIOD)
-_ABBR = re.compile(r"[ء-ي]{1,2}\.")
-_YEAR = re.compile(r"(?:19|20)\d\d")
 _MOBILE = re.compile(r"تطبيق(?:ات)?\s+(?:ل)?(?:ال)?جوال")
 
 
@@ -55,46 +41,6 @@ class Understood:
 
 def _has(text: str, words) -> bool:
     return any(_n(w) in text for w in words)
-
-
-def _ends(w: str) -> bool:
-    """A word that ends a name; also when a و is glued to it («وخدماتنا», «وواتساب»)."""
-    return w in _STOP or w in _WHEN or (w.startswith("و") and (w[1:] in _STOP or w[1:] in _WHEN))
-
-
-def _name(text: str) -> str:
-    words = text.split()
-    for i, w in enumerate(words):
-        if _n(w.strip(_EDGE)) in _MARKERS:
-            out = []
-            for nxt in words[i + 1:i + 5]:
-                bare = nxt.strip(_EDGE)
-                if _YEAR.fullmatch(bare) and out:
-                    out.append(bare)  # a year after a name word is part of the name (تخرج 2026), not data
-                    break
-                if out and _PERIOD_WORD.fullmatch(_n(bare)) and any(c.isdigit() for t in words[i + 2 + len(out):i + 4 + len(out)] for c in t):
-                    break  # «المصروفات الاسبوع الاول 300»: the period word starts the first data label
-                if any(c.isdigit() for c in bare):
-                    if out:
-                        out.pop()  # the word before a number is a data label, not part of the name
-                    break
-                if not bare or (out and _ends(_n(bare))):  # the first word is the name even if it is a stop word (لون)
-                    break
-                abbr = bool(_ABBR.fullmatch(nxt))  # a title such as «د.» keeps its dot and does not end the name
-                out.append(nxt if abbr else bare)
-                if nxt[-1] in _EDGE and not abbr:
-                    break
-            return " ".join(out)
-    return ""
-
-
-def _pairs(text: str) -> list[tuple[str, float]]:
-    out = []
-    for label, num in _PAIR.findall(text):
-        label = label[1:] if label.startswith("و") and len(label) > 3 else label
-        if _n(label) not in _MARKERS and _n(label) not in _STOP:
-            out.append((label, float(num)))
-    return out
 
 
 def _kind(norm: str) -> str:
@@ -116,6 +62,14 @@ def _app(norm: str) -> str:
     return "register" if _has(norm, ("تسجيل", "نموذج", "اشتراك")) else ""
 
 
+def _game(norm: str, name: str, got, accent: str) -> Understood:
+    """A game: which one is the only essential question; the title defaults to the game's own name."""
+    game = gameword.detect(norm)
+    if not game:
+        return Understood(None, question="أي لعبة تبي؟ ذاكرة، تخمين رقم، إكس أو، أسئلة، أو ثعبان.")
+    return Understood(Spec(kind="game", game=game, name=name or gameword.TITLES[game], accent=accent, facts=got.facts))
+
+
 def understand(request: str) -> Understood:
     text = " ".join(request.translate(_DIGITS).split())
     norm = _n(text).lower()
@@ -127,11 +81,14 @@ def understand(request: str) -> Understood:
     hit = next((w for w, rx in _OUT if rx.search(asked)), "") or ("جوال" if _MOBILE.search(asked) else "")
     if hit:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
+    accent = next((hex_ for ar, hex_ in COLORS.items() if _n(ar) in norm), DEFAULT_ACCENT)
+    if gameword.wants_game(norm):
+        return _game(norm, name, got, accent)
     kind = _kind(norm)
     label, _, _ = content.for_business(text)
     spec = Spec(kind=kind, business=label if kind == "landing" else "", name=name,
                 facts=got.facts, services=got.services)
-    spec.accent = next((hex_ for ar, hex_ in COLORS.items() if _n(ar) in norm), DEFAULT_ACCENT)
+    spec.accent = accent
     if kind == "landing":
         found = {s for s, ws in SECTION_WORDS.items() if _has(norm, ws)}
         spec.sections = [s for s in ("about", "services", "gallery", "pricing", "testimonials", "contact")
