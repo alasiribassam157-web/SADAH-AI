@@ -10,13 +10,14 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
-from builder import api as builder_api, share
+from builder import api as builder_api, chatapi, share
 
 ROOT = Path(__file__).resolve().parent
 app = FastAPI(title="sadah", version="4.0")
 app.mount("/ui", StaticFiles(directory=ROOT / "ui"), name="ui")
 app.include_router(builder_api.build_router())
 app.include_router(share.build_router())
+app.include_router(chatapi.build_router())
 
 
 @app.get("/")
