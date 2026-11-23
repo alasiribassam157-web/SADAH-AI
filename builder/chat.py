@@ -1,12 +1,11 @@
 """The conversation: (messages so far, current project) -> the assistant's next message, and the site when this turn built or changed one.
 
 Stateless like the rest of sadah: the browser sends the whole conversation, the server replays the person's earlier messages to recover what is still
-being asked («وش اسم المشروع؟» → the next short message is the name), then answers the last one. Rules only. When the site owner turns on a model
-(builder/llm.py) the same replay supplies the context and the model does the talking, while this module's pipeline still builds the site."""
+being asked («وش اسم المشروع؟» → the next short message is the name), then answers the last one. Rules only: no outside model, nothing leaves the server."""
 import re
 from dataclasses import dataclass, field
 
-from builder import chattext as T, edit, llm, specio
+from builder import chattext as T, edit, specio
 from builder.build import Result, build, render
 from builder.norm import n
 from builder.spec import Spec
@@ -25,7 +24,8 @@ _REQUEST = re.compile(r"(?<![ء-ي])(?:ابغى|ابي|ابغا|اريد|سوي|
 class State:
     spec: Spec | None = None
     pending: str = ""   # the request that was not complete yet
-    asked: str = ""     # "name" when the last question was the project's name
+    asked: str = ""     # what the last question was about: "name", or one of chattext.FIELDS
+    skipped: tuple = ()  # interview questions the person waved away
 
 
 @dataclass
@@ -34,7 +34,6 @@ class Turn:
     suggestions: list[str] = field(default_factory=list)
     result: Result | None = None
     spec: Spec | None = None
-    engine: str = "rules"
 
 
 def clean(messages) -> list[tuple[str, str]]:
@@ -46,8 +45,31 @@ def clean(messages) -> list[tuple[str, str]]:
     return out[-MAX_MESSAGES:]
 
 
+_SKIP = re.compile(r"^(?:لا|تخطى|خلاص|بعدين|ما ابي|مو لازم|ما له داعي|ماله داعي|كذا حلو|عادي)(?![ء-ي])")
+_PHONE = re.compile(r"(?<!\d)(\+?\d{9,13})(?!\d)")
+_FIELD_EDIT = {"colour": "غير اللون الى {}", "theme": "خله {}"}
+
+
 def _built(st: State, r: Result, text: str, new: bool, note: str = "") -> tuple[State, str, list[str], Result]:
-    return State(spec=r.spec), T.built(r.spec, new, text, note), T.missing(r.spec), r
+    skipped = () if new else st.skipped
+    field = T.next_field(r.spec, skipped)
+    return State(r.spec, asked=field, skipped=skipped), T.built(r.spec, new, text, note, field), T.CHOICES.get(field, []), r
+
+
+def _answer(st: State, text: str, nt: str) -> tuple[State, str, list[str], Result | None] | None:
+    """The person's reply to an interview question: skip it, or apply it as an edit. None when it is not an answer (it is handled as a normal message)."""
+    field = st.asked
+    if _SKIP.match(nt):
+        skipped = st.skipped + (field,)
+        nxt = T.next_field(st.spec, skipped)
+        return State(st.spec, asked=nxt, skipped=skipped), T.QUESTION[nxt] if nxt else T.DONE, T.CHOICES.get(nxt, []), None
+    instruction = ""
+    if field == "phone" and (m := _PHONE.search(nt.replace(" ", ""))):
+        instruction = f"اضف رقم جوالي {m.group(1)}"
+    elif field in _FIELD_EDIT and len(nt.split()) <= 3:
+        instruction = _FIELD_EDIT[field].format(text)
+    done = edit.apply(st.spec, instruction) if instruction else None
+    return _built(st, render(done.spec), text, False, done.note) if done and done.changed else None
 
 
 def _step(st: State, text: str) -> tuple[State, str, list[str], Result | None]:
@@ -58,6 +80,8 @@ def _step(st: State, text: str) -> tuple[State, str, list[str], Result | None]:
         nt = n(text)
     elif st.pending:
         text, nt = f"{st.pending} {text}", n(f"{st.pending} {text}")
+    elif st.spec and st.asked in T.FIELDS and (got := _answer(st, text, nt)):
+        return got
     elif _THANKS.search(nt):
         return st, T.pick(T.THANKS, text), [], None
     elif _CAN.search(nt):
@@ -75,7 +99,11 @@ def _step(st: State, text: str) -> tuple[State, str, list[str], Result | None]:
         done = edit.apply(st.spec, text)
         if done.changed:
             return _built(st, render(done.spec), text, False, done.note)
-    if not (_KIND.search(nt) or st.pending or "باسم" in nt or st.spec):
+    if st.spec and not (_KIND.search(nt) or st.pending or "باسم" in nt):   # something said about the current project that no rule understood
+        if st.asked in T.FIELDS:
+            return st, "ما فهمت جوابك. " + T.QUESTION[st.asked], T.CHOICES[st.asked], None
+        return st, "ما فهمت التعديل. جرّب مثلًا:", T.missing(st.spec), None
+    if not (_KIND.search(nt) or st.pending or "باسم" in nt):
         return State(), "ما عرفت وش تبي بالضبط. تبي موقع، تطبيق صغير، ولا لعبة؟ جرّب مثلًا:", T.START, None
     r = build(text)
     if r.ok:
@@ -90,7 +118,7 @@ def _step(st: State, text: str) -> tuple[State, str, list[str], Result | None]:
     return State(), "ما قدرت أبني هذا الطلب (" + "، ".join(r.problems) + "). جرّب تعيد صياغته.", T.START, None
 
 
-def turn(messages, spec_data=None, use_model: bool = True) -> Turn:
+def turn(messages, spec_data=None) -> Turn:
     """The assistant's reply to the last user message in `messages`."""
     msgs = clean(messages)
     if not msgs or msgs[-1][0] != "user":
@@ -102,25 +130,6 @@ def turn(messages, spec_data=None, use_model: bool = True) -> Turn:
         st = _step(st, text)[0]
     if spec and not bad:
         st.spec = spec
-    if use_model and llm.enabled() and (said := llm.ask(msgs, T.summary(st.spec) if st.spec else "")):
-        return _from_model(st, said)
     st, reply, sug, res = _step(st, users[-1])
     return Turn(reply, sug, res, res.spec if res else st.spec)
 
-
-def _from_model(st: State, said: str) -> Turn:
-    """The model talked; if it also wrote a request or an edit in the exact words the rules understand, the rules build it."""
-    reply, request, instruction = llm.parse(said)
-    res = None
-    if request:
-        r = build(request)
-        res = r if r.ok else None
-        if not r.ok and (r.question or r.message):
-            reply = f"{reply}\n{r.question or r.message}".strip()
-    elif instruction and st.spec:
-        done = edit.apply(st.spec, instruction)
-        res = render(done.spec) if done.changed else None
-        if not done.changed:
-            reply = f"{reply}\n{done.note}".strip()
-    spec = res.spec if res else st.spec
-    return Turn(reply or T.pick(T.HELLO, said), T.missing(spec) if spec else T.START, res, spec, "model")

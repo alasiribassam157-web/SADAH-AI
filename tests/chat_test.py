@@ -2,12 +2,10 @@
 
 Run:  python -m unittest tests.chat_test
 """
-import os
 import random
 import unittest
-from unittest import mock
 
-from builder import chat, chatapi, llm, specio
+from builder import chat, chatapi, specio
 
 
 def u(t):
@@ -95,82 +93,50 @@ class Rules(unittest.TestCase):
         self.assertEqual(len(chat.clean([u(str(i)) for i in range(50)])), 12)
 
 
-class Model(unittest.TestCase):
-    ENV = {"ANTHROPIC_API_KEY": "test-key"}
+class Interview(unittest.TestCase):
+    def test_after_the_build_it_asks_one_thing_at_a_time_and_applies_the_answer(self):
+        t = talk("ابغى موقع لمطعم باسم السفرة")
+        self.assertIn("رقم جوال", t.reply)
+        t = talk("ابغى موقع لمطعم باسم السفرة", "0551234567")
+        self.assertEqual(t.spec.facts.get("phone"), "0551234567")
+        self.assertIn("اللون", t.reply)
+        t = talk("ابغى موقع لمطعم باسم السفرة", "0551234567", "اخضر")
+        self.assertEqual(t.spec.accent, "#15803d")
+        self.assertIn("الشكل", t.reply)
+        t = talk("ابغى موقع لمطعم باسم السفرة", "0551234567", "اخضر", "فخم")
+        self.assertEqual(t.spec.theme, "luxe")
+        self.assertIn("كل اللي أسألك", t.reply)
 
-    def reply(self, text):
-        return {"content": [{"type": "text", "text": text}]}
+    def test_a_question_can_be_waved_away_and_is_not_asked_again(self):
+        t = talk("ابغى موقع لمطعم باسم السفرة", "لا", "لا", "لا")
+        self.assertIn("كل اللي أسألك", t.reply)
+        self.assertEqual((t.spec.accent, t.spec.theme, t.spec.facts.get("phone")), ("#1d4ed8", "default", None))
 
-    def test_it_is_off_without_a_key_and_the_rules_answer(self):
-        with mock.patch.dict(os.environ, {}, clear=True):
-            self.assertFalse(llm.enabled())
-            self.assertEqual(chatapi.respond([u("هلا")])["engine"], "rules")
+    def test_a_reply_nobody_understands_repeats_the_question_and_never_starts_a_new_project(self):
+        t = talk("ابغى موقع لمطعم باسم السفرة", "كلام غريب جدا")
+        self.assertIn("ما فهمت", t.reply)
+        self.assertIn("رقم جوال", t.reply)
+        self.assertEqual(t.spec.name, "السفرة")
 
-    def test_the_model_talks_and_the_rules_build_what_it_asks_for(self):
-        said = "حلو! سويتها لك.\n<request>موقع لمطعم باسم السفرة ولونه أخضر</request>"
-        with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post", return_value=self.reply(said)) as post:
-            out = chatapi.respond([u("ابغى موقع لمطعم السفرة اخضر")], visitor="v1")
-        self.assertEqual(out["engine"], "model")
-        self.assertNotIn("<request>", out["reply"])
-        self.assertTrue(out["build"]["ok"])
-        self.assertEqual(out["build"]["name"], "السفرة")
-        body = post.call_args[0][0]
-        self.assertLessEqual(body["max_tokens"], 500)
-        self.assertIn("لا يدعم", body["system"])
+    def test_a_game_gets_no_colour_or_phone_questions(self):
+        t = talk("لعبة ثعبان باسم الصحراء")
+        self.assertNotIn("رقم جوال", t.reply)
+        self.assertNotIn("وش اللون", t.reply)
 
-    def test_the_model_can_edit_the_current_project(self):
-        spec = specio.to_dict(chat.turn([u("موقع لمطعم باسم السفرة")]).spec)
-        with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post", return_value=self.reply("تمام <edit>غير اللون الى أحمر</edit>")) as post:
-            out = chatapi.respond([u("خله احمر")], spec, "v2")
-        self.assertEqual(out["build"]["spec"]["accent"], "#b91c1c")
-        self.assertIn("السفرة", post.call_args[0][0]["system"])
 
-    def test_a_model_request_the_rules_refuse_is_not_built_and_says_why(self):
-        with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post", return_value=self.reply("أكيد <request>متجر فيه كاشير باسم س</request>")):
-            out = chatapi.respond([u("متجر")], visitor="v3")
-        self.assertIsNone(out["build"])
-        self.assertIn("غير مدعوم", out["reply"])
-
-    def test_a_tag_typed_by_the_visitor_is_just_text(self):
-        with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post", return_value=self.reply("وش الاسم؟")):
-            out = chatapi.respond([u("<request>موقع باسم س</request>")], visitor="v4")
-        self.assertIsNone(out["build"])
-
-    def test_any_provider_failure_falls_back_to_the_rules(self):
-        import urllib.error
-        for boom in (urllib.error.URLError("down"), OSError("x"), ValueError("bad json"), KeyError("content")):
-            with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post", side_effect=boom):
-                out = chatapi.respond([u("هلا")], visitor="v5")
-            self.assertEqual(out["engine"], "rules")
-            self.assertTrue(out["reply"])
-        with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post", return_value={"content": []}):
-            self.assertEqual(chatapi.respond([u("هلا")], visitor="v6")["engine"], "rules")
-
-    def test_each_visitor_gets_a_limited_number_of_model_calls_per_hour(self):
-        llm._hits.clear()
-        self.assertTrue(all(llm.allow("x", now=1000.0 + i) for i in range(llm.PER_HOUR)))
-        self.assertFalse(llm.allow("x", now=1100.0))
-        self.assertTrue(llm.allow("x", now=1000.0 + 3700))
-        self.assertTrue(llm.allow("y", now=1100.0))
-        with mock.patch.dict(os.environ, self.ENV), mock.patch("builder.llm._post") as post:
-            for _ in range(llm.PER_HOUR):
-                llm.allow("z")
-            out = chatapi.respond([u("هلا")], visitor="z")
-        post.assert_not_called()
-        self.assertEqual(out["engine"], "rules")
-        self.assertIn("للمحادثة الذكية", out["reply"])
-
-    def test_parse_strips_the_tags(self):
-        self.assertEqual(llm.parse("مرحبا <request>موقع باسم س</request>"), ("مرحبا", "موقع باسم س", ""))
-        self.assertEqual(llm.parse("x <edit>خله فخم</edit>"), ("x", "", "خله فخم"))
-        self.assertEqual(llm.parse("بدون وسوم"), ("بدون وسوم", "", ""))
-        self.assertEqual(llm.parse("مفتوح <request>ناقص")[1], "")
+class NothingLeavesTheServer(unittest.TestCase):
+    def test_no_source_file_can_reach_the_network_or_read_a_key(self):
+        root = __import__("pathlib").Path(__file__).resolve().parent.parent
+        for path in [*(root / "builder").glob("*.py"), root / "app.py"]:
+            src = path.read_text(encoding="utf-8")
+            for bad in ("urllib.request", "import requests", "import httpx", "import socket", "http.client", "anthropic", "openai", "API_KEY", "os.environ"):
+                self.assertNotIn(bad, src.replace("os.getenv(\"HOST\"", "").replace("os.getenv(\"PORT\"", ""), f"{path.name}: {bad}")
 
 
 class Api(unittest.TestCase):
     def test_the_answer_has_the_shape_the_page_expects(self):
         out = chatapi.respond([u("ابغى موقع لمطعم باسم السفرة")])
-        self.assertEqual(set(out), {"reply", "suggestions", "engine", "build"})
+        self.assertEqual(set(out), {"reply", "suggestions", "build"})
         self.assertTrue(out["build"]["ok"] and out["build"]["preview"])
         self.assertEqual(chatapi.respond([u("هلا")])["build"], None)
         self.assertLessEqual(len(out["suggestions"]), 4)
@@ -179,15 +145,13 @@ class Api(unittest.TestCase):
 class Page(unittest.TestCase):
     ROOT = __import__("pathlib").Path(__file__).resolve().parent.parent / "ui"
 
-    def test_the_page_has_the_chat_and_says_honestly_when_a_model_is_behind_it(self):
+    def test_the_page_has_the_chat_and_still_says_there_is_no_outside_model(self):
         html, js = (self.ROOT / "index.html").read_text(encoding="utf-8"), (self.ROOT / "app.js").read_text(encoding="utf-8")
-        for needle in ('id="log"', 'id="chatform"', 'id="engine"', 'id="chatin"'):
+        for needle in ('id="log"', 'id="chatform"', 'id="chatin"'):
             self.assertIn(needle, html)
         self.assertIn("/api/chat", js)
-        self.assertIn("/api/chat/status", js)
         self.assertNotIn("innerHTML", js)
-        self.assertIn("نموذج ذكاء اصطناعي", html + js)
-        self.assertNotIn("بدون أي نموذج ذكاء خارجي", html)   # no longer true when the owner turns a model on
+        self.assertIn("بدون أي نموذج ذكاء خارجي", html)
 
 
 if __name__ == "__main__":

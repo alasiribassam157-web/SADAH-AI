@@ -64,8 +64,30 @@ def missing(spec: Spec) -> list[str]:
     return out[:4] or ["غير اللون الى بنفسجي", "خله زجاجي"]
 
 
-def built(spec: Spec, new: bool, seed: str, note: str = "") -> str:
-    ask = "تبي أعدّل شي؟ مثلًا: " + "، ".join(f"«{s}»" for s in missing(spec)[:3]) + "."
+FIELDS = ("phone", "colour", "theme")
+QUESTION = {"phone": "تبي أحط رقم جوال للتواصل؟ اكتبه هنا، أو قل «لا».",
+            "colour": "وش اللون اللي يعجبك؟ أزرق، أخضر، أحمر، أسود، ذهبي، بنفسجي، برتقالي. أو قل «لا» وأخليه كذا.",
+            "theme": "وش الشكل اللي تبيه؟ فخم، داكن، بسيط، زجاجي. أو قل «لا» وأخليه كذا."}
+CHOICES = {"phone": ["لا"], "colour": ["أخضر", "أحمر", "بنفسجي", "لا"], "theme": ["فخم", "داكن", "زجاجي", "لا"]}
+DONE = "هذا كل اللي أسألك عنه. جرّب المشروع، وقل لي لو تبي أي تعديل ثاني."
+
+
+def next_field(spec: Spec, skipped: tuple) -> str:
+    """The next thing worth asking about: what the request left out and the person has not waved away."""
+    for f in FIELDS:
+        if f in skipped:
+            continue
+        if f == "phone" and spec.kind in ("landing", "shop", "portfolio") and not spec.facts.get("phone"):
+            return f
+        if f == "colour" and spec.accent == "#1d4ed8" and spec.kind != "game":
+            return f
+        if f == "theme" and spec.theme == "default":
+            return f
+    return ""
+
+
+def built(spec: Spec, new: bool, seed: str, note: str = "", field: str = "") -> str:
+    ask = QUESTION[field] if field else DONE
     if new:
         return f"{pick(['تمام، سويته لك!', 'أبشر، جاهز.', 'خلصت، شوف المعاينة.'], seed)} فهمت إنك تبي {summary(spec)} {ask}"
     return f"تم. {note} صار المشروع الحين: {summary(spec)} {ask}"
