@@ -4,7 +4,7 @@ Matching ignores hamza/alef variants (أ إ آ ا) and ى/ي, because people typ
 import re
 from dataclasses import dataclass
 
-from builder import appword, content, facts, gameword, quizbank, themeword
+from builder import aliases, appword, content, facts, gameword, quizbank, themeword
 from builder.products import products
 from builder.naming import _name, _pairs, strip_name
 from builder.norm import n as _n
@@ -17,7 +17,7 @@ OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانا
                 "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال",
                 # features that need a server or live data: said plainly, never silently dropped
                 "سلة مشتريات", "سلة التسوق", "نظام تذاكر", "بنكي", "اونلاين", "اون لاين", "متصدرين", "ثلاثية الابعاد", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
-                "لعبة كلمات", "كلمات متقاطعة", "باتل رويال", "بوبجي", "فورتنايت", "فري فاير", "مدفوع", "اشتراك شهري", "كاشير", "نقاط البيع", "تنبيهات", "ترجمة تلقائية", "ترجمة فورية", "مزامنة", "حساب", "حسابات", "عضوية", "تتبع", "توصيل للطلبات", "توصيل الطلبات", "استقبال الطلبات", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
+                "العملات", "عملات", "سعر الصرف", "اسعار الصرف", "الاسهم", "البورصة", "كريبتو", "لعبة كلمات", "كلمات متقاطعة", "باتل رويال", "بوبجي", "فورتنايت", "فري فاير", "مدفوع", "اشتراك شهري", "كاشير", "نقاط البيع", "تنبيهات", "ترجمة تلقائية", "ترجمة فورية", "مزامنة", "حساب", "حسابات", "عضوية", "تتبع", "توصيل للطلبات", "توصيل الطلبات", "استقبال الطلبات", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
                  "gallery": ("معرض صور", "صور", "ألبوم"), "pricing": ("أسعار", "باقات", "تسعير"),
                  "testimonials": ("آراء", "تقييمات", "شهادات"), "contact": ("اتصال", "تواصل", "واتساب")}
@@ -51,7 +51,7 @@ def _kind(norm: str) -> str:
         return "shop"
     if _has(norm, ("صفحة هبوط", "لاندنج", "landing")):   # «صفحة هبوط لتطبيق توصيل» is a page about an app, not an app
         return "landing"
-    if "موقع" not in norm and _has(norm, ("تطبيق", "نموذج تسجيل", "نموذج اشتراك", "قائمة مهام")):
+    if "موقع" not in norm and (re.search(r"تطبيق(?!ات)", norm) or _has(norm, ("نموذج تسجيل", "نموذج اشتراك", "قائمة مهام"))):   # «لمطور تطبيقات» is not an app
         return "webapp"
     for kind, words in _PAGE_WORDS.items():   # «ملف أعمال لمصورة … تصوير منتجات» is a portfolio, not a shop
         if _has(norm, words):
@@ -79,8 +79,8 @@ def _game(norm: str, name: str, got, accent: str) -> Understood:
 
 
 def understand(request: str) -> Understood:
-    text = " ".join(request.translate(_DIGITS).split())
-    norm = _n(text).lower()
+    text = aliases.clean(" ".join(request.translate(_DIGITS).split()))
+    norm = aliases.read(_n(text).lower())
     got = facts.extract(text, _SECTION_SKIP)   # phone / e-mail / hours leave the text, so they are never names or numbers
     name = _name(got.text)
     # a name after «باسم» is a label, not a feature request («ندوة الذكاء»); only an explicit marker earns this
