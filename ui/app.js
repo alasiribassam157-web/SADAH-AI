@@ -28,6 +28,38 @@
   });
   fill($("kinds"), KINDS, ""); fill($("games"), GAMES, "game");
 
+  // the conversation: the browser keeps the messages, the server replays them (it keeps no state)
+  const log = $("log"), sugg = $("sugg"), chatin = $("chatin"), send = $("send"), engine = $("engine");
+  const talk = [];
+  const bubble = (who, text) => { const d = document.createElement("div"); d.className = "msg " + who; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; };
+  const chips = (list) => { sugg.replaceChildren(); (list || []).slice(0, 4).forEach((t) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = t;
+    b.addEventListener("click", () => { chatin.value = t; $("chatform").requestSubmit(); }); sugg.appendChild(b); }); };
+  const hello = "هلا! أنا sadah. قل لي وش تبي: موقع، تطبيق صغير، أو لعبة، وأسألك عن الباقي وأبنيه لك.";
+  bubble("bot", hello); chips(["موقع لمطعم باسم السفرة", "متجر باسم الورد وفيه ورد 20 وشموع 35", "لعبة ذاكرة باسم نجوم", "وش تقدر تسوي؟"]);
+  const mark = (name) => { engine.textContent = name === "model" ? "نموذج ذكاء اصطناعي" : "يرد بالقواعد"; engine.className = "badge" + (name === "model" ? " model" : ""); };
+  fetch("/api/chat/status").then((r) => r.json()).then((j) => mark(j.engine)).catch(() => {});
+  $("chatform").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = chatin.value.trim();
+    if (!text) return;
+    chatin.value = ""; send.disabled = true; sugg.replaceChildren(); bubble("me", text); talk.push({ role: "user", content: text });
+    const wait = bubble("bot wait", "…");
+    try {
+      const res = await post("/api/chat", { messages: talk.slice(-12), spec });
+      if (!res.ok) throw new Error("server");
+      const r = await res.json();
+      wait.remove(); bubble("bot", r.reply); talk.push({ role: "assistant", content: r.reply }); chips(r.suggestions); mark(r.engine);
+      if (r.build && r.build.ok) {
+        const first = result.hidden;
+        spec = r.build.spec; zip.disabled = false; share.disabled = false; sharebox.hidden = true;
+        if (first) show(r.build); else view.srcdoc = r.build.preview;
+        result.hidden = false;
+      }
+    } catch (err) { wait.remove(); bubble("bot", "تعذّر الاتصال بالخادم. حاول مرة أخرى."); }
+    send.disabled = false; chatin.focus();
+  });
+
   go.addEventListener("click", async () => {
     const text = req.value.trim();
     if (!text) { say("اكتب طلبك أولًا.", true); return; }

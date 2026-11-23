@@ -29,6 +29,17 @@
       <h1 class="hero-title">من جملة عربية <em>إلى موقع أو تطبيق أو لعبة</em></h1>
       <p class="hero-sub">صِف اللي تبيه بكلامك، وsadah يبنيه ويعطيك المعاينة والملفات جاهزة.</p>
     </div>
+    <section class="narrow" aria-label="تحدّث مع sadah">
+      <div class="box chat">
+        <div class="chathead"><b>تكلّم مع sadah</b><span id="engine" class="badge">يرد بالقواعد</span></div>
+        <div id="log" class="log" role="log" aria-live="polite"></div>
+        <div id="sugg" class="chips"></div>
+        <form id="chatform" class="chatrow">
+          <input id="chatin" type="text" maxlength="800" autocomplete="off" aria-label="رسالتك" placeholder="اكتب رسالتك: ابغى موقع لمطعم…" />
+          <button id="send" type="submit" class="btn">أرسل</button>
+        </form>
+      </div>
+    </section>
     <section class="narrow" aria-label="ابنِ مشروعك">
       <div class="box">
         <label for="req">وش تبي تبني؟</label>
@@ -54,7 +65,7 @@
       <iframe id="view" title="معاينة المشروع" sandbox="allow-scripts"></iframe>
     </section>
   </main>
-  <footer class="foot">sadah يعمل بقواعد عربية مكتوبة من الصفر، بدون أي نموذج ذكاء خارجي، ولا يرسل طلبك لأي جهة.</footer>
+  <footer class="foot">sadah يبني بقواعد عربية مكتوبة من الصفر ولا يرسل طلبك لأي جهة، والمحادثة كذلك بالقواعد، إلا إذا فعّل مالك الموقع نموذج ذكاء اصطناعي فتظهر شارة «نموذج ذكاء اصطناعي» وتُرسل المحادثة وحدها لمزوّد النموذج.</footer>
   <script src="/ui/intro.js"></script>
   <script src="/ui/hero.js"></script>
   <script src="/ui/app.js"></script>
