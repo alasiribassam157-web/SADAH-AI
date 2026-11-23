@@ -4,6 +4,7 @@ Run:  python -m tests.builder_share_test
 """
 import base64
 import json
+import random
 import re
 import unittest
 import zlib
@@ -54,6 +55,16 @@ class Hostile(unittest.TestCase):
                      {"kind": "landing", "name": "x", "accent": "#112233", "theme": "neon"}, [1, 2], "text"):
             t = base64.urlsafe_b64encode(zlib.compress(json.dumps(spec).encode())).decode().rstrip("=")
             self.assertIsNone(share.files_of(t), str(spec))
+
+    def test_a_link_longer_than_the_host_accepts_is_never_made(self):
+        # the host answers 502 for any path over ~2000 characters, so such a link would be shared but would never open
+        self.assertLessEqual(share.MAX_TOKEN + len("/s//"), 1950)
+        spec = specio.to_dict(build("موقع لمطعم باسم السفرة").spec)
+        rnd = random.Random(1)
+        spec["services"] = ["".join(chr(0x0621 + rnd.randrange(40)) for _ in range(60)) for _ in range(40)]   # does not compress
+        self.assertIsNone(share.encode(spec))
+        spec["services"] = spec["services"][:3]
+        self.assertIsNotNone(share.encode(spec))
 
     def test_an_invalid_spec_is_not_shared(self):
         self.assertIsNone(share.encode({"kind": "x"}))

@@ -11,7 +11,7 @@ import zlib
 from builder import specio
 from builder.build import render
 
-MAX_TOKEN, MAX_JSON = 6000, 60_000
+MAX_TOKEN, MAX_JSON = 1900, 60_000   # hosting rejects paths over ~2000 characters (502), so a longer link would be shared but never open
 FILES = {"index.html": "text/html; charset=utf-8", "style.css": "text/css; charset=utf-8", "app.js": "text/javascript; charset=utf-8"}
 HEADERS = {"Content-Security-Policy": "default-src 'none'; style-src 'self'; script-src 'self'; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'self'",
            "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "Cache-Control": "public, max-age=300"}

@@ -16,5 +16,8 @@ from tests.builder_cases_e import CASES as _E
 from tests.builder_cases_f import CASES as _F
 from tests.builder_cases_g import CASES as _G
 from tests.builder_cases_h import CASES as _H
+from tests.builder_cases_i import CASES as _I
+from tests.builder_cases_j import CASES as _J
+from tests.builder_cases_k import CASES as _K
 
-SUITE = _A + _B + _C + _D + _E + _F + _G + _H
+SUITE = _A + _B + _C + _D + _E + _F + _G + _H + _I + _J + _K
