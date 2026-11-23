@@ -5,7 +5,7 @@ KINDS = ("landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event",
 APPS = ("tasks", "register", "calculator", "counter", "timer", "expenses", "notes", "converter", "habits")
 GAMES = ("memory", "guess", "xo", "quiz", "snake", "g2048", "catch", "math")
 TOPICS = ("general", "space", "animals", "geography", "science", "football")   # the quiz topics (builder/quizbank.py)
-THEMES = ("default", "light", "dark", "luxe", "simple")   # the looks (builder/themes.py)
+THEMES = ("default", "light", "dark", "luxe", "simple", "glass")   # the looks (builder/themes.py)
 SECTIONS = ("about", "services", "gallery", "pricing", "testimonials", "contact")
 COLORS = {"أزرق": "#1d4ed8", "أخضر": "#15803d", "أحمر": "#b91c1c", "أسود": "#111827",
           "ذهبي": "#a16207", "بنفسجي": "#6d28d9", "برتقالي": "#c2410c"}

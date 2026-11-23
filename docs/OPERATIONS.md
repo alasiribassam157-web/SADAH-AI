@@ -19,7 +19,7 @@
 - **أسلوب كتابة جديد:** `builder/aliases.py` (إيموجي، مدّ الحروف، كلمات إنجليزية، تصحيح في منتصف الجملة) و`builder/naming.py` (كلمات تنهي الاسم مثل «شكرا» و«ان شاء الله»). الأرابيزي (حروف لاتينية بأرقام) لا يُفهم: يسأل بدل أن يخمّن.
 - **النشر برابط:** `builder/share.py`؛ الرابط `/s/<token>/` يحمل المواصفات مضغوطة وتُتحقق عند الفتح (سقف الرابط 1900 حرفًا لأن الاستضافة ترفض أي مسار فوق نحو 2000 حرف برد 502 وقد قيس هذا على الإنتاج؛ المشاريع العادية 250 إلى 350 حرفًا، حماية من القنابل المضغوطة، CSP صارمة). لا تخزين ولا مفاتيح. إن أردت لاحقًا روابط ثابتة لا تتأثر بتغيير القوالب فالحل تخزين الملفات (يحتاج حسابًا خارجيًا).
 - **زخرفة جديدة:** دالة في `builder/art.py` ثم اسمها في `MOTIFS` و`BY_KIND`.
-- **ثيم جديد:** في `PALETTE`/`_LUXE`/`_SIMPLE` داخل `builder/themes.py` وفي `THEMES` (`builder/spec.py`) وكلماته في `builder/themeword.py`؛ `tests/builder_themes_test.py` يفحص التباين لكل لون.
+- **ثيم جديد:** في `PALETTE`/`_LUXE`/`_SIMPLE`/`_GLASS` داخل `builder/themes.py` وفي `THEMES` (`builder/spec.py`) وكلماته في `builder/themeword.py`؛ `tests/builder_themes_test.py` يفحص التباين لكل لون.
 - **تطبيق جديد:** اسمه في `APPS` (`builder/spec.py`)، وكلماته في `builder/appword.py`، وHTML/JS/CSS في `builder/app_main.py` و`app_js*.py`. البيانات تُحفظ عبر `STORE` (localStorage مع رجوع إلى الذاكرة داخل iframe المعاينة).
 - **موضوع أسئلة جديد:** في `TOPICS` (`builder/spec.py`) و`builder/quizbank.py` (ست أسئلة بأربع إجابات)، وكلماته في `quizbank.WORDS`.
 - **لعبة جديدة:** اسمها في `GAMES` (`builder/spec.py`)، وكلماتها وعنوانها في `builder/gameword.py`، وHTML في `MAINS` (`builder/games.py`) وسكربتها في `builder/game_js*.py`. السكربت DOM فقط: بلا `innerHTML` ولا `eval` ولا شبكة (`builder/checks.py` يرفضها).
