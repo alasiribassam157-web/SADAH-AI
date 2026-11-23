@@ -26,9 +26,9 @@ class Server(unittest.TestCase):
         for path in ("/ui/app.js", "/ui/app.css", "/ui/hero.js", "/ui/style.css", "/ui/logo.svg"):
             self.assertEqual(self.c.get(path).status_code, 200, path)
 
-    def test_the_old_builder_link_goes_home_and_the_chat_is_gone(self):
+    def test_the_old_builder_link_goes_home_and_the_old_endpoints_are_gone(self):
         self.assertEqual(self.c.get("/builder", follow_redirects=False).headers["location"], "/")
-        for path in ("/api/chat", "/api/home", "/dev"):
+        for path in ("/api/home", "/dev"):
             self.assertIn(self.c.post(path, json={}).status_code, (404, 405), path)
 
     def test_a_project_can_be_published_to_a_link_and_opened(self):
