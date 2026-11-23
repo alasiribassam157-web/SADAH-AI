@@ -85,7 +85,7 @@ class Understanding(unittest.TestCase):
             self.assertIn("غير مدعوم", build(q).message, q)
 
     def test_server_side_features_are_refused_in_every_kind_not_silently_dropped(self):
-        for q in ("ابغى متجر فيه سلة مشتريات", "ابغى مدونة فيها بث مباشر", "ابغى موقع باسم اخبار فيه اشعارات",
+        for q in ("ابغى موقع تعريفي فيه سلة مشتريات", "ابغى مدونة فيها بث مباشر", "ابغى موقع باسم اخبار فيه اشعارات",
                   "ابغى مدونة باسم رحلات فيها تعليقات", "ابغى متجر باسم عطور فيه كوبونات"):
             self.assertIn("غير مدعوم", build(q).message, q)
         self.assertTrue(build("ابغى متجر باسم السلة وفيه ورد 20").ok)  # a name that merely contains a word is fine

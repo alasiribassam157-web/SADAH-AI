@@ -37,7 +37,7 @@ CASES = [
     case("event", "موقع لفعالية رياضية باسم ماراثون الرياض الساعة 5", name="ماراثون الرياض"),
     case("ask", "ابغى مدونة عن السفر"),
     case("ask", "ابغى موقع لمطعم البيك"),
-    case("refuse", "ابغى متجر فيه سلة مشتريات"),
+    case("refuse", "ابغى موقع تعريفي فيه سلة مشتريات"),
     case("refuse", "ابغى تطبيق ايفون وموقع باسم رحلتي"),
     case("refuse", "ابغى مدونة فيها بث مباشر"),
     # moved from held-out v9 after measuring it (8/15 before tuning: unsupported features without a refusal word,

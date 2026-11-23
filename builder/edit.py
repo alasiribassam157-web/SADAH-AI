@@ -8,7 +8,7 @@ from builder import content, facts, gameword, themeword
 from builder.norm import n
 from builder.products import products
 from builder.spec import COLORS, SECTIONS, Spec
-from builder.understand import OUT_OF_SCOPE, _OUT, SUPPORTED
+from builder.understand import SUPPORTED, refused as out_of_scope
 
 _ADD = "(?:" + "|".join(n(w) for w in ("اضف", "اضيف", "زود", "زد", "حط", "ضيف", "ابغى", "ابي", "ابغا", "نبي", "نبغى", "نبغا", "اريد", "اضافة")) + ")"
 _DEL = "(?:" + "|".join(n(w) for w in ("احذف", "شيل", "ازل", "امسح", "الغ", "الغي", "بدون", "نزل")) + ")"
@@ -54,7 +54,9 @@ def apply(spec: Spec, instruction: str) -> Edit:
     nt = n(text).lower()
     # «أضف خدمة حجز طاولات»: the name of an item is a label, not a request for the feature
     asked = re.sub(_ITEM, " ", nt)
-    if hit := next((w for w, rx in _OUT if rx.search(asked)), ""):
+    if spec.kind == "shop" and re.search(rf"{_W}(?:ال)?سله{_END}", asked) and not out_of_scope(asked, "shop"):
+        return Edit(spec, "السلة موجودة في المتجر أصلًا: يضيف الزبون منتجات ويرى المجموع وينسخ الطلب.", False)
+    if hit := out_of_scope(asked, spec.kind):
         return Edit(spec, f"«{hit}» غير مدعوم بعد. {SUPPORTED}", False)
     notes, new = [], spec
     # a colour word names the colour when the sentence talks about «اللون» or says change / make it (not inside a name or an item)

@@ -10,7 +10,7 @@ from builder.naming import _name, _pairs, strip_name
 from builder.norm import n as _n
 from builder.spec import COLORS, DEFAULT_ACCENT, Spec
 
-SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر عرض، ملف أعمال، مدونة، دعوة فعالية، "
+SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيانات، متجر بسلة طلبات (بلا دفع)، ملف أعمال، مدونة، دعوة فعالية، "
              "وتطبيقات ويب صغيرة (قائمة مهام، حاسبة، عدّاد، مؤقت، مصروفات، ملاحظات، محوّل وحدات، عادات، نموذج تسجيل)، "
              "وألعاب (ذاكرة، تخمين رقم، إكس أو، أسئلة، ثعبان، 2048، التقاط، تحدي حساب).")
 OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانات", "تسجيل دخول", "حجز", "سيرفر", "ذكاء",
@@ -38,6 +38,14 @@ class Understood:
     spec: Spec | None
     question: str = ""
     unsupported: str = ""
+
+
+CART = ("سلة مشتريات", "سلة التسوق")   # a shop has one (it adds and totals; it takes no payment), so only other kinds refuse it
+
+
+def refused(asked: str, kind: str) -> str:
+    """The first out-of-scope word in an (already normalised) request, or ''."""
+    return next((w for w, rx in _OUT if rx.search(asked) and not (kind == "shop" and w in CART)), "")
 
 
 def _has(text: str, words) -> bool:
@@ -95,7 +103,7 @@ def understand(request: str) -> Understood:
     asked = re.sub(rf"(?:{_n('ايفون')}|{_n('اندرويد')})\s+\d+", " ", asked)   # «ايفون 3500» is a product in a shop, not an iPhone app
     if not gameword.wants_game(asked):
         asked = re.sub(rf"{_n('اونلاين')}|{_n('اون لاين')}", " ", asked)   # «متجر اونلاين» is a normal site; online play is a game feature
-    hit = next((w for w, rx in _OUT if rx.search(asked)), "") or ("جوال" if _MOBILE.search(asked) else "")
+    hit = refused(asked, _kind(norm)) or ("جوال" if _MOBILE.search(asked) else "")
     if hit:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
     accent = next((hex_ for ar, hex_ in COLORS.items() if _n(ar) in norm), DEFAULT_ACCENT)
