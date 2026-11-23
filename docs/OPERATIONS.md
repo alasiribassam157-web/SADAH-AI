@@ -16,6 +16,7 @@
 ## إضافة شيء جديد
 
 - **نوع صفحة:** أضفه إلى `KINDS` في `builder/spec.py`، وقالبًا (`builder/pages.py` أو ملف جديد)، وكلماته إلى `_PAGE_WORDS` في `builder/understand.py`، وسجّله في `RENDERERS` في `builder/build.py`. اكتب حالات محجوزة قبل القواعد.
+- **أسلوب كتابة جديد:** `builder/aliases.py` (إيموجي، مدّ الحروف، كلمات إنجليزية، تصحيح في منتصف الجملة) و`builder/naming.py` (كلمات تنهي الاسم مثل «شكرا» و«ان شاء الله»). الأرابيزي (حروف لاتينية بأرقام) لا يُفهم: يسأل بدل أن يخمّن.
 - **ثيم جديد:** في `PALETTE`/`_LUXE`/`_SIMPLE` داخل `builder/themes.py` وفي `THEMES` (`builder/spec.py`) وكلماته في `builder/themeword.py`؛ `tests/builder_themes_test.py` يفحص التباين لكل لون.
 - **تطبيق جديد:** اسمه في `APPS` (`builder/spec.py`)، وكلماته في `builder/appword.py`، وHTML/JS/CSS في `builder/app_main.py` و`app_js*.py`. البيانات تُحفظ عبر `STORE` (localStorage مع رجوع إلى الذاكرة داخل iframe المعاينة).
 - **موضوع أسئلة جديد:** في `TOPICS` (`builder/spec.py`) و`builder/quizbank.py` (ست أسئلة بأربع إجابات)، وكلماته في `quizbank.WORDS`.
