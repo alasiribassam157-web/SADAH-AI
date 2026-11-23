@@ -37,8 +37,6 @@
 
 .chat { margin-bottom: 26px; }
 .chathead { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px 10px; }
-.badge { font-size: 12px; padding: 2px 12px; border: 1px solid var(--rule); border-radius: 99px; color: var(--ink-2); }
-.badge.model { border-color: var(--accent); color: var(--accent); }
 .log { display: flex; flex-direction: column; gap: 10px; max-height: 340px; overflow-y: auto; padding: 4px 6px 10px; }
 .msg { max-width: 88%; padding: 10px 16px; border-radius: 18px; line-height: 1.8; white-space: pre-wrap; font-size: 15.5px; }
 .msg.bot { align-self: flex-start; background: var(--sunk); border: 1px solid var(--line); border-end-start-radius: 6px; }

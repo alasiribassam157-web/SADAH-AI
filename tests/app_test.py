@@ -59,9 +59,7 @@ class Server(unittest.TestCase):
         self.assertEqual((z.status_code, z.headers["content-type"]), (200, "application/zip"))
 
     def test_the_chat_talks_and_builds_over_http(self):
-        self.assertEqual(self.c.get("/api/chat/status").json(), {"engine": "rules"})
         r = self.c.post("/api/chat", json={"messages": [{"role": "user", "content": "ابغى موقع لمطعم باسم السفرة"}]}).json()
-        self.assertEqual(r["engine"], "rules")
         self.assertTrue(r["build"]["ok"])
         self.assertEqual(self.c.post("/api/chat", json={"messages": "x"}).status_code, 422)
         r = self.c.post("/api/chat", json={"messages": [{"role": "user", "content": "هلا"}], "spec": None}).json()
