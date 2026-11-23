@@ -23,7 +23,7 @@
 .cv-f { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; font-weight: 600; color: var(--ink-2); }
 .cv-f.wide { grid-column: 1 / -1; }
 .cv-f input, .cv-f textarea { font: 400 15px/1.7 var(--f-ui); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 0; padding: 8px 11px; resize: vertical; }
-.cv-f input:focus, .cv-f textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,164,92,.22); }
+.cv-f input:focus, .cv-f textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,179,107,.22); }
 .cv-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
 .cv-lang { font-size: 14px; font-weight: 500; color: var(--ink-2); display: flex; gap: 6px; align-items: center; }
 .cv-lang select { border: 1px solid var(--rule); padding: 4px 8px; background: var(--surface); }

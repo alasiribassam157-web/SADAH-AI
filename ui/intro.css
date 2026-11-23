@@ -1,23 +1,11 @@
-/* Intro sequence, 2.2 s on the compositor (transform / opacity only, GPU layers via will-change + translate3d, so it holds 60 fps):
-   0.0–0.7 s the gold threads are drawn · 0.7–1.5 s the diamond core forms with a pulse · 1.5–2.2 s the name appears. */
-.intro-screen { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
-  background: #080706; transition: opacity .4s ease; cursor: pointer; will-change: opacity; }
+/* Opening: the sadah wordmark rises out of the dark with an ember glow (1.6 s, opacity/transform only). A tap skips it. */
+.intro-screen { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: #050506; transition: opacity .4s ease; cursor: pointer; }
 .intro-screen.out { opacity: 0; pointer-events: none; }
-.loom { position: relative; width: min(46vw, 210px); height: auto; overflow: visible; will-change: transform, opacity; transform: translate3d(0, 0, 0); }
-.loom .th { fill: none; stroke: url(#ig); stroke-width: 1.5; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .34s cubic-bezier(.4,0,.2,1) calc(var(--i) * .06s) forwards; }
-.loom .core path { transform-box: fill-box; transform-origin: center; opacity: 0; will-change: transform, opacity; backface-visibility: hidden; animation: form .55s cubic-bezier(.2,.9,.25,1.2) forwards; }
-.loom .d-out { animation-delay: .7s; } .loom .d-in { animation-delay: .95s; } .loom .d-dot { animation-delay: 1.2s; }
-.loom .pulse { transform-box: fill-box; transform-origin: center; opacity: 0; will-change: transform, opacity; animation: bloom .9s ease-out .7s forwards, beat 1.6s ease-in-out 1.6s infinite; }
-.intro-screen::before { content: ""; position: absolute; width: 340px; height: 340px; border-radius: 50%; opacity: 0; will-change: transform, opacity;
-  background: radial-gradient(circle, rgba(212,175,55,.28), rgba(212,175,55,0) 65%); transform: translate3d(0, -34px, 0) scale3d(.6, .6, 1); animation: glow .9s ease-out .8s forwards; pointer-events: none; }
-.intro-name { display: flex; align-items: center; gap: 14px; opacity: 0; transform: translate3d(0, 8px, 0); will-change: transform, opacity; animation: name .7s ease-out 1.5s forwards; color: #F4EFE6; }
-.intro-name b { font: 600 34px/1 "IBM Plex Sans Arabic", sans-serif; color: #D4AF37; }
-.intro-name i { width: 1px; height: 26px; background: #8A6D1B; }
-.intro-name span { font: 500 22px/1 "JetBrains Mono", monospace; letter-spacing: .32em; }
-@keyframes draw { to { stroke-dashoffset: 0; } }
-@keyframes form { from { opacity: 0; transform: scale3d(.2, .2, 1) rotate(45deg); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
-@keyframes bloom { to { opacity: .9; transform: scale3d(1.1, 1.1, 1); } }
-@keyframes beat { 50% { opacity: .55; transform: scale3d(1.04, 1.04, 1); } }
-@keyframes glow { to { opacity: 1; transform: translate3d(0, -34px, 0) scale3d(1, 1, 1); } }
-@keyframes name { to { opacity: 1; transform: translate3d(0, 0, 0); } }
+.intro-screen::before { content: ""; position: absolute; width: 420px; height: 420px; border-radius: 50%; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(circle, rgba(255,106,61,.28), rgba(255,106,61,0) 65%); animation: glow 1.2s ease-out .1s forwards; }
+.intro-word { position: relative; font: 800 clamp(64px, 16vw, 128px)/1 var(--f-word); letter-spacing: -.04em; direction: ltr; opacity: 0;
+  background: linear-gradient(100deg, #FFD2A8, #FFB36B 45%, #FF6A3D); -webkit-background-clip: text; background-clip: text; color: transparent;
+  transform: translate3d(0, 14px, 0); animation: name .8s cubic-bezier(.2,.8,.2,1) .15s forwards; }
+@keyframes glow { to { opacity: 1; transform: scale(1.15); } }
+@keyframes name { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .intro-screen { display: none; } }

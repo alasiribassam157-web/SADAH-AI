@@ -1,4 +1,4 @@
-// "NAWL is waking up…": the free server sleeps after 15 idle minutes and needs about a minute to start.
+// "sadah is waking up…": the free server sleeps after 15 idle minutes and needs about a minute to start.
 (function wake() {
   const screen = document.getElementById("wake");
   let shown = false;
