@@ -4,7 +4,7 @@ Matching ignores hamza/alef variants (أ إ آ ا) and ى/ي, because people typ
 import re
 from dataclasses import dataclass
 
-from builder import content, facts, gameword
+from builder import appword, content, facts, gameword, quizbank
 from builder.products import products
 from builder.naming import _name, _pairs
 from builder.norm import n as _n
@@ -15,7 +15,7 @@ SUPPORTED = ("المتاح حاليًا: موقع تعريفي، لوحة بيا
 OUT_OF_SCOPE = ("اندرويد", "ايفون", "دفع", "قاعدة بيانات", "تسجيل دخول", "حجز", "سيرفر", "ذكاء",
                 "دردشة", "محادثة", "شات", "اموال", "تحويل", "ارسال",
                 # features that need a server or live data: said plainly, never silently dropped
-                "سلة مشتريات", "سلة التسوق", "نظام تذاكر", "اونلاين", "اون لاين", "متصدرين", "ثلاثية الابعاد", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
+                "سلة مشتريات", "سلة التسوق", "نظام تذاكر", "بنكي", "اونلاين", "اون لاين", "متصدرين", "ثلاثية الابعاد", "بث مباشر", "اشعارات", "تعليقات", "كوبونات", "مزاد",
                 "مدفوع", "اشتراك شهري", "كاشير", "نقاط البيع", "تنبيهات", "ترجمة تلقائية", "ترجمة فورية", "مزامنة", "حساب", "حسابات", "عضوية", "تتبع", "توصيل للطلبات", "توصيل الطلبات", "استقبال الطلبات", "تقييمات", "مراجعات", "نشرة بريدية", "خريطة", "خرائط", "نظام نقاط", "بحث متقدم")
 SECTION_WORDS = {"about": ("من نحن", "عن الشركة", "نبذة"), "services": ("خدمات", "خدماتنا"),
                  "gallery": ("معرض صور", "صور", "ألبوم"), "pricing": ("أسعار", "باقات", "تسعير"),
@@ -53,6 +53,8 @@ def _kind(norm: str) -> str:
     for kind, words in _PAGE_WORDS.items():   # «ملف أعمال لمصورة … تصوير منتجات» is a portfolio, not a shop
         if _has(norm, words):
             return kind
+    if "موقع" not in norm and appword.detect(norm):   # «ابغى حاسبة»: an app named without the word «تطبيق»
+        return "webapp"
     return "shop" if _has(norm, ("منتجات", "منتجاتي")) else "landing"
 
 
@@ -67,7 +69,9 @@ def _game(norm: str, name: str, got, accent: str) -> Understood:
     game = gameword.detect(norm)
     if not game:
         return Understood(None, question="أي لعبة تبي؟ ذاكرة، تخمين رقم، إكس أو، أسئلة، أو ثعبان.")
-    return Understood(Spec(kind="game", game=game, name=name or gameword.TITLES[game], accent=accent, facts=got.facts))
+    topic = gameword.topic(norm) if game == "quiz" else "general"
+    title = f"مسابقة {quizbank.TOPICS[topic][0]}" if topic != "general" else gameword.TITLES[game]
+    return Understood(Spec(kind="game", game=game, topic=topic, name=name or title, accent=accent, facts=got.facts))
 
 
 def understand(request: str) -> Understood:
@@ -78,12 +82,16 @@ def understand(request: str) -> Understood:
     # a name after «باسم» is a label, not a feature request («ندوة الذكاء»); only an explicit marker earns this
     # (two words at most: «حوالات يرسل اموال» is a name that swallowed a feature request)
     asked = norm.replace(_n(name), " ", 1) if name and len(name.split()) <= 2 else norm
+    asked = asked.replace(_n("تحويل الوحدات"), " ").replace(_n("تحويل وحدات"), " ")   # unit conversion is an app, money transfer is not
+    asked = re.sub(rf"{_n('حساب')}\s+(?:سريع|ذهني)", " ", asked)   # a quick-maths game is not «حساب» (an account)
+    asked = re.sub(rf"{_n('تتبع')}\s+(?:ال)?(?:مصروف|مصاريف|عاد|ميزاني)", " ", asked)   # tracking expenses or habits is an app, not order tracking
     hit = next((w for w, rx in _OUT if rx.search(asked)), "") or ("جوال" if _MOBILE.search(asked) else "")
     if hit:
         return Understood(None, unsupported=f"طلب «{hit}» غير مدعوم بعد. {SUPPORTED}")
     accent = next((hex_ for ar, hex_ in COLORS.items() if _n(ar) in norm), DEFAULT_ACCENT)
-    if gameword.wants_game(norm):
-        return _game(norm, name, got, accent)
+    bare = norm.replace(_n(name), " ", 1) if name else norm   # the project name is a label, not a request
+    if gameword.wants_game(bare):
+        return _game(bare, name, got, accent)
     kind = _kind(norm)
     label, _, _ = content.for_business(text)
     spec = Spec(kind=kind, business=label if kind == "landing" else "", name=name,
@@ -94,7 +102,9 @@ def understand(request: str) -> Understood:
         spec.sections = [s for s in ("about", "services", "gallery", "pricing", "testimonials", "contact")
                          if s in {"about", "services", "contact"} | found]
     elif kind == "webapp":
-        spec.app = _app(norm)
+        spec.app = "tasks" if _has(norm, ("مهام", "مهمة")) else appword.detect(norm) or _app(norm)
+        if not spec.app and not name and len(norm.split()) <= 3:
+            return Understood(None, question=appword.ASK)
         if not spec.app:
             return Understood(None, unsupported=f"هذا النوع من التطبيقات غير مدعوم بعد. {SUPPORTED}")
     elif kind == "shop":

@@ -40,7 +40,7 @@ class Landing(unittest.TestCase):
 
 class QuestionsAndRefusals(unittest.TestCase):
     def test_missing_name_asks_one_short_question_and_builds_nothing(self):
-        for request in (q for q in asked("ask") if "لعبة" not in q):   # a game with no kind asks which game (builder_games_test)
+        for request in (q for q in asked("ask") if "لعبة" not in q and "تطبيق" not in q):   # a bare game or app asks which one (builder_games_test, builder_apps_test)
             r = build(request)
             self.assertFalse(r.ok, request)
             self.assertEqual(r.question, "ما اسم المشروع؟", request)

@@ -48,6 +48,31 @@ class Templates(unittest.TestCase):
                 self.assertIn(f'id="{i}"', files["index.html"], f"{g}: #{i}")
 
 
+class QuizTopics(unittest.TestCase):
+    def test_every_topic_ships_its_own_six_questions(self):
+        from builder.quizbank import TOPICS
+        seen = set()
+        for t, (label, qs) in TOPICS.items():
+            self.assertEqual(len(qs), 6, t)
+            for q, answers, right in qs:
+                self.assertEqual(len(answers), 4, q)
+                self.assertTrue(0 <= right < 4, q)
+            files = games.render(Spec(kind="game", name="x", game="quiz", topic=t))
+            self.assertEqual(checks.check_site(files), [], t)
+            self.assertNotIn("__QS__", files["app.js"])
+            seen.add(files["app.js"])
+        self.assertEqual(len(seen), len(TOPICS))
+
+    def test_topic_comes_from_the_request_and_an_edit_can_change_it(self):
+        r = build("لعبة اسئلة عن الفضاء باسم رواد")
+        self.assertEqual((r.spec.game, r.spec.topic), ("quiz", "space"))
+        again = edit.apply(r.spec, "خلي الاسئلة عن الحيوانات")
+        self.assertEqual(again.spec.topic, "animals")
+
+    def test_an_unknown_topic_is_a_problem(self):
+        self.assertTrue(problems(Spec(kind="game", name="x", game="quiz", topic="politics")))
+
+
 class Spec_(unittest.TestCase):
     def test_an_unknown_game_is_a_problem(self):
         self.assertTrue(problems(Spec(kind="game", name="x", game="chess")))
@@ -65,7 +90,8 @@ class Spec_(unittest.TestCase):
 class Requests(unittest.TestCase):
     def test_each_game_is_found_from_its_arabic_words(self):
         for q, game in [("ابغى لعبة ذاكرة", "memory"), ("لعبة خمن الرقم", "guess"), ("لعبة اكس او", "xo"),
-                        ("لعبة اسئلة", "quiz"), ("لعبة ثعبان", "snake")]:
+                        ("لعبة اسئلة", "quiz"), ("لعبة ثعبان", "snake"),
+                        ("ابغى لعبة 2048", "g2048"), ("لعبة التقاط النجوم", "catch"), ("تحدي حساب سريع", "math")]:
             r = build(q)
             self.assertTrue(r.ok, q)
             self.assertEqual((r.spec.kind, r.spec.game), ("game", game), q)

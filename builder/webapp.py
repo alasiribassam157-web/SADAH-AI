@@ -2,7 +2,7 @@
 it never uses innerHTML, eval, network calls or inline handlers, and nothing is sent anywhere."""
 from html import escape
 
-from builder import base
+from builder import app_main, base
 from builder.spec import Spec
 
 TASKS_JS = """"use strict";
@@ -53,7 +53,10 @@ REGISTER_MAIN = ('<section id="app"><h2>نموذج التسجيل</h2><form id="
 
 
 def render(spec: Spec) -> dict[str, str]:
-    main, js = (TASKS_MAIN, TASKS_JS) if spec.app == "tasks" else (REGISTER_MAIN, REGISTER_JS)
+    if spec.app in app_main.MAINS:
+        main, js, css = app_main.MAINS[spec.app], app_main.JS[spec.app], base.css(spec) + app_main.CSS
+    else:
+        main, js = (TASKS_MAIN, TASKS_JS) if spec.app == "tasks" else (REGISTER_MAIN, REGISTER_JS)
+        css = base.css(spec)
     hero = f'<div class="hero"><h1>{escape(spec.name)}</h1></div>'
-    return {"index.html": base.page(spec, '<a href="#app">التطبيق</a>', hero, main, script=True),
-            "style.css": base.css(spec), "app.js": js}
+    return {"index.html": base.page(spec, '<a href="#app">التطبيق</a>', hero, main, script=True), "style.css": css, "app.js": js}
