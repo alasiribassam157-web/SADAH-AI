@@ -5,8 +5,3 @@ services:
     plan: free
     autoDeploy: true
     healthCheckPath: /api/health
-    envVars:
-      - key: SADAH_ACCESS_TOKEN
-        sync: false              # Render asks for this value during setup (never stored in git)
-      - key: SADAH_SAFE_MODE
-        value: "1"

@@ -1,5 +1,0 @@
-# Kaggle/Colab only — the main app (requirements.txt) never needs these.
-torch>=2.2
-tokenizers>=0.19
-datasets>=2.19
-numpy>=1.26

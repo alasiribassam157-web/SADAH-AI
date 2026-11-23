@@ -76,14 +76,18 @@
     ctx.globalAlpha = 1;
   }
 
-  const say = (html) => { cap.innerHTML = html; cap.classList.remove("fade"); void cap.offsetWidth; cap.classList.add("fade"); };
+  const say = (before, bold, after = "") => {   // caption: plain text around one bold word, built with DOM nodes (no HTML strings)
+    const b = document.createElement("b"); b.textContent = bold;
+    cap.replaceChildren(before, b, after);
+    cap.classList.remove("fade"); void cap.offsetWidth; cap.classList.add("fade");
+  };
   const CYCLE = 15600, big = () => small() ? 30 : 56;
   const EVENTS = [
-    [0, () => { solidTarget = 0; say("تكتب <b>جملة</b>"); target(textPts(SENT, `500 ${big()}px Alexandria`, W * .86)); }],
-    [3200, () => { say("sadah <b>تفهمها</b>"); scatter(9); }],
-    [4400, () => { say("و<b>تبني</b> موقعك"); target(sitePts()); }],
+    [0, () => { solidTarget = 0; say("تكتب ", "جملة"); target(textPts(SENT, `500 ${big()}px Alexandria`, W * .86)); }],
+    [3200, () => { say("sadah ", "تفهمها"); scatter(9); }],
+    [4400, () => { say("و", "تبني", " مشروعك"); target(sitePts()); }],
     [6200, () => { solidTarget = 1; }],
-    [9800, () => { solidTarget = 0; scatter(7); say("بثوانٍ، <b>بالعربي</b>"); }],
+    [9800, () => { solidTarget = 0; scatter(7); say("موقع، أو تطبيق، أو ", "لعبة"); }],
     [11000, () => { target(textPts("sadah", `800 ${small() ? 80 : Math.min(190, H * .5)}px Syne`, W * .8)); }],
     [14500, () => { scatter(10); }],
   ];
