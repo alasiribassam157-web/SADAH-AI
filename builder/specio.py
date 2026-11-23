@@ -49,7 +49,7 @@ def from_dict(d) -> Spec:
     spec = Spec(kind=_text(d.get("kind", "")), name=_text(d.get("name", "")), business=_text(d.get("business", "")),
                 sections=[_text(s, 30) for s in sections], accent=_text(d.get("accent", ""), 7), lang="ar",
                 data=_pairs(d.get("data", []), _number), items=_pairs(d.get("items", []), lambda v: _text(v, 40)),
-                app=_text(d.get("app", ""), 20), game=_text(d.get("game", "memory"), 20), topic=_text(d.get("topic", "general"), 20),
+                app=_text(d.get("app", ""), 20), game=_text(d.get("game", "memory"), 20), topic=_text(d.get("topic", "general"), 20), theme=_text(d.get("theme", "default"), 12),
                 facts={k: _text(v, 80) for k, v in facts.items() if k in _FACT_KEYS},
                 services=[_text(s, 80) for s in services])
     if not re.fullmatch(r"#[0-9a-fA-F]{6}", spec.accent):   # it is written into the CSS: hex only

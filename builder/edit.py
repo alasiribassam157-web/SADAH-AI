@@ -4,7 +4,7 @@ Unsupported requests are named (same list as the builder), and a rule that canno
 import re
 from dataclasses import dataclass, replace
 
-from builder import content, facts, gameword
+from builder import content, facts, gameword, themeword
 from builder.norm import n
 from builder.products import products
 from builder.spec import COLORS, SECTIONS, Spec
@@ -71,6 +71,8 @@ def apply(spec: Spec, instruction: str) -> Edit:
     new, got = _fact_note(new, text)
     notes += got
     new, got = gameword.switch(new, nt)
+    notes += got
+    new, got = themeword.switch(new, nt)
     notes += got
     new, got = _lists(new, nt, text)
     notes += got

@@ -25,7 +25,7 @@ MAINS = {
 }
 JS = {"calculator": app_js.CALC, "counter": app_js.COUNTER, "timer": app_js.TIMER, "expenses": app_js2.EXPENSES, "notes": app_js2.NOTES,
       "converter": app_js2.CONVERTER, "habits": app_js2.HABITS}
-CSS = """.big{font-size:3rem;font-weight:800;text-align:center;color:var(--accent);margin:0 0 12px;line-height:1.3}
+CSS = """.big{font-size:3rem;font-weight:800;text-align:center;color:var(--accent-text);margin:0 0 12px;line-height:1.3}
 .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
 #app{max-width:560px}
 #app h2{display:inline-block}

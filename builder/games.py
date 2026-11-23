@@ -46,19 +46,19 @@ CSS = """.board.g{grid-template-columns:repeat(4,1fr);gap:8px;max-width:360px;ba
 .g.v512{background:#2563eb;color:#fff}.g.v1024{background:#0891b2;color:#fff;font-size:1.2rem}.g.v2048{background:#15803d;color:#fff;font-size:1.2rem}
 .board.c{grid-template-columns:repeat(7,1fr);gap:1px;max-width:340px;background:var(--line);border:2px solid var(--line)}
 .cell.star{color:#f59e0b;text-align:center;font-size:1.3rem;line-height:1.6}
-.cell.me{background:var(--accent);border-radius:6px;color:#fff;text-align:center;line-height:1.6}
+.cell.me{background:var(--accent);border-radius:6px;color:var(--on);text-align:center;line-height:1.6}
 .pad2{display:flex;gap:12px;justify-content:center;direction:ltr;margin-bottom:14px}
 .pad2 button{margin:0;padding:12px 34px;border-radius:12px}
-#question.big{font-size:3rem;font-weight:800;color:var(--accent);line-height:1.4}
+#question.big{font-size:3rem;font-weight:800;color:var(--accent-text);line-height:1.4}
 .board{display:grid;gap:10px;margin:0 auto 18px;max-width:440px;direction:ltr}
 .board.m{grid-template-columns:repeat(4,1fr)}
 .board.x{grid-template-columns:repeat(3,1fr);max-width:330px}
 .board.s{grid-template-columns:repeat(14,1fr);gap:1px;max-width:420px;background:var(--line);border:2px solid var(--line)}
 .tile,.xcell{aspect-ratio:1;margin:0;padding:0;font-size:2rem;border-radius:12px;display:grid;place-items:center}
-.tile{background:var(--accent);color:#fff}
+.tile{background:var(--accent);color:var(--on)}
 .tile.open,.tile.done{background:var(--card);color:var(--ink);border:2px solid var(--accent)}
 .tile.done{opacity:.55}
-.xcell{background:var(--card);color:var(--accent);border:2px solid var(--line);font-size:2.4rem;font-weight:800}
+.xcell{background:var(--card);color:var(--accent-text);border:2px solid var(--line);font-size:2.4rem;font-weight:800}
 .cell{aspect-ratio:1;background:var(--card)}
 .cell.snake{background:var(--accent)}
 .cell.food{background:#dc2626;border-radius:50%}

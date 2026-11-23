@@ -22,7 +22,7 @@ def contact(spec: Spec) -> str:
 
 
 def css(spec: Spec) -> str:
-    return theme.css(spec.accent)
+    return theme.css(spec.accent, spec.theme)
 
 
 def page(spec: Spec, nav: str, hero: str, main: str, script: bool = False) -> str:

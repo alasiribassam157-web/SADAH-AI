@@ -4,7 +4,8 @@ from dataclasses import dataclass, field
 KINDS = ("landing", "dashboard", "shop", "webapp", "portfolio", "blog", "event", "game")
 APPS = ("tasks", "register", "calculator", "counter", "timer", "expenses", "notes", "converter", "habits")
 GAMES = ("memory", "guess", "xo", "quiz", "snake", "g2048", "catch", "math")
-TOPICS = ("general", "space", "animals", "geography", "science")   # the quiz topics (builder/quizbank.py)
+TOPICS = ("general", "space", "animals", "geography", "science", "football")   # the quiz topics (builder/quizbank.py)
+THEMES = ("default", "light", "dark", "luxe", "simple")   # the looks (builder/themes.py)
 SECTIONS = ("about", "services", "gallery", "pricing", "testimonials", "contact")
 COLORS = {"أزرق": "#1d4ed8", "أخضر": "#15803d", "أحمر": "#b91c1c", "أسود": "#111827",
           "ذهبي": "#a16207", "بنفسجي": "#6d28d9", "برتقالي": "#c2410c"}
@@ -24,6 +25,7 @@ class Spec:
     app: str = "tasks"                                            # webapp: one of APPS
     game: str = "memory"                                          # game: one of GAMES
     topic: str = "general"                                        # quiz game: one of TOPICS
+    theme: str = "default"                                        # one of THEMES
     facts: dict = field(default_factory=dict)                     # stated in the request: phone, email, city, hours, date, time, place
     services: list[str] = field(default_factory=list)             # stated services / skills / products (else the defaults)
 
@@ -44,6 +46,8 @@ def problems(spec: Spec) -> list[str]:
         out.append(f"نوع التطبيق غير مدعوم: {spec.app}")
     if spec.kind == "game" and spec.game not in GAMES:
         out.append(f"نوع اللعبة غير مدعوم: {spec.game}")
+    if spec.theme not in THEMES:
+        out.append(f"الثيم غير مدعوم: {spec.theme}")
     if spec.kind == "game" and spec.game == "quiz" and spec.topic not in TOPICS:
         out.append(f"موضوع المسابقة غير مدعوم: {spec.topic}")
     if not (spec.accent.startswith("#") and len(spec.accent) == 7):
