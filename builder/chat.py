@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass, field
 
 from builder import chattext as T, edit, specio
+from builder.ml import design
 from builder.build import Result, build, render
 from builder.norm import n
 from builder.spec import Spec
@@ -26,6 +27,7 @@ class State:
     pending: str = ""   # the request that was not complete yet
     asked: str = ""     # what the last question was about: "name", or one of chattext.FIELDS
     skipped: tuple = ()  # interview questions the person waved away
+    about: str = ""      # the request that made the project: what the design model reads
 
 
 @dataclass
@@ -46,14 +48,16 @@ def clean(messages) -> list[tuple[str, str]]:
 
 
 _SKIP = re.compile(r"^(?:لا|تخطى|خلاص|بعدين|ما ابي|مو لازم|ما له داعي|ماله داعي|كذا حلو|عادي)(?![ء-ي])")
+_YES = re.compile(r"^(?:طبّ?قه|طبّ?ق|ايوه|ايه|ايوا|نعم|اي|تمام|اوكي|ok|يلا|ابشر|موافق|حلو|زين)(?![ء-ي])")
+_NAMEHELP = re.compile(r"اقترح|اختر لي|انت اختر|ما ادري|مدري|ماعندي|ما عندي|اي اسم|فكره|ساعدني")
 _PHONE = re.compile(r"(?<!\d)(\+?\d{9,13})(?!\d)")
 _FIELD_EDIT = {"colour": "غير اللون الى {}", "theme": "خله {}"}
 
 
 def _built(st: State, r: Result, text: str, new: bool, note: str = "") -> tuple[State, str, list[str], Result]:
-    skipped = () if new else st.skipped
-    field = T.next_field(r.spec, skipped)
-    return State(r.spec, asked=field, skipped=skipped), T.built(r.spec, new, text, note, field), T.CHOICES.get(field, []), r
+    skipped, about = ((), text) if new else (st.skipped, st.about)
+    field = T.next_field(r.spec, skipped, about)
+    return State(r.spec, asked=field, skipped=skipped, about=about), T.built(r.spec, new, text, note, field, about), T.CHOICES.get(field, []), r
 
 
 def _answer(st: State, text: str, nt: str) -> tuple[State, str, list[str], Result | None] | None:
@@ -61,8 +65,13 @@ def _answer(st: State, text: str, nt: str) -> tuple[State, str, list[str], Resul
     field = st.asked
     if _SKIP.match(nt):
         skipped = st.skipped + (field,)
-        nxt = T.next_field(st.spec, skipped)
-        return State(st.spec, asked=nxt, skipped=skipped), T.QUESTION[nxt] if nxt else T.DONE, T.CHOICES.get(nxt, []), None
+        nxt = T.next_field(st.spec, skipped, st.about)
+        return State(st.spec, asked=nxt, skipped=skipped, about=st.about), T.question(nxt, st.spec, st.about) if nxt else T.DONE, T.CHOICES.get(nxt, []), None
+    if field == "design":
+        s = design.suggest(st.spec, st.about)
+        if s and _YES.match(nt):
+            return _built(st, render(design.apply(st.spec, s)), text, False, "طبّقت التصميم المقترح.")
+        return None
     instruction = ""
     if field == "phone" and (m := _PHONE.search(nt.replace(" ", ""))):
         instruction = f"اضف رقم جوالي {m.group(1)}"
@@ -74,6 +83,9 @@ def _answer(st: State, text: str, nt: str) -> tuple[State, str, list[str], Resul
 
 def _step(st: State, text: str) -> tuple[State, str, list[str], Result | None]:
     nt = n(text).strip()
+    if st.asked == "name" and st.pending and _NAMEHELP.search(nt):
+        picks = design.names(st.pending, text)
+        return st, T.name_ideas(picks), picks, None
     if st.asked == "name" and st.pending and len(nt.split()) <= 5 and not (_KIND.search(nt) or _REQUEST.search(nt)):
         marker = "" if re.match(r"(?:باسم|اسمه|اسمها|الاسم)\b", nt) else " باسم"
         text = f"{st.pending}{marker} {text}"
@@ -90,18 +102,21 @@ def _step(st: State, text: str) -> tuple[State, str, list[str], Result | None]:
         return st, "هذا اللي عندي الحين: " + T.summary(st.spec), T.missing(st.spec), None
     elif _GREET.search(nt) and not _KIND.search(nt) and len(nt.split()) <= 6:
         return st, T.pick(T.HELLO, text), T.START, None
+    elif st.spec and design.wants(nt):
+        s = design.suggest(st.spec, st.about)
+        if not s:
+            return st, T.NO_DOMAIN, [], None
+        return _built(st, render(design.apply(st.spec, s)), text, False, f"اخترت لك التصميم المناسب لمجال «{s.label}».")
     elif st.spec and (m := re.match(r"(?:باسم|اسمه|اسمها|الاسم)\s+(.+)", nt)):   # «باسم الملوك» after a build is a rename
         text = "غير الاسم الى " + " ".join(text.split()[1:])
         done = edit.apply(st.spec, text)
         if done.changed:
             return _built(st, render(done.spec), text, False, done.note)
-    elif st.spec and _EDIT.search(nt):
-        done = edit.apply(st.spec, text)
-        if done.changed:
-            return _built(st, render(done.spec), text, False, done.note)
+    elif st.spec and _EDIT.search(nt) and (done := edit.apply(st.spec, text)).changed:
+        return _built(st, render(done.spec), text, False, done.note)
     if st.spec and not (_KIND.search(nt) or st.pending or "باسم" in nt):   # something said about the current project that no rule understood
         if st.asked in T.FIELDS:
-            return st, "ما فهمت جوابك. " + T.QUESTION[st.asked], T.CHOICES[st.asked], None
+            return st, "ما فهمت جوابك. " + T.question(st.asked, st.spec, st.about), T.CHOICES[st.asked], None
         return st, "ما فهمت التعديل. جرّب مثلًا:", T.missing(st.spec), None
     if not (_KIND.search(nt) or st.pending or "باسم" in nt):
         return State(), "ما عرفت وش تبي بالضبط. تبي موقع، تطبيق صغير، ولا لعبة؟ جرّب مثلًا:", T.START, None
